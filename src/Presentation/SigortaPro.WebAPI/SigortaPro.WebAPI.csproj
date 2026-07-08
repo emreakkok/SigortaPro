@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\SigortaPro.Domain\SigortaPro.Domain.csproj" />
+    <ProjectReference Include="..\..\Core\SigortaPro.Application\SigortaPro.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\SigortaPro.Persistence\SigortaPro.Persistence.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\SigortaPro.Infrastructure\SigortaPro.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

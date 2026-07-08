@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\SigortaPro.Domain\SigortaPro.Domain.csproj" />
+    <ProjectReference Include="..\..\Core\SigortaPro.Application\SigortaPro.Application.csproj" />
+  </ItemGroup>
+
+</Project>
