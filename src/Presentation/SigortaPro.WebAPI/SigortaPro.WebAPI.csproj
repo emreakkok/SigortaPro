@@ -1,10 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup>
+    <!-- Swagger/OpenAPI, XML doc yorumlarını uç nokta dokümantasyonuna dahil eder (DEVELOPMENT_RULES.md §2.3). -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1591: Her public üye için XML doc zorunlu değildir; Swagger yalnızca sağlanan yorumları kullanır,
+         eksik olanlar için uyarı üretilmesi zero-warning hedefiyle çeliştiğinden bu proje için kapatılır. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\Core\SigortaPro.Domain\SigortaPro.Domain.csproj" />
     <ProjectReference Include="..\..\Core\SigortaPro.Application\SigortaPro.Application.csproj" />
     <ProjectReference Include="..\..\Infrastructure\SigortaPro.Persistence\SigortaPro.Persistence.csproj" />
     <ProjectReference Include="..\..\Infrastructure\SigortaPro.Infrastructure\SigortaPro.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
 </Project>

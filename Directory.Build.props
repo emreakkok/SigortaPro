@@ -7,6 +7,10 @@
     <LangVersion>12.0</LangVersion>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <!-- CA1848: LoggerMessage source-generator delegate'leri yerine CODING_STANDARDS.md §8.2'nin
+         zorunlu kıldığı _logger.LogX("...", args) yapılandırılmış (structured) logging biçimi kullanılır;
+         bu uyarı tüm katmanlarda tekrar edeceği için proje genelinde kapatılmıştır. -->
+    <NoWarn>$(NoWarn);CA1848</NoWarn>
   </PropertyGroup>
 
 </Project>

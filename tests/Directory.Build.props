@@ -1,0 +1,11 @@
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <!-- DEVELOPMENT_RULES.md §5.2: test metotları {Metot}_Should_{Beklenen}_When_{Koşul} formatında adlandırılır. -->
+    <!-- CA1707 (üye adlarında alt çizgi kullanılmaması) bu standartla çelişir; test projelerinde bilinçli olarak kapatılmıştır. -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+
+</Project>
