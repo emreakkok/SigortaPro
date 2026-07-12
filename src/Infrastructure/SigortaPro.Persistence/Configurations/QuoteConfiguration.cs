@@ -13,7 +13,14 @@ public sealed class QuoteConfiguration : BaseEntityConfiguration<Quote>
 
         builder.Property(q => q.Branch).IsRequired();
         builder.Property(q => q.Status).IsRequired();
+        builder.Property(q => q.CoveragePackage).IsRequired();
         builder.Property(q => q.TotalPremium).HasColumnType("decimal(18,2)").IsRequired();
+
+        // Yenileme hasar geçmişi çarpanı; mevcut/normal tekliflerde varsayılan 1.00 (ADR-025).
+        builder.Property(q => q.ClaimHistoryFactor)
+            .HasColumnType("decimal(18,2)")
+            .HasDefaultValue(1.00m)
+            .IsRequired();
 
         builder.HasOne(q => q.Customer)
             .WithMany(c => c.Quotes)

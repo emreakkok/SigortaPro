@@ -1,0 +1,103 @@
+using Microsoft.Extensions.Logging;
+using SigortaPro.Application.Common.Interfaces;
+using SigortaPro.Application.Common.Notifications;
+using SigortaPro.Domain.Constants;
+using SigortaPro.Domain.Entities;
+
+namespace SigortaPro.Application.Features.Renewals.Commands.GeneratePolicyRenewals;
+
+public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<GeneratePolicyRenewalsCommand, int>
+{
+    private readonly IPolicyRepository _policyRepository;
+    private readonly IQuoteRepository _quoteRepository;
+    private readonly IRenewalRepository _renewalRepository;
+    private readonly IClaimRepository _claimRepository;
+    private readonly IPricingEngine _pricingEngine;
+    private readonly INotificationService _notificationService;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<GeneratePolicyRenewalsCommandHandler> _logger;
+
+    public GeneratePolicyRenewalsCommandHandler(
+        IPolicyRepository policyRepository,
+        IQuoteRepository quoteRepository,
+        IRenewalRepository renewalRepository,
+        IClaimRepository claimRepository,
+        IPricingEngine pricingEngine,
+        INotificationService notificationService,
+        IDateTimeProvider dateTimeProvider,
+        IUnitOfWork unitOfWork,
+        ILogger<GeneratePolicyRenewalsCommandHandler> logger)
+    {
+        _policyRepository = policyRepository;
+        _quoteRepository = quoteRepository;
+        _renewalRepository = renewalRepository;
+        _claimRepository = claimRepository;
+        _pricingEngine = pricingEngine;
+        _notificationService = notificationService;
+        _dateTimeProvider = dateTimeProvider;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
+    public async Task<int> Handle(GeneratePolicyRenewalsCommand request, CancellationToken cancellationToken)
+    {
+        var now = _dateTimeProvider.UtcNow;
+        var windowEnd = now.AddDays(BusinessConstants.RenewalNoticeWindowDays);
+
+        var duePolicies = await _policyRepository.GetDueForRenewalAsync(now, windowEnd, cancellationToken);
+        if (duePolicies.Count == 0)
+        {
+            return 0;
+        }
+
+        var notifications = new List<RenewalOfferedNotification>();
+
+        foreach (var policy in duePolicies)
+        {
+            var originalQuote = policy.Quote;
+            var customer = policy.Customer;
+            var product = originalQuote?.InsuranceProduct;
+            if (originalQuote is null || customer is null || product is null)
+            {
+                // Beklenmez (repository ilişkileri yükler); veri tutarsızlığında bu poliçe atlanır.
+                _logger.LogWarning("Yenileme atlandı: poliçe {PolicyId} teklif/ürün/müşteri verisi eksik.", policy.Id);
+                continue;
+            }
+
+            var reportableClaims = await _claimRepository.CountReportableClaimsByCustomerAsync(
+                customer.Id, cancellationToken);
+            var claimHistoryFactor = RenewalPricing.ClaimHistoryFactor(reportableClaims);
+
+            var renewalQuote = RenewalQuoteFactory.Build(
+                originalQuote, customer, product, originalQuote.Vehicle, originalQuote.Property,
+                _pricingEngine, claimHistoryFactor, now);
+
+            await _quoteRepository.AddAsync(renewalQuote, cancellationToken);
+
+            var renewal = new Renewal(policy.Id, renewalQuote.Id, now);
+            await _renewalRepository.AddAsync(renewal, cancellationToken);
+
+            notifications.Add(new RenewalOfferedNotification(
+                customer.Id, policy.PolicyNumber, renewalQuote.Branch,
+                renewalQuote.TotalPremium, renewalQuote.ValidUntil!.Value));
+        }
+
+        if (notifications.Count == 0)
+        {
+            return 0;
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Bildirimler yalnızca kalıcılaştırılan teklifler için gönderilir (mock — log/e-posta simülasyonu).
+        foreach (var notification in notifications)
+        {
+            await _notificationService.NotifyRenewalOfferedAsync(notification, cancellationToken);
+        }
+
+        _logger.LogInformation("Arkaplan: {Count} poliçe için yenileme teklifi üretildi.", notifications.Count);
+
+        return notifications.Count;
+    }
+}

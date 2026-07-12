@@ -35,6 +35,42 @@ public class Quote : BaseEntity, IAggregateRoot
     public decimal TotalPremium { get; private set; }
     public DateTime? ValidUntil { get; private set; }
 
+    // Seçilen teminat paketi (Standart varsayılan). Primi ve teminat limitlerini ölçekler; teklif
+    // detayında prim dökümü bu seçim + saklı veri üzerinden deterministik yeniden hesaplanır (ADR-021).
+    public CoveragePackage CoveragePackage { get; private set; } = CoveragePackage.Standart;
+
+    // Hasar geçmişi çarpanı (varsayılan 1.00 = etkisiz). Yalnızca yenileme tekliflerinde (Task 13) müşterinin
+    // önceki dönem hasar geçmişine göre 1.00'ın üzerine set edilir; prim dökümünün deterministik yeniden
+    // hesabında CoveragePackage gibi saklı bir girdi olarak kullanılır (ADR-021 ile tutarlı — ADR-025).
+    public decimal ClaimHistoryFactor { get; private set; } = 1.00m;
+
+    /// <summary>Fiyatlamadan önce teminat paketini seçer; yalnızca taslak durumunda değiştirilebilir.</summary>
+    public void SelectCoveragePackage(CoveragePackage coveragePackage)
+    {
+        if (Status != QuoteStatus.Draft)
+        {
+            throw new DomainException("Teminat paketi yalnızca taslak durumundaki teklifte seçilebilir.");
+        }
+
+        CoveragePackage = coveragePackage;
+    }
+
+    /// <summary>Yenileme fiyatlamasında hasar geçmişi çarpanını uygular; yalnızca taslak durumunda ve 1.00'dan küçük olamaz.</summary>
+    public void ApplyClaimHistoryFactor(decimal claimHistoryFactor)
+    {
+        if (Status != QuoteStatus.Draft)
+        {
+            throw new DomainException("Hasar geçmişi çarpanı yalnızca taslak durumundaki teklifte uygulanabilir.");
+        }
+
+        if (claimHistoryFactor < 1.00m)
+        {
+            throw new DomainException("Hasar geçmişi çarpanı 1.00'dan küçük olamaz.");
+        }
+
+        ClaimHistoryFactor = claimHistoryFactor;
+    }
+
     /// <summary>Draft → Priced. Fiyatlama motorunun ürettiği tutar ve geçerlilik tarihiyle çağrılır.</summary>
     public void MarkAsPriced(decimal totalPremium, DateTime validUntil)
     {

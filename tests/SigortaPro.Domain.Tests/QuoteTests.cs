@@ -134,6 +134,74 @@ public class QuoteTests
         act.Should().Throw<DomainException>();
     }
 
+    [Fact]
+    public void SelectCoveragePackage_Should_SetPackage_When_StatusIsDraft()
+    {
+        var quote = CreateDraftQuote();
+
+        quote.SelectCoveragePackage(CoveragePackage.Premium);
+
+        quote.CoveragePackage.Should().Be(CoveragePackage.Premium);
+    }
+
+    [Fact]
+    public void SelectCoveragePackage_Should_DefaultToStandart_When_NotSelected()
+    {
+        var quote = CreateDraftQuote();
+
+        quote.CoveragePackage.Should().Be(CoveragePackage.Standart);
+    }
+
+    [Fact]
+    public void SelectCoveragePackage_Should_ThrowDomainException_When_StatusIsNotDraft()
+    {
+        var quote = CreateDraftQuote();
+        quote.MarkAsPriced(1500m, DateTime.UtcNow.AddDays(7));
+
+        var act = () => quote.SelectCoveragePackage(CoveragePackage.Premium);
+
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void ClaimHistoryFactor_Should_DefaultToOne_When_NotApplied()
+    {
+        var quote = CreateDraftQuote();
+
+        quote.ClaimHistoryFactor.Should().Be(1.00m);
+    }
+
+    [Fact]
+    public void ApplyClaimHistoryFactor_Should_SetFactor_When_StatusIsDraftAndFactorAtLeastOne()
+    {
+        var quote = CreateDraftQuote();
+
+        quote.ApplyClaimHistoryFactor(1.40m);
+
+        quote.ClaimHistoryFactor.Should().Be(1.40m);
+    }
+
+    [Fact]
+    public void ApplyClaimHistoryFactor_Should_ThrowDomainException_When_FactorBelowOne()
+    {
+        var quote = CreateDraftQuote();
+
+        var act = () => quote.ApplyClaimHistoryFactor(0.90m);
+
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void ApplyClaimHistoryFactor_Should_ThrowDomainException_When_StatusIsNotDraft()
+    {
+        var quote = CreateDraftQuote();
+        quote.MarkAsPriced(1500m, DateTime.UtcNow.AddDays(7));
+
+        var act = () => quote.ApplyClaimHistoryFactor(1.20m);
+
+        act.Should().Throw<DomainException>();
+    }
+
     private static Quote CreateDraftQuote()
     {
         return new Quote(Guid.NewGuid(), Guid.NewGuid(), InsuranceBranch.Kasko, vehicleId: Guid.NewGuid(), propertyId: null);
