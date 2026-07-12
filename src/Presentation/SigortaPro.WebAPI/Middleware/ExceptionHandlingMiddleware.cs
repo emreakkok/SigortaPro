@@ -102,6 +102,11 @@ public sealed class ExceptionHandlingMiddleware
                 problemDetails = CreateProblem(StatusCodes.Status409Conflict, "İş kuralı ihlali", "business-rule", exception.Message);
                 break;
 
+            case PaymentFailedException:
+                _logger.LogWarning("Ödeme reddedildi: {Path} — {Message}", context.Request.Path, exception.Message);
+                problemDetails = CreateProblem(StatusCodes.Status402PaymentRequired, "Ödeme başarısız", "payment-failed", exception.Message);
+                break;
+
             case SigortaProException:
                 // Taban tipe düşen diğer uygulama hataları (ileride eklenen türler) 400 olarak yansıtılır.
                 _logger.LogWarning("Uygulama hatası: {Path} — {Message}", context.Request.Path, exception.Message);

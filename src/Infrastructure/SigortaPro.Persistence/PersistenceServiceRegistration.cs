@@ -41,6 +41,14 @@ public static class PersistenceServiceRegistration
 
         services.AddScoped(typeof(IReadRepository<>), typeof(GenericRepository<>));
         services.AddScoped(typeof(IWriteRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IQuoteRepository, QuoteRepository>();
+        services.AddScoped<IInsuranceProductRepository, InsuranceProductRepository>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IPolicyRepository, PolicyRepository>();
+        services.AddScoped<IClaimRepository, ClaimRepository>();
+        services.AddScoped<IRenewalRepository, RenewalRepository>();
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IIdentityService, IdentityService>();

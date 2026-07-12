@@ -13,7 +13,7 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
     private readonly IIdentityService _identityService;
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly IWriteRepository<Customer> _customerRepository;
+    private readonly ICustomerRepository _customerRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RegisterCommandHandler> _logger;
 
@@ -21,7 +21,7 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
         IIdentityService identityService,
         ITokenService tokenService,
         IRefreshTokenService refreshTokenService,
-        IWriteRepository<Customer> customerRepository,
+        ICustomerRepository customerRepository,
         IUnitOfWork unitOfWork,
         ILogger<RegisterCommandHandler> logger)
     {
@@ -38,6 +38,13 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
         if (await _identityService.ExistsByEmailAsync(request.Email, cancellationToken))
         {
             return Result<AuthResponse>.Failure("Bu e-posta adresi ile daha önce bir hesap oluşturulmuş.");
+        }
+
+        // TCKN benzersizliği transaction öncesi ön-kontrol edilir (e-posta ile aynı desen); aksi halde
+        // UQ_Customers_TCKN ihlali DbUpdateException olarak 500'e düşerdi. ADR-017 transaction akışı değişmez.
+        if (await _customerRepository.ExistsByTcknAsync(request.Tckn, cancellationToken))
+        {
+            return Result<AuthResponse>.Failure("Bu TCKN ile daha önce bir kayıt oluşturulmuş.");
         }
 
         var userId = Guid.Empty;

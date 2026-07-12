@@ -596,6 +596,14 @@ namespace SigortaPro.Persistence.Migrations
                     b.Property<int>("Branch")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("ClaimHistoryFactor")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(1.00m);
+
+                    b.Property<int>("CoveragePackage")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 

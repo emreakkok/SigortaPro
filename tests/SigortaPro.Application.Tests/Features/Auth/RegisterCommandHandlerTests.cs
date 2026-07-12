@@ -14,7 +14,7 @@ public class RegisterCommandHandlerTests
     private readonly IIdentityService _identityService = Substitute.For<IIdentityService>();
     private readonly ITokenService _tokenService = Substitute.For<ITokenService>();
     private readonly IRefreshTokenService _refreshTokenService = Substitute.For<IRefreshTokenService>();
-    private readonly IWriteRepository<Customer> _customerRepository = Substitute.For<IWriteRepository<Customer>>();
+    private readonly ICustomerRepository _customerRepository = Substitute.For<ICustomerRepository>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly RegisterCommandHandler _handler;
 
@@ -56,6 +56,21 @@ public class RegisterCommandHandlerTests
         result.IsFailure.Should().BeTrue();
         await _identityService.DidNotReceive().CreateUserAsync(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ReturnFailure_When_TcknAlreadyExists()
+    {
+        _identityService.ExistsByEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(false);
+        _customerRepository.ExistsByTcknAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
+
+        var result = await _handler.Handle(Command(), CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        // TCKN çakışması insert öncesi yakalanır: Identity kullanıcısı oluşturulmaz, kayıt eklenmez.
+        await _identityService.DidNotReceive().CreateUserAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _customerRepository.DidNotReceive().AddAsync(Arg.Any<Customer>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

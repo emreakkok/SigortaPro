@@ -10,5 +10,9 @@ public static class Roles
     public const string Personel = nameof(UserRole.Personel);
     public const string Customer = nameof(UserRole.Customer);
 
+    // [Authorize(Roles = ...)] için birleşik sabit (attribute argümanı derleme zamanı sabiti olmak zorunda).
+    // Acente personeli (Admin + Personel) tüm müşteri kayıtlarına erişebilir (PROJECT_CONTEXT.md §3).
+    public const string Staff = Admin + "," + Personel;
+
     public static readonly IReadOnlyList<string> All = new[] { Admin, Personel, Customer };
 }

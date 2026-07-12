@@ -7,4 +7,7 @@ public static class BusinessConstants
     public const int RenewalNoticeWindowDays = 30;
     public const string PolicyNumberPrefix = "POL";
     public const int MaskedCardVisibleDigits = 4;
+
+    // Satın alınan poliçenin varsayılan vade süresi (yıl). Poliçe bitiş tarihi başlangıç + bu süre olarak set edilir.
+    public const int PolicyTermYears = 1;
 }
