@@ -1,5 +1,7 @@
 # SigortaPro — Mimari Doküman
 
+> API uçlarının derli toplu özeti için bkz. [`API.md`](API.md); kurulum ve çalıştırma için [`README.md`](README.md).
+
 ## Katman Yapısı (Clean Architecture)
 
 ```
@@ -406,7 +408,11 @@ Satın alınan poliçe için QuestPDF (ADR-006) ile sertifika üretilir, saklan�
 
 | Uç | İşlem | Yetki |
 |----|-------|-------|
+| `GET /api/v1/policies` | "Poliçelerim": müşterinin poliçeleri (sayfalı + durum filtresi) — **Task 18, ADR-031** | `Customer` |
+| `GET /api/v1/policies/{id}` | Poliçe detayı (teminat tablosu ile) — **Task 18, ADR-031** | Sahip müşteri / personel |
 | `GET /api/v1/policies/{id}/document` | Poliçe sertifikası PDF'ini indir (ilk erişimde üretilir) | Sahip müşteri / personel |
+
+> **Task 18 (ADR-031):** `GET /policies` ve `GET /policies/{id}` **salt okunur, additive** uçlardır (frontend "Poliçelerim" ekranı için). Mevcut desenleri izler: `IPolicyRepository.GetByCustomerPagedAsync`/`GetReadDetailByIdAsync` (AsNoTracking; PDF'in tracked `GetDetailByIdAsync`'inden ayrı), `QuoteAuthorization` sahiplik, `QuotePricingFactory` ile deterministik teminat yeniden hesabı (ADR-021). Hiçbir mevcut uç/DTO/şema değişmedi; migration yok.
 
 **Öne çıkan kararlar:**
 
@@ -475,10 +481,87 @@ Acente personelinin admin panelinin **salt okunur** veri kaynağı: özet metrik
 - **Read-model'ler (DTO değil):** Gruplu metrikler `MonthlySalesAggregate`/`BranchDistributionAggregate`/`CustomerRiskAggregate` read-model kayıtları döner (`Features/Dashboard/ReadModels`); handler bunları `DashboardMappings` ile API DTO'suna manuel eşler → §4.2 ("repository DTO döndürmez") korunur. Rapor listeleri (poliçe/ödeme) entity + `Include` döner, handler map eder (Task 7–13 deseni).
 - **Türetilmiş oranlar Application'da:** Yenileme oranı (onaylanan/sunulan) ve hasar/prim oranı (ödenen hasar/üretilen prim) `GetDashboardSummaryQueryHandler` içinde 0'a bölme korumasıyla hesaplanır; aylık trend penceresi (son 12 ay) `IDateTimeProvider`'dan türetilir.
 
+## Frontend (React SPA) — FAZ 2
+
+Task 15 ile `frontend/` altında SPA iskeleti kuruldu (ADR-009, ADR-027, ADR-028). Backend'den tamamen ayrık yaşar; tek temas noktası `VITE_API_BASE_URL` üzerinden HTTP API'dir (CORS `http://localhost:5173`'e açık — Task 6).
+
+### Stack ve Yapı
+
+| Katman | Teknoloji |
+|--------|-----------|
+| UI | React 18 + TypeScript (strict, `any` yasak) |
+| Build | Vite 8 (`npm run build` = `tsc` tip kontrolü + `vite build`) |
+| Routing | React Router v6 — `createBrowserRouter`, route bazlı `React.lazy` + `Suspense` |
+| Server state | TanStack Query v5 (tek `queryClient`, staleTime 30 sn) |
+| HTTP | Axios (tek instance; JWT interceptor + refresh yenileme) |
+| Form | React Hook Form + Zod (`@hookform/resolvers`) — ilk ekran Task 16'da |
+| Styling | Tailwind CSS v3 + shadcn/ui tarzı el yazımı bileşen seti (cva + tailwind-merge) |
+| Grafikler | Recharts 2.15 (admin dashboard — yalnızca lazy dashboard chunk'ında; ADR-033) |
+
+Klasör düzeni CODING_STANDARDS.md §2.3 ile birebir: `src/app/` (App, providers, routes, `ProtectedRoute`/`GuestRoute`, sistem sayfaları), `src/features/` (iş modülleri: `auth`, `profile`, `quotes`, `payments`, `policies`, `claims`, `renewals`, `dashboard`, `customers` — her feature kendi müşteri ve personel/admin yüzeyine sahiptir, ADR-033), `src/shared/` (`components/` tasarım sistemi, `layouts/` CustomerLayout + AdminLayout, `hooks/` useDebounce, `lib/` axios/queryClient/session/apiError/env/cn, `types/` ortak API-auth-insurance tipleri, `utils/` validation + format), `src/styles/globals.css` (HSL CSS değişkenli tema token'ları, koyu tema hazır).
+
+### Öne Çıkan Kararlar
+
+- **Oturum & token yenileme (ADR-028):** Oturum (`userId/email/roles/accessToken/refreshToken`) localStorage'da tek anahtar altındadır; roller JWT decode edilmeden `AuthResponse.roles`'tan alınır. Axios yanıt interceptor'ı 401'de **tek uçuşlu (single-flight)** refresh yapar (rotasyonlu refresh token ile uyum için zorunlu), isteği bir kez tekrarlar, yenileme başarısızsa oturumu temizleyip `/401` sayfasına tam sayfa yönlendirir.
+- **Oturum yönetimi (ADR-029, Task 16):** localStorage kalıcı doğruluk kaynağıdır; `AuthProvider` (`features/auth`) onun React yansımasıdır (`signIn`/`signOut`). Axios'un sessiz yenilemesi yalnızca localStorage'ı günceller (UI token okumadığından zararsız); zorunlu çıkıştaki tam sayfa yeniden yükleme state'i sıfırlar. Login/register RHF + Zod formlarıyla `features/auth` altındadır; Zod şemaları backend FluentValidation kurallarını Türkçe mesajlarıyla birebir aynalar.
+- **Rota koruması UX'tir, yetki backend'dedir:** `ProtectedRoute` oturumsuz kullanıcıyı `/login`'e (+`from` geri dönüş adresi), rol uyuşmazlığını `/403`'e gönderir; `GuestRoute` oturumluyu login/register'dan rol ana sayfasına yönlendirir (Customer → `/portal`, Admin/Personel → `/admin`). Gerçek yetki her zaman `[Authorize]` + kaynak sahipliğindedir; rol adları backend `UserRole` enum'u ile birebir aynıdır.
+- **İş mantığı frontend'e sızmaz (CLAUDE.md §10):** Fiyatlama, durum geçişleri ve doğrulamanın son sözü backend'dedir; Zod yalnızca kullanıcı deneyimi için ön doğrulamadır.
+- **Tasarım sistemi sahiplidir (ADR-027):** shadcn CLI/Radix bağımlılığı yoktur; dar bileşen seti (`Button/Input/Label/Select/Card/Badge/Spinner/Alert/FormField`) shadcn konvansiyonlarıyla elde yazılmıştır, ihtiyaç oldukça aynı desenle genişletilir. Kullanıcı menüsü gibi feature bileşenleri layout'lara **slot** (`userMenu` prop'u) olarak routes.tsx'ten enjekte edilir — shared katmanı feature'ları bilmez (ADR-029).
+
+### Müşteri Portalı — Profil & Teklif Sihirbazı (Task 17)
+
+Portalın vitrin deneyimi iki feature ile kurulur: `features/profile` (profil + araç/konut yönetimi) ve `features/quotes` (teklif sihirbazı, tekliflerim listesi/detayı). Öne çıkan kararlar (ADR-030):
+
+- **Sayısal enum mirror'ları:** Backend `JsonStringEnumConverter` kaydetmediğinden Domain enum'ları JSON'da **sayısal** döner (canlı API ile doğrulandı). `shared/types/insurance.types.ts` bunları `as const` sayısal nesne/tip olarak yansıtır (+ Türkçe etiket/rozet haritaları) ve API'ye sayısal gönderir — `shared/types/auth.types.ts`'teki `UserRole` mirror desenini izler. Para/tarih/gün-sayacı biçimlendirme `shared/utils/format.ts`'te (native `Intl`, ek paket yok).
+- **Çok adımlı sihirbaz (`QuoteWizardPage`):** branş → risk bilgileri → anlık prim/risk skoru + paket karşılaştırma. Backend `CreateQuoteCommand` yalnızca kalıcı `VehicleId`/`PropertyId` aldığından, risk adımı mevcut araç/konuttan seçtirir veya **aynı ekranda** ekletir; ekleme, profil feature'ının `VehicleForm`/`PropertyForm` + `useAddVehicle`/`useAddProperty`'sini **yeniden kullanır** (DRY). Anlık prim + risk skoru + 3 paket tek `GET /quotes/compare` çağrısından beslenir. Sağlık branşı risk objesi gerektirmez.
+- **Cross-feature yön:** `features/quotes` → `features/profile` (sihirbaz profil risk objelerini okur/ekler) tek yönlü ve döngüsüzdür; ortak parçalar `shared`'dadır.
+- **Tekliflerim/detay:** durum rozetleri + geçerlilik sayacı + durum filtresi/sayfalama (`GET /quotes`); detayda prim dökümü/teminatlar + onayla/reddet (`POST /quotes/{id}/approve|reject`). Onaylanınca detay, ödeme sayfasına yönlendiren aktif "Satın Al" gösterir (Task 18).
+
+### Müşteri Portalı — Satın Alma & Poliçe Ekranları (Task 18)
+
+Teklif → ödeme → poliçe → PDF müşteri akışı iki feature ile tamamlanır: `features/payments` (mock ödeme + başarı ekranı) ve `features/policies` (Poliçelerim liste/detay + PDF). Öne çıkan kararlar (ADR-031):
+
+- **Ödeme sayfası (`PurchasePage` — `/portal/quotes/:id/purchase`):** yalnızca `Approved` teklif için taksit seçenekleri (`GET /payments/installment-options`) + kart formu (RHF + Zod, backend `PurchaseQuoteCommandValidator` aynası) + test kartı ipuçları gösterir. Tek sayfalı durum makinesi: başarılı ödemede (`POST /payments`) aynı sayfa `PurchaseSuccess` (poliçe künyesi + PDF indirme + yönlendirmeler) render eder — sonuç route'lar arası taşınmaz (KISS). **Başarısız senaryo** (402) `getApiErrorMessages` ile RFC 7807 `detail`'inden gösterilir; teklif/poliçe değişmez.
+- **Poliçelerim (`PolicyListPage` — `/portal/policies`):** durum sekmeleri (Aktif / Süresi Dolmuş / İptal / Tümü; her biri tek `GET /policies?status=` filtresi) + sayfalama + durum rozetleri. **Detay (`PolicyDetailPage`):** künye + risk objesi + **teminat tablosu** (`GET /policies/{id}`; teklifle aynı `CoverageList`, ADR-021 deterministik) + PDF indirme.
+- **PDF blob indirme:** Bearer başlığı axios interceptor'ında eklendiğinden `<a href>` yerine `responseType:"blob"` ile indirilir; dosya adı `Content-Disposition`'dan çıkarılır (`filename` + `filename*=UTF-8''`), `URL.createObjectURL` + geçici `<a download>` ile kaydettirilir. İndirme `useMutation` ile modellenir.
+- **İş mantığı backend'de:** Luhn/senaryo bazlı ret, poliçeleştirme, teminat hesabı backend'dedir; Zod yalnızca yapısal kart doğrulamasıdır. Numaralı enum sözleşmesi (ADR-030) `PolicyStatus`/`PaymentStatus`'e genişletildi.
+
+### Müşteri Portalı — Hasar & Yenileme (Task 19)
+
+Müşteri tarafı süreçleri iki feature ile tamamlanır: `features/claims` (hasar bildirimi + takip) ve `features/renewals` (yenileme teklifi + onay). **Backend'e dokunulmadı** — Task 12/13 uçları (`ClaimsController`/`RenewalsController`) olduğu gibi tüketildi. Öne çıkan kararlar (ADR-032):
+
+- **Hasar (`features/claims`):** `ClaimCreatePage`/`ClaimForm` (`/portal/claims/new`) — poliçe seçici **yalnızca aktif poliçeleri** Task 18 `GET /policies?status=Active`'ten alır (DRY, `claims → policies`); olay tarihi/tutar/açıklama (RHF + Zod, `CreateClaimCommandValidator` aynası) + **mock foto** (dosya adları metadata olarak; yüklenmez — ADR-024). `ClaimListPage` durum filtresi + sayfalama; `ClaimDetailPage` künye + değerlendirme notu + **durum zaman çizelgesi** (`ClaimTimeline`: Bildirildi → İncelemede → Onaylandı → Ödendi | Reddedildi çatalı). Durum-geçişi (inceleme/onay/ret/ödeme) `Staff` işidir → Task 20.
+- **Yenileme (`features/renewals`):** `RenewalListPage`/`RenewalCard` (`/portal/renewals`) — `GET /renewals` ile bekleyen teklifler (prim + geçerlilik sayacı, `renewals → quotes`); **onay** (`POST /renewals/{id}/accept`) yeni dönem teklifini Approved'a çeker ve **"Ödemeye Geç"** ile mevcut Task 18 `PurchasePage`'e köprülenir (DRY — Task 13 backend'inin `PurchaseQuoteCommand`'ı yeniden kullanması ile simetrik).
+- **Altyapı:** `ClaimStatus` sayısal enum mirror'ı (ADR-030 deseni) + tasarım sistemine `Textarea` (ADR-027). Cross-feature bağımlılıklar tek yönlü ve döngüsüzdür; iş mantığı ve durum geçişleri backend'de kalır (CLAUDE.md §10).
+
+### Acente Admin Paneli (Task 20)
+
+Acente personelinin (Admin/Personel) çalışma yüzeyi `/admin` altındadır (`AdminLayout` — sidebar nav: Dashboard/Müşteriler/Teklifler/Poliçeler/Hasarlar). **Backend'e dokunulmadı** — Task 14 dashboard uçları ve modüllerin `Staff` uçları olduğu gibi tüketildi. Öne çıkan kararlar (ADR-033):
+
+- **Dashboard (`features/dashboard` — `/admin`):** 6 KPI kartı (toplam prim, aktif poliçe, bekleyen teklif/hasar, yenileme oranı, hasar/prim oranı) + **aylık prim trendi** (tek serili sütun) + **branş dağılımı** (tek hue yatay bar — büyüklük karşılaştırması; kimlik eksen etiketinde, poliçe adedi tooltip'te; ikinci eksen yok) + **en riskli müşteriler** (ilk 5). Grafikler **Recharts** ile tema token'larından (`hsl(var(--primary))`) çizilir — koyu tema otomatik; Recharts lazy `AdminDashboardPage` chunk'ına hapsedilir (ana bundle etkilenmez).
+- **Yönetim ekranları — tablo + filtre + detay çekmecesi:** El yazımı `Drawer` (shared; overlay/Escape, `role="dialog"` — ADR-027 konvansiyonu, Radix yok) dört ekranda ortak. **Müşteriler** (`features/customers`, yeni): debounce'lu ad/soyad/TCKN araması + il filtresi (`GET /customers`), çekmecede profil + araç/konut (`GET /customers/{id}` — backend `CustomerDto` profil ekranıyla aynı olduğundan `CustomerProfile` tipi yeniden kullanılır). **Teklifler** (`features/quotes`): durum+branş filtresi (personel tümünü görür — Task 9), çekmecede prim dökümü/teminatlar mevcut bileşenlerle. **Poliçeler** (`features/policies`): personelin tüm poliçeleri listeleyebildiği tek uç olan `GET /dashboard/reports/policies` tarih aralığı filtresiyle (`policies → dashboard` tek yönlü); çekmecede personel-muaf `GET /policies/{id}` + PDF indirme. **Hasarlar** (`features/claims`): durum filtresi, çekmecede açıklama/not + `ClaimTimeline` + karar aksiyonları.
+- **Hasar karar aksiyonları (`ClaimDecisionPanel`):** Durum makinesini aynalar — Submitted → İncelemeye Al; UnderReview → Onayla (tutar + not; `ApproveClaimCommandValidator` aynası Zod) / Reddet (gerekçe zorunlu); Approved → Ödemeyi Gerçekleştir. Geçersiz geçişin son sözü backend'de 409'dur (ADR-013); mutation'lar hasar liste+detay cache'ini geçersizleştirir.
+- **Altyapı:** `Pagination` + `Drawer` (shared/components), `useDebounce` (shared/hooks, DEVELOPMENT_RULES §6), `formatPercent`/`formatCompactCurrency`/`formatMonthLabel` (shared/utils). Yeni npm bağımlılığı yalnızca `recharts`.
+
+## Test Altyapısı — FAZ 3 (Task 21)
+
+Test projeleri (`tests/`) katmanlarla bire bir eşleşir (DEVELOPMENT_RULES.md §5.1); xUnit + FluentAssertions + NSubstitute kullanılır. Task 21 ile paket iki seviyede tamamlanmıştır:
+
+- **Birim testler** (Task 3–20 boyunca biriken): fiyatlama motoru kural senaryoları (`Infrastructure.Tests/Services/Pricing`), domain durum makineleri (`Domain.Tests` — Quote/Policy/Claim/Payment/Renewal geçişleri), handler/validator/pipeline testleri (`Application.Tests`), middleware testleri (`WebAPI.Tests/Middleware`).
+- **Entegrasyon testleri** (`WebAPI.Tests/Integration`, ADR-034): `WebApplicationFactory<Program>` gerçek HTTP pipeline'ını (middleware → authentication → MediatR → EF Core → Identity) **SQLite in-memory** veritabanıyla ayağa kaldırır. Kapsam: auth akışı (`register` → `login` → refresh **rotasyonu** + 401/409/400 negatifleri) ve teklif→satın alma akışı (araç ekle → teklif oluştur → onayla → mock POS ödeme → **aktif poliçe** + `Purchased` teklif; 402 yetersiz bakiye → teklif `Approved` kalır; 409 onaysız satın alma; 403 sahiplik ihlali).
+
+**Öne çıkan kararlar (ADR-034):**
+
+- **SQLite in-memory + `EnsureCreated`:** Şema EF modelinden üretilir (SQL Server'a özgü migration'lar çalıştırılmaz); tek açık `SqliteConnection` factory ömrü boyunca yaşar. TestContainers/gerçek SQL Server bilinçli elenmiştir (kurulum bağımlılığı olmadan her ortamda `dotnet test`).
+- **"Testing" ortamı:** `Program.cs`'in Development'a özel migrate/seed bloğu ve Swagger devre dışıdır; şema + referans verisi (5 ürün + roller, prodüksiyondaki `DbSeeder`/`IdentitySeeder` ile) factory başlatılırken yüklenir. Testler kendi kullanıcı/araç/teklif verisini kendileri oluşturur (§5.4).
+- **Tek paylaşılan factory (collection fixture):** Serilog bootstrap logger'ı ilk host kurulumunda dondurulduğundan aynı test sürecinde ikinci bir host kurulamaz; tüm entegrasyon sınıfları `IntegrationTestCollection` üzerinden tek host'u paylaşır ve sıralı çalışır (SQLite bağlantısının eşzamanlı kullanımı da böylece önlenir).
+- **Rate limit bütçesi:** Auth uçları IP başına 10 istek/dk limitlidir (ADR-020); testlerin arrange aşaması HTTP yerine `ISender` (MediatR) üzerinden kayıt yapar (`TestAccountFactory`), HTTP auth çağrıları yalnızca fiilen test edilen uçlara harcanır.
+- **Arkaplan servisi devre dışı:** `PolicyLifecycleBackgroundService` test host'undan çıkarılır (komutları Task 13 birim testlerinde kapsanır; paylaşılan SQLite bağlantısına eşzamanlı erişim testleri kırılgan yapardı).
+
 ## Mimari Kararlar
 
-Tüm önemli mimari kararlar ve gerekçeleri için bkz. [`docs/ai/DECISIONS.md`](docs/ai/DECISIONS.md). Bu doküman kuruluşta ADR-001 (Clean Architecture katman yapısı) kararını uygular; Domain modeli ADR-013 ve ADR-014 kararlarını, Application/CQRS omurgası ADR-002, ADR-013 ve ADR-015 kararlarını, Persistence katmanı ADR-005, ADR-010 ve ADR-016 kararlarını, kimlik doğrulama ADR-003, ADR-014 ve ADR-017 kararlarını, cross-cutting API altyapısı ADR-018 (exception handling/ProblemDetails), ADR-019 (API versiyonlama) ve ADR-020 (rate limiting + güvenlik header'ları) kararlarını uygular (ADR-012, ADR-014 ile revize edilmiştir).
+Tüm önemli mimari kararlar ve gerekçeleri `docs/ai/DECISIONS.md` dosyasında (ADR-001…034; yerel geliştirme dokümanı — `.gitignore` ile repo dışında) kayıtlıdır. Bu doküman kuruluşta ADR-001 (Clean Architecture katman yapısı) kararını uygular; Domain modeli ADR-013 ve ADR-014 kararlarını, Application/CQRS omurgası ADR-002, ADR-013 ve ADR-015 kararlarını, Persistence katmanı ADR-005, ADR-010 ve ADR-016 kararlarını, kimlik doğrulama ADR-003, ADR-014 ve ADR-017 kararlarını, cross-cutting API altyapısı ADR-018 (exception handling/ProblemDetails), ADR-019 (API versiyonlama) ve ADR-020 (rate limiting + güvenlik header'ları) kararlarını uygular (ADR-012, ADR-014 ile revize edilmiştir).
 
 ## Durum
 
-Bu doküman **Task 1 — Solution İskeleti**, **Task 2 — Domain Katmanı**, **Task 3 — Application Katmanı Altyapısı (CQRS Çekirdeği)**, **Task 4 — Persistence Katmanı (EF Core + SQL Server)**, **Task 5 — Kimlik Doğrulama & Yetkilendirme (JWT + Roller)** ve **Task 6 — API Çapraz Kesit Altyapısı (Cross-Cutting)** kapsamında oluşturulmuş; FAZ 1 iş modülleri **Task 7 — Müşteri & Profil Modülü**, **Task 8 — Risk Analizi & Dinamik Fiyatlama Motoru (Mock)**, **Task 9 — Teklif (Quote) Modülü**, **Task 10 — Ödeme (Mock Sanal POS) & Poliçeleştirme**, **Task 11 — PDF Poliçe Dökümanı Üretimi**, **Task 12 — Hasar (Claim) Modülü**, **Task 13 — Poliçe Yenileme (Renewal) & Arkaplan İşleri** ve **Task 14 — Admin Dashboard & Raporlama API'si** ile tamamlanmıştır. FAZ 0 ve FAZ 1 (backend çekirdek iş modülleri) tamamlanmıştır; sonraki adım **FAZ 2 — Task 15 — React Proje Kurulumu & Tasarım Sistemi**'dir.
+Bu doküman **Task 1 — Solution İskeleti**, **Task 2 — Domain Katmanı**, **Task 3 — Application Katmanı Altyapısı (CQRS Çekirdeği)**, **Task 4 — Persistence Katmanı (EF Core + SQL Server)**, **Task 5 — Kimlik Doğrulama & Yetkilendirme (JWT + Roller)** ve **Task 6 — API Çapraz Kesit Altyapısı (Cross-Cutting)** kapsamında oluşturulmuş; FAZ 1 iş modülleri **Task 7 — Müşteri & Profil Modülü**, **Task 8 — Risk Analizi & Dinamik Fiyatlama Motoru (Mock)**, **Task 9 — Teklif (Quote) Modülü**, **Task 10 — Ödeme (Mock Sanal POS) & Poliçeleştirme**, **Task 11 — PDF Poliçe Dökümanı Üretimi**, **Task 12 — Hasar (Claim) Modülü**, **Task 13 — Poliçe Yenileme (Renewal) & Arkaplan İşleri** ve **Task 14 — Admin Dashboard & Raporlama API'si** ile tamamlanmıştır. FAZ 2'den **Task 15 — React Proje Kurulumu & Tasarım Sistemi** (`frontend/` SPA iskeleti), **Task 16 — Auth Ekranları & Oturum Yönetimi** (kayıt/giriş/çıkış, AuthProvider, role göre yönlendirme, guard'lar + 401/403 sayfaları), **Task 17 — Müşteri Portalı: Profil & Teklif Sihirbazı** (profil + araç/konut yönetimi, çok adımlı teklif sihirbazı — anlık prim/risk skoru + paket karşılaştırma, tekliflerim listesi/detayı + onayla/reddet), **Task 18 — Satın Alma & Poliçe Ekranları** (mock ödeme sayfası — taksit + test kartı senaryoları, satın alma sonrası başarı ekranı, Poliçelerim liste/detay + teminat tablosu + PDF indirme; **backend'e ADR-031 ile iki salt okunur additive poliçe ucu eklendi**), **Task 19 — Müşteri Portalı: Hasar & Yenileme** (hasar bildirim formu + durum zaman çizelgeli takip, yenileme teklifi kartı + onay→ödeme köprüsü; ADR-032, **backend'e dokunulmadı**) ve **Task 20 — Admin Paneli** (dashboard: KPI kartları + Recharts grafikleri — aylık prim trendi, branş dağılımı — + en riskli müşteriler; yönetim ekranları: müşteriler/teklifler/poliçeler/hasarlar tablo + filtre + detay çekmecesi; hasar karar aksiyonları; ADR-033, **backend'e dokunulmadı**; tümü canlı backend'e karşı uçtan uca doğrulandı) tamamlanmıştır. FAZ 2 (frontend) tamamdır. FAZ 3'ten **Task 21 — Test Altyapısı** (WebApplicationFactory + SQLite in-memory entegrasyon testleri — auth ve teklif→satın alma akışları; ADR-034; toplam 263 test yeşil) ve **Task 22 — Dokümantasyon Finali & Çalıştırma Deneyimi** ([`README.md`](README.md) finali, [`API.md`](API.md) uç nokta özeti, bu dokümanın son gözden geçirmesi) tamamlanmıştır. **MVP teslime hazırdır**; MVP dışı bırakılan entegrasyonlar (gerçek POS, e-posta, foto depolama, blob storage) ve gelecek faz adayları `docs/ai/DECISIONS.md > Bekleyen / Gelecek Kararlar` tablosunda izlenir.
