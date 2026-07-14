@@ -1,4 +1,6 @@
+using SigortaPro.Application.Common.Models;
 using SigortaPro.Domain.Entities;
+using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
@@ -7,6 +9,19 @@ public interface IPolicyRepository : IReadRepository<Policy>, IWriteRepository<P
 {
     // Verilen yıla ait mevcut poliçe sayısı — sıralı poliçe numarası üretiminde kullanılır (ADR-022).
     Task<int> CountByYearAsync(int year, CancellationToken cancellationToken = default);
+
+    // Salt okunur, sayfalanmış "Poliçelerim" listesi: yalnızca ilgili müşterinin poliçeleri; opsiyonel durum
+    // filtresi (aktif/pasif). Branş/ürün adı için teklif+ürün (InsuranceProduct) yüklenir.
+    Task<PagedResult<Policy>> GetByCustomerPagedAsync(
+        Guid customerId,
+        PolicyStatus? status,
+        PaginationParams paging,
+        CancellationToken cancellationToken = default);
+
+    // Salt okunur (AsNoTracking) poliçe detayı: müşteri, teklif (ürün+teminatlar, araç/konut) ile birlikte —
+    // teminat tablosunun deterministik yeniden hesabı için (GetPolicyById). PDF üretimi için tracked
+    // GetDetailByIdAsync ayrıdır (ADR-023).
+    Task<Policy?> GetReadDetailByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     // İzlemeli (tracked) poliçe detayı: müşteri, teklif (ürün+teminatlar, risk objesi) ve varsa belge ile.
     // PDF üretiminde belge kaydı eklenip kaydedilebildiği için izlemelidir (ADR-023).
