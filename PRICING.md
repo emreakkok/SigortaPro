@@ -1,7 +1,7 @@
 # SigortaPro — Fiyatlama Kuralları (Mock)
 
 > **Kapsam:** Task 8 — Risk Analizi & Dinamik Fiyatlama Motoru (Mock).
-> **Karar:** [ADR-008](docs/ai/DECISIONS.md#adr-008-kural-tabanlı-mock-fiyatlama-motoru).
+> **Karar:** ADR-008 (`docs/ai/DECISIONS.md`, yerel geliştirme dokümanı).
 > **Uyarı:** Bu kurallar **demo/MVP** amaçlıdır; gerçek aktüeryal doğruluğu yoktur.
 > **Senkronizasyon:** Buradaki tüm değerler `SigortaPro.Infrastructure/Services/Pricing/` (`PricingEngine`, `PricingRuleTables`) ile **birebir** eşleşir. Kural değiştiğinde iki taraf birlikte güncellenir.
 
