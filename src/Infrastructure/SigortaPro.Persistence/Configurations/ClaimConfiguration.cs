@@ -27,6 +27,12 @@ public sealed class ClaimConfiguration : BaseEntityConfiguration<Claim>
             .HasForeignKey(c => c.CustomerId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Hasar belgeleri (foto/PDF) aggregate'in parçasıdır → hasarla birlikte silinir (cascade).
+        builder.HasMany(c => c.Documents)
+            .WithOne()
+            .HasForeignKey(d => d.ClaimId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(c => c.PolicyId).HasDatabaseName("IX_Claims_PolicyId");
         builder.HasIndex(c => c.CustomerId).HasDatabaseName("IX_Claims_CustomerId");
         builder.HasIndex(c => c.Status).HasDatabaseName("IX_Claims_Status");

@@ -1,3 +1,4 @@
+import type { VehicleUsage } from "@/shared/types/insurance.types";
 import { z } from "zod";
 import { TURKISH_PHONE_REGEX, TURKISH_PLATE_REGEX } from "@/shared/utils/validation";
 
@@ -59,6 +60,15 @@ export const vehicleSchema = z.object({
     .int("Motor gücü tam sayı olmalıdır.")
     .min(1, `Motor gücü 1 ile ${MAX_ENGINE_POWER_HP} beygir arasında olmalıdır.`)
     .max(MAX_ENGINE_POWER_HP, `Motor gücü 1 ile ${MAX_ENGINE_POWER_HP} beygir arasında olmalıdır.`),
+  // ADR-057: Kullanım amacı zorunludur ve varsayılan yoktur — kullanıcı bilinçli seçmelidir.
+  // Boş seçim "" olarak gelir; sayıya çevrilemediğinde net bir mesaj gösterilir.
+  usagePurpose: z.coerce
+    .number({ invalid_type_error: "Kullanım amacı seçilmelidir." })
+    .int()
+    .min(0, "Kullanım amacı seçilmelidir.")
+    .max(2, "Geçersiz kullanım amacı.")
+    // Doğrulamadan sonra tip, backend enum aynasına daraltılır (form değeri string gelir).
+    .transform((value) => value as VehicleUsage),
 });
 export type VehicleFormValues = z.infer<typeof vehicleSchema>;
 
@@ -74,10 +84,29 @@ export const propertySchema = z.object({
     .int("Metrekare tam sayı olmalıdır.")
     .min(1, `Metrekare 1 ile ${MAX_SQUARE_METERS} arasında olmalıdır.`)
     .max(MAX_SQUARE_METERS, `Metrekare 1 ile ${MAX_SQUARE_METERS} arasında olmalıdır.`),
-  earthquakeZone: z.coerce
-    .number({ invalid_type_error: "Deprem bölgesi sayı olmalıdır." })
-    .int()
-    .min(1, "Deprem bölgesi 1 ile 5 arasında olmalıdır.")
-    .max(5, "Deprem bölgesi 1 ile 5 arasında olmalıdır."),
 });
 export type PropertyFormValues = z.infer<typeof propertySchema>;
+
+// Şifre kuralları backend ChangePasswordCommandValidator (= Register/ResetPassword) ile birebir aynı (ADR-040).
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Mevcut şifre zorunludur."),
+    newPassword: z
+      .string()
+      .min(8, "Şifre en az 8 karakter olmalıdır.")
+      .regex(/[A-Z]/, "Şifre en az bir büyük harf içermelidir.")
+      .regex(/[a-z]/, "Şifre en az bir küçük harf içermelidir.")
+      .regex(/[0-9]/, "Şifre en az bir rakam içermelidir.")
+      .regex(/[^a-zA-Z0-9]/, "Şifre en az bir özel karakter içermelidir."),
+    confirmPassword: z.string().min(1, "Şifre tekrarı zorunludur."),
+  })
+  .refine((values) => values.newPassword === values.confirmPassword, {
+    message: "Şifreler eşleşmiyor.",
+    path: ["confirmPassword"],
+  })
+  .refine((values) => values.newPassword !== values.currentPassword, {
+    message: "Yeni şifre mevcut şifreyle aynı olamaz.",
+    path: ["newPassword"],
+  });
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;

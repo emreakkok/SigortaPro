@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { UserMenu } from "@/features/auth/components/UserMenu";
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { GuestRoute } from "@/app/GuestRoute";
 import { ProtectedRoute } from "@/app/ProtectedRoute";
 import { RoleRedirect } from "@/app/pages/RoleRedirect";
@@ -10,8 +11,11 @@ import { CustomerLayout } from "@/shared/layouts/CustomerLayout";
 import { STAFF_ROLES, UserRoles } from "@/shared/types/auth.types";
 
 // Route bazlı code splitting (DEVELOPMENT_RULES.md §6 — React.lazy + Suspense).
+const LandingPage = lazy(() => import("@/app/pages/LandingPage"));
 const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage"));
 const RegisterPage = lazy(() => import("@/features/auth/pages/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("@/features/auth/pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("@/features/auth/pages/ResetPasswordPage"));
 const PortalHomePage = lazy(() => import("@/app/pages/PortalHomePage"));
 const ProfilePage = lazy(() => import("@/features/profile/pages/ProfilePage"));
 const QuoteListPage = lazy(() => import("@/features/quotes/pages/QuoteListPage"));
@@ -29,6 +33,9 @@ const AdminCustomerListPage = lazy(() => import("@/features/customers/pages/Admi
 const AdminQuoteListPage = lazy(() => import("@/features/quotes/pages/AdminQuoteListPage"));
 const AdminPolicyListPage = lazy(() => import("@/features/policies/pages/AdminPolicyListPage"));
 const AdminClaimListPage = lazy(() => import("@/features/claims/pages/AdminClaimListPage"));
+const NotificationCenterPage = lazy(() => import("@/features/notifications/pages/NotificationCenterPage"));
+const AdminStaffListPage = lazy(() => import("@/features/staff/pages/AdminStaffListPage"));
+const AdminPricingPage = lazy(() => import("@/features/pricing/pages/AdminPricingPage"));
 const UnauthorizedPage = lazy(() => import("@/app/pages/UnauthorizedPage"));
 const ForbiddenPage = lazy(() => import("@/app/pages/ForbiddenPage"));
 const NotFoundPage = lazy(() => import("@/app/pages/NotFoundPage"));
@@ -48,7 +55,7 @@ function withSuspense(node: ReactNode): ReactNode {
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <RoleRedirect />,
+    element: <RoleRedirect landing={withSuspense(<LandingPage />)} />,
   },
   {
     path: "/login",
@@ -57,6 +64,14 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <GuestRoute>{withSuspense(<RegisterPage />)}</GuestRoute>,
+  },
+  {
+    path: "/forgot-password",
+    element: <GuestRoute>{withSuspense(<ForgotPasswordPage />)}</GuestRoute>,
+  },
+  {
+    path: "/reset-password",
+    element: <GuestRoute>{withSuspense(<ResetPasswordPage />)}</GuestRoute>,
   },
   {
     path: "/portal",
@@ -120,7 +135,7 @@ export const router = createBrowserRouter([
     path: "/admin",
     element: (
       <ProtectedRoute allowedRoles={STAFF_ROLES}>
-        <AdminLayout userMenu={<UserMenu />} />
+        <AdminLayout userMenu={<UserMenu />} headerExtras={<NotificationBell />} />
       </ProtectedRoute>
     ),
     children: [
@@ -143,6 +158,28 @@ export const router = createBrowserRouter([
       {
         path: "claims",
         element: withSuspense(<AdminClaimListPage />),
+      },
+      {
+        path: "notifications",
+        element: withSuspense(<NotificationCenterPage />),
+      },
+      {
+        // ADR-060: Personel yönetimi yalnızca Admin'e açıktır (personel/müşteri erişemez).
+        path: "staff",
+        element: (
+          <ProtectedRoute allowedRoles={[UserRoles.Admin]}>
+            {withSuspense(<AdminStaffListPage />)}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        // ADR-048: Fiyatlandırma yönetimi yalnızca Admin'e açıktır (personel/müşteri erişemez).
+        path: "pricing",
+        element: (
+          <ProtectedRoute allowedRoles={[UserRoles.Admin]}>
+            {withSuspense(<AdminPricingPage />)}
+          </ProtectedRoute>
+        ),
       },
     ],
   },

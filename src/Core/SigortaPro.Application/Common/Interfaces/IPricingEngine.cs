@@ -6,5 +6,7 @@ namespace SigortaPro.Application.Common.Interfaces;
 // (ARCHITECTURE_RULES.md §6.1). Saf/deterministik bir fonksiyondur; aynı girdi her zaman aynı çıktıyı üretir.
 public interface IPricingEngine
 {
-    PricingResult CalculatePremium(PricingRequest request);
+    // ADR-048 (additive, opsiyonel parametre): `rates` verilirse baz primler o tarifeden okunur;
+    // verilmezse yerleşik baseline tarife kullanılır (mevcut çağrı noktaları ve davranış değişmez).
+    PricingResult CalculatePremium(PricingRequest request, PricingRateSet? rates = null);
 }

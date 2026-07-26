@@ -171,36 +171,8 @@ public class QuoteTests
         quote.ClaimHistoryFactor.Should().Be(1.00m);
     }
 
-    [Fact]
-    public void ApplyClaimHistoryFactor_Should_SetFactor_When_StatusIsDraftAndFactorAtLeastOne()
-    {
-        var quote = CreateDraftQuote();
 
-        quote.ApplyClaimHistoryFactor(1.40m);
 
-        quote.ClaimHistoryFactor.Should().Be(1.40m);
-    }
-
-    [Fact]
-    public void ApplyClaimHistoryFactor_Should_ThrowDomainException_When_FactorBelowOne()
-    {
-        var quote = CreateDraftQuote();
-
-        var act = () => quote.ApplyClaimHistoryFactor(0.90m);
-
-        act.Should().Throw<DomainException>();
-    }
-
-    [Fact]
-    public void ApplyClaimHistoryFactor_Should_ThrowDomainException_When_StatusIsNotDraft()
-    {
-        var quote = CreateDraftQuote();
-        quote.MarkAsPriced(1500m, DateTime.UtcNow.AddDays(7));
-
-        var act = () => quote.ApplyClaimHistoryFactor(1.20m);
-
-        act.Should().Throw<DomainException>();
-    }
 
     private static Quote CreateDraftQuote()
     {

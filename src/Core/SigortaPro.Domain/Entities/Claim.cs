@@ -31,6 +31,16 @@ public class Claim : BaseEntity, IAggregateRoot
     public ClaimStatus Status { get; private set; }
     public string? ReviewNote { get; private set; }
 
+    // Müşterinin hasar bildiriminde eklediği belge/görseller (foto/PDF). Aggregate'in parçasıdır;
+    // baytlar dosya depolamada, burada yalnızca metadata (ADR-023). Admin/Personel değerlendirmede görür.
+    public ICollection<ClaimDocument> Documents { get; private set; } = new List<ClaimDocument>();
+
+    /// <summary>Hasar bildirimine yüklenen bir belgeyi (metadata; baytlar depolamada) ekler.</summary>
+    public void AddDocument(ClaimDocument document)
+    {
+        Documents.Add(document);
+    }
+
     /// <summary>Submitted → UnderReview. Admin incelemeyi başlattığında çağrılır.</summary>
     public void StartReview()
     {

@@ -3,12 +3,15 @@ using SigortaPro.Application.Features.Claims.DTOs;
 
 namespace SigortaPro.Application.Features.Claims.Commands.CreateClaim;
 
-// Müşteri, aktif bir poliçesi için hasar bildirir (olay tarihi/açıklaması, tahmini tutar).
-// PhotoFileNames mock foto yükleme metadatasıdır; gerçek foto depolama MVP dışıdır (PROJECT_CONTEXT §9, ADR-024)
-// ve kalıcılaştırılmaz — arayüz ileride gerçek depolamaya hazır olacak şekilde tutulur.
+// Müşteri, aktif bir poliçesi için hasar bildirir (olay tarihi/açıklaması, tahmini tutar) ve destekleyici
+// belge/görsel (foto/PDF) ekleyebilir. Belgeler gerçek olarak IFileStorageService'te saklanır (ADR-023)
+// ve Admin/Personel değerlendirmesinde görüntülenir. İçerik JSON'da base64 taşınır (System.Text.Json byte[]).
 public sealed record CreateClaimCommand(
     Guid PolicyId,
     DateTime IncidentDate,
     string Description,
     decimal EstimatedAmount,
-    IReadOnlyList<string>? PhotoFileNames = null) : ICommand<ClaimDto>;
+    IReadOnlyList<CreateClaimDocument>? Documents = null) : ICommand<ClaimDto>;
+
+// Yüklenen tek belge: ad, MIME türü ve içerik (JSON'da base64). Baytlar depolamaya yazılır, metadata DB'ye.
+public sealed record CreateClaimDocument(string FileName, string ContentType, byte[] Content);

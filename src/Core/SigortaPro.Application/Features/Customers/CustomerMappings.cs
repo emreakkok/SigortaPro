@@ -35,7 +35,8 @@ internal static class CustomerMappings
         vehicle.Brand,
         vehicle.Model,
         vehicle.ManufactureYear,
-        vehicle.EnginePowerHp);
+        vehicle.EnginePowerHp,
+        vehicle.UsagePurpose);
 
     public static PropertyDto ToDto(this Property property) => new(
         property.Id,

@@ -5,6 +5,13 @@
     <ProjectReference Include="..\..\Core\SigortaPro.Application\SigortaPro.Application.csproj" />
   </ItemGroup>
 
+  <!-- ADR-035: Identity DataProtector token provider'ları (AddDefaultTokenProviders,
+       DataProtectionTokenProviderOptions) ASP.NET Core paylaşımlı framework'ünde bulunur.
+       Identity kurulumu tümüyle Persistence'ta tek yerde tutulduğundan framework referansı burada verilir. -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">

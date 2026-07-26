@@ -27,7 +27,10 @@ public sealed record PolicyDocumentModel(
     decimal BasePremium,
     decimal TotalPremium,
     IReadOnlyList<PolicyCoverageLine> Coverages,
-    IReadOnlyList<PricingBreakdownItem> PremiumBreakdown);
+    IReadOnlyList<PricingBreakdownItem> PremiumBreakdown,
+    // ADR-042 (additive): Sağlıkta "başkası adına" poliçede sigortalı özeti ("Ad Soyad (Yakınlık) · TCKN maskeli").
+    // Doluysa PDF, sigorta ettiren (poliçe sahibi) ile sigortalıyı ayrı gösterir; null = sigortalı poliçe sahibidir.
+    string? InsuredPersonSummary = null);
 
 // Poliçe teminat tablosu satırı (paket ölçeğiyle uygulanmış limitle).
 public sealed record PolicyCoverageLine(string Name, string Description, decimal Limit);

@@ -1,10 +1,11 @@
 import { ClaimDecisionPanel } from "@/features/claims/components/ClaimDecisionPanel";
+import { ClaimDocuments } from "@/features/claims/components/ClaimDocuments";
 import { ClaimStatusBadge } from "@/features/claims/components/ClaimStatusBadge";
 import { ClaimTimeline } from "@/features/claims/components/ClaimTimeline";
 import { useClaim } from "@/features/claims/hooks/useClaims";
 import { Alert, Spinner } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
-import { formatCurrency, formatDate } from "@/shared/utils/format";
+import { formatCurrency, formatDate, formatDateTime } from "@/shared/utils/format";
 
 /**
  * Admin hasar detay çekmecesi içeriği: künye + açıklama + durum zaman çizelgesi
@@ -34,8 +35,8 @@ export function AdminClaimDetailPanel({ claimId }: { claimId: string }) {
 
       <section className="space-y-1 text-sm">
         <p>
-          <span className="text-muted-foreground">Olay tarihi: </span>
-          <span className="font-medium">{formatDate(data.incidentDate)}</span>
+          <span className="text-muted-foreground">Olay zamanı: </span>
+          <span className="font-medium">{formatDateTime(data.incidentDate)}</span>
         </p>
         <p>
           <span className="text-muted-foreground">Bildirim tarihi: </span>
@@ -64,6 +65,9 @@ export function AdminClaimDetailPanel({ claimId }: { claimId: string }) {
           <p className="whitespace-pre-wrap text-sm">{data.reviewNote}</p>
         </section>
       )}
+
+      {/* Müşterinin yüklediği belgeler (foto/PDF) — hasar değerlendirmesinde acente tarafından görüntülenir. */}
+      <ClaimDocuments claimId={data.id} documents={data.documents} />
 
       <section>
         <h3 className="mb-2 text-sm font-semibold text-muted-foreground">Süreç</h3>

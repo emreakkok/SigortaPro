@@ -45,6 +45,15 @@ public class Policy : BaseEntity, IAggregateRoot
         PolicyDocument = document;
     }
 
+    /// <summary>
+    /// Olayın teminat DÖNEMİ içinde gerçekleşip gerçekleşmediği — sınırlar dahil: <c>StartDate ≤ olay ≤ EndDate</c>.
+    /// StartDate/EndDate satın alma ANINI (saat dahil, UTC) taşır; bu nedenle kontrol saat hassasiyetlidir:
+    /// aynı gün poliçe başlangıç saatinden SONRAKİ bir olay geçerli, ÖNCEKİ bir olay geçersizdir. Aktiflik
+    /// (Status) ve "gelecekte olamaz" ayrı kurallardır; burada yalnızca teminat penceresi değerlendirilir.
+    /// </summary>
+    public bool CoversIncidentAt(DateTime incidentDate) =>
+        incidentDate >= StartDate && incidentDate <= EndDate;
+
     /// <summary>Müşteri veya admin tarafından tetiklenen iptal; yalnızca aktif poliçe iptal edilebilir.</summary>
     public void Cancel()
     {

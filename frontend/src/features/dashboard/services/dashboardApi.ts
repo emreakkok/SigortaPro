@@ -3,13 +3,20 @@ import type { PagedResult } from "@/shared/types/api.types";
 import type {
   CustomerRiskSegment,
   DashboardSummary,
+  DashboardSummaryParams,
   PolicyReportItem,
   PolicyReportParams,
 } from "@/features/dashboard/types/dashboard.types";
 
-/** `GET /dashboard/summary` — özet metrikler + aylık trend + branş dağılımı (tek çağrı). */
-export async function getDashboardSummary(): Promise<DashboardSummary> {
-  const response = await api.get<DashboardSummary>("/dashboard/summary");
+/**
+ * `GET /dashboard/summary` — operasyon dashboard'ının TÜM blokları tek çağrıda (ADR-052):
+ * dönem KPI'ları + karşılaştırma, aksiyon merkezi, prim serisi, satış hunisi, branş performansı,
+ * hasar operasyonu, portföy. Filtre değiştiğinde yalnızca bu istek yenilenir.
+ */
+export async function getDashboardSummary(
+  params: DashboardSummaryParams = {},
+): Promise<DashboardSummary> {
+  const response = await api.get<DashboardSummary>("/dashboard/summary", { params });
   return response.data;
 }
 

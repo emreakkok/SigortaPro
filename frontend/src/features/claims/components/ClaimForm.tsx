@@ -3,9 +3,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   claimSchema,
+  combineIncidentDateTime,
   type ClaimFormValues,
 } from "@/features/claims/types/claim.schemas";
-import type { CreateClaimRequest } from "@/features/claims/types/claim.types";
+import type {
+  CreateClaimDocumentPayload,
+  CreateClaimRequest,
+} from "@/features/claims/types/claim.types";
 import type { PolicyListItem } from "@/features/policies/types/policy.types";
 import {
   Alert,
@@ -26,33 +30,71 @@ interface ClaimFormProps {
   error?: unknown;
 }
 
-const TODAY = new Date().toISOString().slice(0, 10);
-const ACCEPTED_PHOTO_TYPES = ".jpg,.jpeg,.png,.pdf";
-const MAX_PHOTOS = 10;
+const ACCEPTED_DOCUMENT_TYPES = ".jpg,.jpeg,.png,.webp,.pdf";
+const MAX_DOCUMENTS = 5;
+const MAX_DOCUMENT_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB (backend ile aynı sınır)
+
+/** Seçilen dosyayı backend'in beklediği base64 içerikli belge yüküne çevirir. */
+async function fileToPayload(file: File): Promise<CreateClaimDocumentPayload> {
+  const buffer = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  for (let index = 0; index < buffer.length; index += 1) {
+    binary += String.fromCharCode(buffer[index]);
+  }
+  return {
+    fileName: file.name,
+    contentType: file.type || "application/octet-stream",
+    content: btoa(binary),
+  };
+}
+
+/** Bugünün yerel tarihi ("YYYY-MM-DD") — gelecek tarih seçimini engellemek için `max`. */
+function localDateValue(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** Şimdinin yerel saati ("HH:mm") — saat alanı için makul varsayılan. */
+function localTimeValue(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
 
 /** Hasar bildirim formu: poliçe seçimi, olay tarihi/açıklaması, tahmini tutar + mock foto metadatası. */
 export function ClaimForm({ activePolicies, onSubmit, isPending, error }: ClaimFormProps) {
+  const now = new Date();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ClaimFormValues>({
     resolver: zodResolver(claimSchema),
-    defaultValues: { policyId: activePolicies.length === 1 ? activePolicies[0].id : "" },
+    defaultValues: {
+      policyId: activePolicies.length === 1 ? activePolicies[0].id : "",
+      incidentDate: localDateValue(now),
+      incidentTime: localTimeValue(now),
+    },
   });
 
-  // Foto yükleme mock'tur: gerçek dosya yüklenmez, yalnızca dosya adları metadata olarak gönderilir (ADR-024).
-  const [photoNames, setPhotoNames] = useState<string[]>([]);
+  // Belgeler (foto/PDF) gerçek olarak yüklenir: seçilen dosyalar base64'e çevrilip gönderilir, backend
+  // depolamada saklar ve Admin/Personel değerlendirmede görür. Baytlar submit anında okunur.
+  const [files, setFiles] = useState<File[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
   const serverErrors = error !== undefined ? getApiErrorMessages(error) : [];
+  const today = localDateValue(now);
 
-  const submit = (values: ClaimFormValues) =>
+  const submit = async (values: ClaimFormValues) => {
+    const documents = files.length > 0 ? await Promise.all(files.map(fileToPayload)) : undefined;
     onSubmit({
       policyId: values.policyId,
-      incidentDate: values.incidentDate,
+      // Olay tarihi + saati birleştirilip UTC ISO'ya çevrilir; backend teminat penceresini bu kesin anla
+      // (saat dahil) karşılaştırır — böylece aynı gün poliçe başlangıcından sonraki hasar doğru kabul edilir.
+      incidentDate: combineIncidentDateTime(values.incidentDate, values.incidentTime).toISOString(),
       description: values.description,
       estimatedAmount: values.estimatedAmount,
-      photoFileNames: photoNames.length > 0 ? photoNames : undefined,
+      documents,
     });
+  };
 
   return (
     <form className="space-y-4" noValidate onSubmit={handleSubmit(submit)}>
@@ -81,16 +123,20 @@ export function ClaimForm({ activePolicies, onSubmit, isPending, error }: ClaimF
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField htmlFor="incidentDate" label="Olay Tarihi" error={errors.incidentDate?.message}>
-          <Input id="incidentDate" type="date" max={TODAY} {...register("incidentDate")} />
+          <Input id="incidentDate" type="date" max={today} {...register("incidentDate")} />
         </FormField>
-        <FormField
-          htmlFor="estimatedAmount"
-          label="Tahmini Hasar Tutarı (₺)"
-          error={errors.estimatedAmount?.message}
-        >
-          <Input id="estimatedAmount" type="number" inputMode="decimal" step="0.01" {...register("estimatedAmount")} />
+        <FormField htmlFor="incidentTime" label="Olay Saati" error={errors.incidentTime?.message}>
+          <Input id="incidentTime" type="time" {...register("incidentTime")} />
         </FormField>
       </div>
+
+      <FormField
+        htmlFor="estimatedAmount"
+        label="Tahmini Hasar Tutarı (₺)"
+        error={errors.estimatedAmount?.message}
+      >
+        <Input id="estimatedAmount" type="number" inputMode="decimal" step="0.01" {...register("estimatedAmount")} />
+      </FormField>
 
       <FormField htmlFor="description" label="Hasar Açıklaması" error={errors.description?.message}>
         <Textarea
@@ -102,26 +148,32 @@ export function ClaimForm({ activePolicies, onSubmit, isPending, error }: ClaimF
       </FormField>
 
       <div className="space-y-2">
-        <label htmlFor="photos" className="text-sm font-medium">
-          Fotoğraflar <span className="text-muted-foreground">(opsiyonel, demo)</span>
+        <label htmlFor="documents" className="text-sm font-medium">
+          Belgeler / Fotoğraflar <span className="text-muted-foreground">(opsiyonel)</span>
         </label>
         <input
-          id="photos"
+          id="documents"
           type="file"
           multiple
-          accept={ACCEPTED_PHOTO_TYPES}
+          accept={ACCEPTED_DOCUMENT_TYPES}
           className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium hover:file:bg-accent"
           onChange={(event) => {
-            const names = Array.from(event.target.files ?? [])
-              .slice(0, MAX_PHOTOS)
-              .map((file) => file.name);
-            setPhotoNames(names);
+            const selected = Array.from(event.target.files ?? []);
+            const withinSize = selected.filter((file) => file.size <= MAX_DOCUMENT_SIZE_BYTES);
+            const skipped = selected.length - withinSize.length;
+            setFiles(withinSize.slice(0, MAX_DOCUMENTS));
+            setFileError(
+              skipped > 0 ? `${skipped} dosya 3 MB sınırını aştığı için eklenmedi.` : null,
+            );
           }}
         />
-        {photoNames.length > 0 && (
-          <p className="text-xs text-muted-foreground">
-            Seçilen: {photoNames.join(", ")} — bu demoda fotoğraflar yüklenmez, yalnızca dosya adları kaydedilir.
-          </p>
+        <p className="text-xs text-muted-foreground">
+          JPEG, PNG, WEBP veya PDF · en fazla {MAX_DOCUMENTS} dosya · dosya başına 3 MB. Yüklediğiniz
+          belgeler hasar değerlendirmesinde acente tarafından görüntülenir.
+        </p>
+        {fileError !== null && <p className="text-xs text-destructive">{fileError}</p>}
+        {files.length > 0 && (
+          <p className="text-xs text-muted-foreground">Seçilen: {files.map((file) => file.name).join(", ")}</p>
         )}
       </div>
 

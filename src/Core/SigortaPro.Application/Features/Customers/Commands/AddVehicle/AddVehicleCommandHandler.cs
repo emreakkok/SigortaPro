@@ -42,7 +42,8 @@ public sealed class AddVehicleCommandHandler : ICommandHandler<AddVehicleCommand
             request.Brand,
             request.Model,
             request.ManufactureYear,
-            request.EnginePowerHp);
+            request.EnginePowerHp,
+            request.UsagePurpose);
 
         await _vehicleRepository.AddAsync(vehicle, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

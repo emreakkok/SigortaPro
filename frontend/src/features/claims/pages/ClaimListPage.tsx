@@ -2,8 +2,20 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ClaimStatusBadge } from "@/features/claims/components/ClaimStatusBadge";
 import { useClaimList } from "@/features/claims/hooks/useClaims";
-import { Alert, Button, Card, CardContent, Label, Select, Spinner } from "@/shared/components";
+import {
+  Alert,
+  AlertTriangleIcon,
+  Button,
+  Card,
+  CardContent,
+  EmptyState,
+  Label,
+  Pagination,
+  Select,
+  SkeletonRows,
+} from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
+import { PORTAL_PAGE_SIZE } from "@/shared/lib/pagination";
 import {
   CLAIM_STATUS_LABELS,
   ClaimStatus,
@@ -19,7 +31,7 @@ export default function ClaimListPage() {
 
   const { data, isLoading, isError, error, isFetching } = useClaimList({
     page,
-    pageSize: 10,
+    pageSize: PORTAL_PAGE_SIZE,
     status,
   });
 
@@ -58,19 +70,21 @@ export default function ClaimListPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
+        <SkeletonRows rows={4} />
       ) : isError || data === undefined ? (
         <Alert variant="destructive">{getApiErrorMessages(error)[0]}</Alert>
       ) : data.items.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Henüz hasar bildiriminiz yok.{" "}
-            <Link to="/portal/claims/new" className="font-medium text-primary hover:underline">
-              Hasar bildirin.
-            </Link>
-          </CardContent>
+          <EmptyState
+            icon={<AlertTriangleIcon />}
+            title="Henüz hasar bildiriminiz yok"
+            description="Bir hasar yaşarsanız çevrimiçi bildirin; değerlendirme sürecini adım adım buradan takip edersiniz."
+            action={
+              <Link to="/portal/claims/new">
+                <Button>Hasar Bildir</Button>
+              </Link>
+            }
+          />
         </Card>
       ) : (
         <>
@@ -97,22 +111,12 @@ export default function ClaimListPage() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-              Önceki
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Sayfa {data.page} / {data.totalPages === 0 ? 1 : data.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= data.totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Sonraki
-            </Button>
-          </div>
+          <Pagination
+            page={data.page}
+            totalPages={data.totalPages}
+            onPageChange={setPage}
+            totalCount={data.totalCount}
+          />
         </>
       )}
     </div>

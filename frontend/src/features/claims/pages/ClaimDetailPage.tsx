@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { ClaimDocuments } from "@/features/claims/components/ClaimDocuments";
 import { ClaimStatusBadge } from "@/features/claims/components/ClaimStatusBadge";
 import { ClaimTimeline } from "@/features/claims/components/ClaimTimeline";
 import { useClaim } from "@/features/claims/hooks/useClaims";
@@ -11,7 +12,7 @@ import {
   Spinner,
 } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
-import { formatCurrency, formatDate } from "@/shared/utils/format";
+import { formatCurrency, formatDate, formatDateTime } from "@/shared/utils/format";
 
 /** Hasar detayı: künye, tutarlar, değerlendirme notu ve durum zaman çizelgesi. */
 export default function ClaimDetailPage() {
@@ -62,7 +63,7 @@ export default function ClaimDetailPage() {
             <CardTitle>Bilgiler</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Row label="Olay tarihi" value={formatDate(claim.incidentDate)} />
+            <Row label="Olay zamanı" value={formatDateTime(claim.incidentDate)} />
             <Row label="Bildirim tarihi" value={formatDate(claim.createdAt)} />
             <Row label="Tahmini tutar" value={formatCurrency(claim.estimatedAmount)} />
             {claim.approvedAmount !== null && (
@@ -90,6 +91,14 @@ export default function ClaimDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      {claim.documents.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <ClaimDocuments claimId={claim.id} documents={claim.documents} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

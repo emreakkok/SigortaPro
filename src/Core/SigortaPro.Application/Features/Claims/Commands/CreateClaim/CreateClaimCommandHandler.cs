@@ -12,6 +12,7 @@ public sealed class CreateClaimCommandHandler : ICommandHandler<CreateClaimComma
     private readonly ICustomerRepository _customerRepository;
     private readonly IPolicyRepository _policyRepository;
     private readonly IClaimRepository _claimRepository;
+    private readonly IFileStorageService _fileStorage;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
@@ -21,6 +22,7 @@ public sealed class CreateClaimCommandHandler : ICommandHandler<CreateClaimComma
         ICustomerRepository customerRepository,
         IPolicyRepository policyRepository,
         IClaimRepository claimRepository,
+        IFileStorageService fileStorage,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
@@ -29,6 +31,7 @@ public sealed class CreateClaimCommandHandler : ICommandHandler<CreateClaimComma
         _customerRepository = customerRepository;
         _policyRepository = policyRepository;
         _claimRepository = claimRepository;
+        _fileStorage = fileStorage;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
@@ -60,7 +63,9 @@ public sealed class CreateClaimCommandHandler : ICommandHandler<CreateClaimComma
             throw new BusinessRuleException("Yalnızca aktif poliçe için hasar bildirilebilir.");
         }
 
-        if (request.IncidentDate < policy.StartDate || request.IncidentDate > policy.EndDate)
+        // Saat hassasiyetli teminat penceresi (StartDate/EndDate satın alma anını taşır): aynı gün, poliçe
+        // başlangıç saatinden sonraki olay geçerlidir; önceki olay değildir. Kural Policy aggregate'indedir.
+        if (!policy.CoversIncidentAt(request.IncidentDate))
         {
             throw new BusinessRuleException("Olay tarihi poliçe döneminin dışında olamaz.");
         }
@@ -72,20 +77,27 @@ public sealed class CreateClaimCommandHandler : ICommandHandler<CreateClaimComma
 
         var claim = new Claim(policy.Id, customer.Id, request.IncidentDate, request.Description, request.EstimatedAmount);
 
+        // Belgeler (foto/PDF): baytlar dosya depolamaya yazılır (ADR-023), metadata aggregate'e eklenir.
+        // Doğrulama (adet/boyut/tür) CreateClaimCommandValidator'dadır; burada kalıcılaştırılır.
+        if (request.Documents is { Count: > 0 } documents)
+        {
+            foreach (var upload in documents)
+            {
+                var documentId = Guid.NewGuid();
+                var storageKey = ClaimDocumentStorage.KeyFor(claim.Id, documentId);
+                await _fileStorage.SaveAsync(storageKey, upload.Content, cancellationToken);
+
+                claim.AddDocument(new ClaimDocument(
+                    documentId, claim.Id, upload.FileName, upload.ContentType, upload.Content.LongLength, storageKey));
+            }
+        }
+
         await _claimRepository.AddAsync(claim, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Mock foto yükleme: gerçek depolama MVP dışı olduğundan (PROJECT_CONTEXT §9) yalnızca kabul edilip loglanır.
-        if (request.PhotoFileNames is { Count: > 0 } photos)
-        {
-            _logger.LogInformation(
-                "Hasar bildirimi için {PhotoCount} foto alındı (mock; saklanmaz). ClaimId: {ClaimId}",
-                photos.Count, claim.Id);
-        }
-
         _logger.LogInformation(
-            "Hasar bildirildi. ClaimId: {ClaimId}, PolicyId: {PolicyId}, CustomerId: {CustomerId}",
-            claim.Id, policy.Id, customer.Id);
+            "Hasar bildirildi. ClaimId: {ClaimId}, PolicyId: {PolicyId}, CustomerId: {CustomerId}, Belge: {DocumentCount}",
+            claim.Id, policy.Id, customer.Id, claim.Documents.Count);
 
         return ClaimMappings.ToDto(claim, policy.PolicyNumber);
     }

@@ -104,4 +104,19 @@ public sealed class PolicyRepository : GenericRepository<Policy>, IPolicyReposit
                 && policy.EndDate <= renewalWindowEnd
                 && !policy.Renewals.Any())
             .ToListAsync(cancellationToken);
+
+    // ADR-059: Bonus-Malus girdisi. Tek sorgu; SQL tarafında COUNT + NOT EXISTS ile hesaplanır (N+1 yok).
+    // Branş, poliçenin kaynaklandığı teklifden okunur → Kasko ve Trafik AYRI basamak taşır.
+    public Task<int> CountClaimFreeCompletedPeriodsAsync(
+        Guid customerId, InsuranceBranch branch, DateTime asOf, CancellationToken cancellationToken = default) =>
+        _context.Policies
+            .AsNoTracking()
+            .CountAsync(
+                policy => policy.CustomerId == customerId
+                    && policy.Quote!.Branch == branch
+                    && policy.EndDate < asOf
+                    && policy.Status != PolicyStatus.Cancelled
+                    && !policy.Claims.Any(claim =>
+                        claim.Status == ClaimStatus.Approved || claim.Status == ClaimStatus.Paid),
+                cancellationToken);
 }

@@ -2,8 +2,18 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PolicyStatusBadge } from "@/features/policies/components/PolicyStatusBadge";
 import { usePolicyList } from "@/features/policies/hooks/usePolicies";
-import { Alert, Button, Card, CardContent, Spinner } from "@/shared/components";
+import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  EmptyState,
+  Pagination,
+  ShieldCheckIcon,
+  SkeletonRows,
+} from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
+import { PORTAL_PAGE_SIZE } from "@/shared/lib/pagination";
 import { cn } from "@/shared/lib/utils";
 import {
   INSURANCE_BRANCH_LABELS,
@@ -31,7 +41,7 @@ export default function PolicyListPage() {
   const status = TABS[tabIndex].status;
   const { data, isLoading, isError, error, isFetching } = usePolicyList({
     page,
-    pageSize: 10,
+    pageSize: PORTAL_PAGE_SIZE,
     status,
   });
 
@@ -64,19 +74,21 @@ export default function PolicyListPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
+        <SkeletonRows rows={4} />
       ) : isError || data === undefined ? (
         <Alert variant="destructive">{getApiErrorMessages(error)[0]}</Alert>
       ) : data.items.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Bu durumda poliçeniz yok.{" "}
-            <Link to="/portal/quotes/new" className="font-medium text-primary hover:underline">
-              Yeni bir teklif alın.
-            </Link>
-          </CardContent>
+          <EmptyState
+            icon={<ShieldCheckIcon />}
+            title="Bu durumda poliçeniz yok"
+            description="Bu sekmede görüntülenecek bir poliçeniz bulunmuyor. Yeni bir teklif alarak dakikalar içinde güvence oluşturabilirsiniz."
+            action={
+              <Link to="/portal/quotes/new">
+                <Button>Yeni Teklif Al</Button>
+              </Link>
+            }
+          />
         </Card>
       ) : (
         <>
@@ -105,22 +117,12 @@ export default function PolicyListPage() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-              Önceki
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Sayfa {data.page} / {data.totalPages === 0 ? 1 : data.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= data.totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Sonraki
-            </Button>
-          </div>
+          <Pagination
+            page={data.page}
+            totalPages={data.totalPages}
+            onPageChange={setPage}
+            totalCount={data.totalCount}
+          />
         </>
       )}
     </div>

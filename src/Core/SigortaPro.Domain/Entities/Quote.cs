@@ -42,7 +42,73 @@ public class Quote : BaseEntity, IAggregateRoot
     // Hasar geçmişi çarpanı (varsayılan 1.00 = etkisiz). Yalnızca yenileme tekliflerinde (Task 13) müşterinin
     // önceki dönem hasar geçmişine göre 1.00'ın üzerine set edilir; prim dökümünün deterministik yeniden
     // hesabında CoveragePackage gibi saklı bir girdi olarak kullanılır (ADR-021 ile tutarlı — ADR-025).
+    // ADR-059 (LEGACY): Bu alan artık YENİ tekliflerde kullanılmaz — hasar geçmişi tek bir Bonus-Malus
+    // basamağıyla (PricingSnapshot.NoClaimTier) fiyatlanır. Alan, ADR-059 ÖNCESİ oluşturulmuş yenileme
+    // tekliflerinin primini ve prim dökümünü birebir korumak için saklanır ve yeniden hesapta uygulanmaya
+    // devam eder. Yeni tekliflerde varsayılan 1.00 (etkisiz) kalır; değeri değiştiren bir metot YOKTUR.
     public decimal ClaimHistoryFactor { get; private set; } = 1.00m;
+
+    // Sağlıkta "başkası adına" teklifte sigortalanan kişi (null = poliçe sahibi kendisi — ADR-041).
+    // Owned/gömülü değer; fiyatlamanın deterministik yeniden hesabında yaş bu kişiden türetilir (ADR-021).
+    public InsuredPerson? InsuredPerson { get; private set; }
+
+    // ADR-048: Teklifin fiyatlandığı tarife versiyonu. Teklif oluşturulurken o an yürürlükte olan versiyon
+    // **sabitlenir**; sonraki tüm yeniden hesaplar (detay, PDF, poliçe görünümü) bu versiyonu kullanır.
+    // Böylece admin tarifeyi değiştirse bile geçmiş teklif/poliçe primleri matematiksel olarak değişemez.
+    // null = bu alan eklenmeden önce oluşturulmuş kayıtlar → yerleşik baseline tarife (bit-aynı sonuç).
+    public Guid? PricingVersionId { get; private set; }
+
+    // ADR-053: Teklifin fiyatlandığı andaki risk GİRDİLERİ (sürücü/sigortalı yaşı, araç yaşı, motor gücü,
+    // risk ili, bina yaşı, m², deprem bölgesi, sigara beyanı). ADR-048 tarifeyi sabitler; bu da girdiyi
+    // sabitler → müşteri adresini/aracını sonradan değiştirse bile eski teklifin risk skoru ve prim dökümü
+    // DEĞİŞMEZ. null = bu alan eklenmeden önce oluşturulmuş kayıtlar → canlı veriden hesaplanır (bit-aynı davranış).
+    public PricingSnapshot? PricingSnapshot { get; private set; }
+
+    /// <summary>
+    /// Fiyatlama girdilerini teklifte dondurur; yalnızca fiyatlamadan önce (taslak) çağrılabilir.
+    /// Tarife sabitleme (<see cref="PinPricingVersion"/>) ile birlikte teklifi fiyat açısından değişmez kılar.
+    /// </summary>
+    public void CapturePricingSnapshot(PricingSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        if (Status != QuoteStatus.Draft)
+        {
+            throw new DomainException("Fiyatlama girdileri yalnızca taslak durumundaki teklifte sabitlenebilir.");
+        }
+
+        PricingSnapshot = snapshot;
+    }
+
+    /// <summary>Teklifi fiyatlandıran tarife versiyonunu sabitler; yalnızca fiyatlamadan önce (taslak) çağrılabilir.</summary>
+    public void PinPricingVersion(Guid pricingVersionId)
+    {
+        if (Status != QuoteStatus.Draft)
+        {
+            throw new DomainException("Fiyatlandırma versiyonu yalnızca taslak durumundaki teklifte sabitlenebilir.");
+        }
+
+        PricingVersionId = pricingVersionId;
+    }
+
+    /// <summary>
+    /// Sağlık teklifinde sigortalıyı poliçe sahibinden farklı bir kişi olarak belirler ("başkası adına").
+    /// Yalnızca Sağlık branşında ve taslak durumunda (fiyatlamadan önce) çağrılabilir.
+    /// </summary>
+    public void SetInsuredPerson(InsuredPerson insuredPerson)
+    {
+        if (Branch != InsuranceBranch.Saglik)
+        {
+            throw new DomainException("Başkası adına sigortalı yalnızca Sağlık branşında tanımlanabilir.");
+        }
+
+        if (Status != QuoteStatus.Draft)
+        {
+            throw new DomainException("Sigortalı bilgisi yalnızca taslak durumundaki teklifte belirlenebilir.");
+        }
+
+        InsuredPerson = insuredPerson;
+    }
 
     /// <summary>Fiyatlamadan önce teminat paketini seçer; yalnızca taslak durumunda değiştirilebilir.</summary>
     public void SelectCoveragePackage(CoveragePackage coveragePackage)
@@ -53,22 +119,6 @@ public class Quote : BaseEntity, IAggregateRoot
         }
 
         CoveragePackage = coveragePackage;
-    }
-
-    /// <summary>Yenileme fiyatlamasında hasar geçmişi çarpanını uygular; yalnızca taslak durumunda ve 1.00'dan küçük olamaz.</summary>
-    public void ApplyClaimHistoryFactor(decimal claimHistoryFactor)
-    {
-        if (Status != QuoteStatus.Draft)
-        {
-            throw new DomainException("Hasar geçmişi çarpanı yalnızca taslak durumundaki teklifte uygulanabilir.");
-        }
-
-        if (claimHistoryFactor < 1.00m)
-        {
-            throw new DomainException("Hasar geçmişi çarpanı 1.00'dan küçük olamaz.");
-        }
-
-        ClaimHistoryFactor = claimHistoryFactor;
     }
 
     /// <summary>Draft → Priced. Fiyatlama motorunun ürettiği tutar ve geçerlilik tarihiyle çağrılır.</summary>

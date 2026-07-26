@@ -103,6 +103,24 @@ public static class ServiceCollectionExtensions
                     NameClaimType = ClaimTypes.NameIdentifier,
                     RoleClaimType = ClaimTypes.Role,
                 };
+
+                // ADR-041: SignalR WebSocket bağlantıları Authorization header taşıyamaz; hub yoluna gelen
+                // isteklerde token, SignalR istemcisinin standart "access_token" query parametresinden okunur.
+                // Yalnızca hub path'i ile sınırlıdır — normal API uçlarında davranış değişmez.
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        if (!string.IsNullOrEmpty(accessToken)
+                            && context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                };
             });
 
         return services;

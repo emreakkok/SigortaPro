@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Common.Models;
+using SigortaPro.Application.Common.Search;
 using SigortaPro.Domain.Entities;
 using SigortaPro.Domain.Enums;
 using SigortaPro.Persistence.Context;
@@ -37,12 +38,15 @@ public sealed class QuoteRepository : GenericRepository<Quote>, IQuoteRepository
         Guid? customerId,
         QuoteStatus? status,
         InsuranceBranch? branch,
+        string? search,
         PaginationParams paging,
         CancellationToken cancellationToken = default)
     {
+        // Customer, listede müşteri kimliği (ad + telefon) göstermek ve aramak için tek sorguda JOIN edilir (N+1 yok).
         var query = _context.Quotes
             .AsNoTracking()
             .Include(quote => quote.InsuranceProduct)
+            .Include(quote => quote.Customer)
             .AsQueryable();
 
         if (customerId.HasValue)
@@ -58,6 +62,20 @@ public sealed class QuoteRepository : GenericRepository<Quote>, IQuoteRepository
         if (branch.HasValue)
         {
             query = query.Where(quote => quote.Branch == branch.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            var phone = PhoneNumberSearch.ToSubscriberDigits(term);
+            var hasPhone = phone.Length >= PhoneNumberSearch.MinSubscriberDigits;
+
+            // Ad/soyad/tam ad (SQL CI collation) veya telefon (kanonik "+90…" → "+" atılıp abone son eki Contains).
+            query = query.Where(quote =>
+                (quote.Customer!.FirstName + " " + quote.Customer.LastName).Contains(term)
+                || quote.Customer.FirstName.Contains(term)
+                || quote.Customer.LastName.Contains(term)
+                || (hasPhone && quote.Customer.PhoneNumber.Replace("+", "").Contains(phone)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

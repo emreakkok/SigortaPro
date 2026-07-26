@@ -10,17 +10,20 @@ public sealed class GetQuoteByIdQueryHandler : IQueryHandler<GetQuoteByIdQuery, 
     private readonly IQuoteRepository _quoteRepository;
     private readonly ICustomerRepository _customerRepository;
     private readonly IPricingEngine _pricingEngine;
+    private readonly IPricingRateResolver _pricingRateResolver;
     private readonly ICurrentUserService _currentUserService;
 
     public GetQuoteByIdQueryHandler(
         IQuoteRepository quoteRepository,
         ICustomerRepository customerRepository,
         IPricingEngine pricingEngine,
+        IPricingRateResolver pricingRateResolver,
         ICurrentUserService currentUserService)
     {
         _quoteRepository = quoteRepository;
         _customerRepository = customerRepository;
         _pricingEngine = pricingEngine;
+        _pricingRateResolver = pricingRateResolver;
         _currentUserService = currentUserService;
     }
 
@@ -34,6 +37,10 @@ public sealed class GetQuoteByIdQueryHandler : IQueryHandler<GetQuoteByIdQuery, 
 
         // Prim dökümü, saklanan seçim + veri üzerinden oluşturma anındaki referansla (CreatedAt) yeniden
         // hesaplanır; deterministik motor sayesinde oluşturma anındaki değerlerle birebir aynıdır (ADR-021).
+        // ADR-048: baz primler teklifin SABİTLEDİĞİ tarife versiyonundan okunur — admin tarifeyi
+        // değiştirse bile bu teklifin primi/dökümü değişmez.
+        var rates = await _pricingRateResolver.ResolveForQuoteAsync(quote.PricingVersionId, cancellationToken);
+
         var pricing = QuotePricingFactory.Compute(
             _pricingEngine,
             quote.Branch,
@@ -43,7 +50,11 @@ public sealed class GetQuoteByIdQueryHandler : IQueryHandler<GetQuoteByIdQuery, 
             quote.InsuranceProduct!.Coverages,
             quote.CoveragePackage,
             quote.CreatedAt,
-            quote.ClaimHistoryFactor);
+            quote.ClaimHistoryFactor,
+            insuredBirthDate: quote.InsuredPerson?.BirthDate,
+            rates: rates,
+            // ADR-053: yeniden hesap teklifin DONDURULMUŞ girdilerinden yapılır (canlı entity'den değil).
+            snapshot: quote.PricingSnapshot);
 
         return QuoteMappings.ToDto(quote, quote.InsuranceProduct!, quote.Vehicle, quote.Property, pricing);
     }

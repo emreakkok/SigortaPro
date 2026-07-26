@@ -10,21 +10,21 @@ namespace SigortaPro.Infrastructure.Services.Pricing;
 // Quote akışından, domain entity'lerinden ve sistem saatinden bağımsızdır.
 public sealed class PricingEngine : IPricingEngine
 {
-    public PricingResult CalculatePremium(PricingRequest request)
+    public PricingResult CalculatePremium(PricingRequest request, PricingRateSet? rates = null)
     {
         ArgumentNullException.ThrowIfNull(request);
 
         return request switch
         {
-            VehiclePricingRequest vehicle => CalculateVehicle(vehicle),
-            PropertyPricingRequest property => CalculateProperty(property),
-            HealthPricingRequest health => CalculateHealth(health),
+            VehiclePricingRequest vehicle => CalculateVehicle(vehicle, rates),
+            PropertyPricingRequest property => CalculateProperty(property, rates),
+            HealthPricingRequest health => CalculateHealth(health, rates),
             _ => throw new ArgumentException(
                 $"Desteklenmeyen fiyatlama isteği tipi: {request.GetType().Name}", nameof(request)),
         };
     }
 
-    private static PricingResult CalculateVehicle(VehiclePricingRequest request)
+    private static PricingResult CalculateVehicle(VehiclePricingRequest request, PricingRateSet? rates)
     {
         EnsureBranch(request.Branch, InsuranceBranch.Kasko, InsuranceBranch.Trafik);
 
@@ -34,13 +34,27 @@ public sealed class PricingEngine : IPricingEngine
             VehicleAgeFactor(request.VehicleAge),
             EnginePowerFactor(request.EnginePowerHp),
             CityRiskFactor(request.City),
-            NoClaimFactor(request.NoClaimTier),
         };
 
-        return BuildResult(request.Branch, breakdown);
+        // ADR-059: Bonus-Malus yalnızca basamak nötr DEĞİLSE prim dökümüne girer. Basamağı 0 olan
+        // (yeni müşteri veya bu sistem öncesi oluşmuş) kayıtlarda kalem hiç üretilmez → eski tekliflerin
+        // dökümü birebir korunur ve kullanıcıya etkisiz bir kalem gösterilmez.
+        if (request.NoClaimTier != 0)
+        {
+            breakdown.Add(BonusMalusFactor(request.NoClaimTier));
+        }
+
+        // ADR-057: Kullanım amacı yalnızca BEYAN edildiyse fiyatlanır ve dökümde görünür; beyanı olmayan
+        // (eski) kayıtlarda faktör hiç üretilmez → geçmiş fiyatlar/dökümler değişmez.
+        if (request.UsagePurpose is not null)
+        {
+            breakdown.Add(VehicleUsageFactor(request.UsagePurpose.Value));
+        }
+
+        return BuildResult(request.Branch, breakdown, rates);
     }
 
-    private static PricingResult CalculateProperty(PropertyPricingRequest request)
+    private static PricingResult CalculateProperty(PropertyPricingRequest request, PricingRateSet? rates)
     {
         EnsureBranch(request.Branch, InsuranceBranch.Konut, InsuranceBranch.Dask);
 
@@ -51,10 +65,10 @@ public sealed class PricingEngine : IPricingEngine
             EarthquakeZoneFactor(request.EarthquakeZone),
         };
 
-        return BuildResult(request.Branch, breakdown);
+        return BuildResult(request.Branch, breakdown, rates);
     }
 
-    private static PricingResult CalculateHealth(HealthPricingRequest request)
+    private static PricingResult CalculateHealth(HealthPricingRequest request, PricingRateSet? rates)
     {
         var breakdown = new List<PricingBreakdownItem>
         {
@@ -62,12 +76,15 @@ public sealed class PricingEngine : IPricingEngine
             SmokerFactor(request.IsSmoker),
         };
 
-        return BuildResult(InsuranceBranch.Saglik, breakdown);
+        return BuildResult(InsuranceBranch.Saglik, breakdown, rates);
     }
 
-    private static PricingResult BuildResult(InsuranceBranch branch, IReadOnlyList<PricingBreakdownItem> breakdown)
+    private static PricingResult BuildResult(
+        InsuranceBranch branch, IReadOnlyList<PricingBreakdownItem> breakdown, PricingRateSet? rates)
     {
-        var basePremium = PricingRuleTables.BasePremiums[branch];
+        // ADR-048: Baz prim verilen tarifeden okunur; tarife yoksa/branşı içermiyorsa yerleşik baseline
+        // kullanılır → tarife yönetimi eklenmeden önce oluşmuş kayıtlar birebir aynı sonucu üretir.
+        var basePremium = rates?.BasePremiumFor(branch) ?? PricingRuleTables.BasePremiums[branch];
         var aggregateMultiplier = breakdown.Aggregate(1m, (accumulator, item) => accumulator * item.Multiplier);
         var totalPremium = Math.Round(basePremium * aggregateMultiplier, 2, MidpointRounding.AwayFromZero);
         var riskScore = DetermineRiskScore(aggregateMultiplier);
@@ -121,16 +138,31 @@ public sealed class PricingEngine : IPricingEngine
         return new PricingBreakdownItem("İl Risk Katsayısı", coefficient, description);
     }
 
-    private static PricingBreakdownItem NoClaimFactor(int noClaimTier)
+    private static PricingBreakdownItem VehicleUsageFactor(VehicleUsage usage)
     {
-        var effectiveTier = Math.Clamp(noClaimTier, 0, PricingRuleTables.MaxNoClaimTier);
-        var multiplier = 1.00m - (effectiveTier * PricingRuleTables.NoClaimDiscountPerTier);
+        var coefficient = PricingRuleTables.VehicleUsageCoefficients[usage];
+        var description = usage switch
+        {
+            VehicleUsage.Hususi => "Hususi (kişisel) kullanım — referans seviye.",
+            VehicleUsage.Ticari => "Ticari kullanım — daha yüksek yıllık kilometre ve kaza sıklığı.",
+            VehicleUsage.Taksi => "Taksi/yolcu taşımacılığı — en yüksek maruziyet.",
+            _ => "Kullanım amacı.",
+        };
 
-        var description = effectiveTier == 0
-            ? "Hasarsızlık indirimi yok (0. basamak)."
-            : $"Hasarsızlık indirimi ({effectiveTier}. basamak, %{effectiveTier * 5}).";
+        return new PricingBreakdownItem("Kullanım Amacı", coefficient, description);
+    }
 
-        return new PricingBreakdownItem("Hasarsızlık İndirimi", multiplier, description);
+    // ADR-059: Hasar geçmişinin tek çarpanı. Negatif basamak ek prim (malus), pozitif basamak indirim (bonus).
+    private static PricingBreakdownItem BonusMalusFactor(int step)
+    {
+        var effectiveStep = Math.Clamp(step, BonusMalusScale.MinStep, BonusMalusScale.MaxStep);
+        var coefficient = PricingRuleTables.BonusMalusCoefficients[effectiveStep];
+
+        var description = effectiveStep < 0
+            ? $"Hasar geçmişi ek primi ({effectiveStep}. basamak)."
+            : $"Hasarsızlık indirimi ({effectiveStep}. basamak).";
+
+        return new PricingBreakdownItem("Hasarsızlık Basamağı", coefficient, description);
     }
 
     // --- Konut / DASK faktörleri ---

@@ -13,23 +13,12 @@ public class AddPropertyCommandValidatorTests
         Neighborhood: "Caferağa",
         PostalCode: "34710",
         BuildingAge: 10,
-        SquareMeters: 120,
-        EarthquakeZone: 1);
+        SquareMeters: 120);
 
     [Fact]
     public void Validate_Should_Pass_When_CommandIsValid()
     {
         _validator.TestValidate(Valid()).ShouldNotHaveAnyValidationErrors();
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(6)]
-    public void Validate_Should_HaveError_When_EarthquakeZoneIsOutOfRange(int zone)
-    {
-        var command = Valid() with { EarthquakeZone = zone };
-
-        _validator.TestValidate(command).ShouldHaveValidationErrorFor(c => c.EarthquakeZone);
     }
 
     [Fact]

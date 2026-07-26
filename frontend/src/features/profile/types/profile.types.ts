@@ -1,3 +1,5 @@
+import type { VehicleUsage } from "@/shared/types/insurance.types";
+
 /** Adres value object (backend `AddressDto`). */
 export interface Address {
   city: string;
@@ -14,6 +16,8 @@ export interface Vehicle {
   model: string;
   manufactureYear: number;
   enginePowerHp: number;
+  /** Kullanım amacı beyanı (ADR-057); bu alan eklenmeden kaydedilmiş araçlarda null. */
+  usagePurpose: VehicleUsage | null;
 }
 
 /** Konut risk objesi (backend `PropertyDto`). */
@@ -22,6 +26,11 @@ export interface Property {
   address: Address;
   buildingAge: number;
   squareMeters: number;
+  /**
+   * Kayıt anında belirlenen deprem bölgesi. ADR-055'ten itibaren sistem tarafından adresin ilinden
+   * türetilir (kullanıcı seçemez). Daha eski kayıtlarda müşterinin o günkü beyanıdır ve tarihsel
+   * doğruluk için korunur (ADR-058). Salt okunurdur.
+   */
   earthquakeZone: number;
 }
 
@@ -57,6 +66,8 @@ export interface VehicleRequest {
   model: string;
   manufactureYear: number;
   enginePowerHp: number;
+  /** Kullanım amacı beyanı (ADR-057) — zorunlu; Kasko/Trafik primini etkiler. */
+  usagePurpose: VehicleUsage;
 }
 
 /** `POST /customers/me/properties` istek gövdesi (backend `AddPropertyCommand`). */
@@ -67,5 +78,4 @@ export interface PropertyRequest {
   postalCode: string;
   buildingAge: number;
   squareMeters: number;
-  earthquakeZone: number;
 }

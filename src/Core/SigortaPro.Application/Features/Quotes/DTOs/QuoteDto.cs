@@ -19,4 +19,9 @@ public sealed record QuoteDto(
     DateTime CreatedAt,
     QuoteRiskObjectDto RiskObject,
     IReadOnlyList<QuoteCoverageDto> Coverages,
-    IReadOnlyList<PricingBreakdownItem> PremiumBreakdown);
+    IReadOnlyList<PricingBreakdownItem> PremiumBreakdown,
+    // ADR-041 (additive): Sağlıkta "başkası adına" teklifte sigortalı özeti; kendisi için null.
+    QuoteInsuredPersonDto? InsuredPerson = null,
+    // Müşteri (Sigorta Ettiren) kimliği (additive) — admin detayında ad + telefon özeti. Navigasyon yoksa boş.
+    string CustomerFullName = "",
+    string? CustomerPhone = null);

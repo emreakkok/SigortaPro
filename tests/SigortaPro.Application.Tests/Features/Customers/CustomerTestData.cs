@@ -1,5 +1,6 @@
 using SigortaPro.Domain.Common;
 using SigortaPro.Domain.Entities;
+using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Tests.Features.Customers;
 
@@ -25,7 +26,7 @@ internal static class CustomerTestData
 
     public static Vehicle CreateVehicle(Guid customerId, Guid vehicleId)
     {
-        return new Vehicle(customerId, "34 ABC 123", "Toyota", "Corolla", 2022, 132)
+        return new Vehicle(customerId, "34 ABC 123", "Toyota", "Corolla", 2022, 132, VehicleUsage.Hususi)
         {
             Id = vehicleId,
         };

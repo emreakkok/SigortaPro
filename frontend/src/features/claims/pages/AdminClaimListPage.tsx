@@ -8,29 +8,41 @@ import {
   CardContent,
   Drawer,
   Label,
+  AlertTriangleIcon,
+  EmptyState,
+  PageSizeSelector,
   Pagination,
   Select,
-  Spinner,
+  SkeletonRows,
 } from "@/shared/components";
+import { useAdminPageSize } from "@/shared/hooks/useAdminPageSize";
+import { useFocusedRecord } from "@/shared/hooks/useFocusedRecord";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
+import type { AdminPageSize } from "@/shared/lib/pagination";
 import {
   CLAIM_STATUS_LABELS,
   ClaimStatus,
 } from "@/shared/types/insurance.types";
 import { formatCurrency, formatDate } from "@/shared/utils/format";
 
-const PAGE_SIZE = 20;
 const STATUS_OPTIONS = Object.values(ClaimStatus);
 
 /** Hasar yönetimi: durum filtresi, tüm müşterilerin hasarları, detay çekmecesi + karar aksiyonları. */
 export default function AdminClaimListPage() {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useAdminPageSize();
   const [status, setStatus] = useState<ClaimStatus | undefined>(undefined);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // ADR-047: bildirimden `?focus=<id>` ile gelindiğinde ilgili hasar dosyasının çekmecesi doğrudan açılır.
+  const [selectedId, setSelectedId] = useFocusedRecord();
+
+  const handlePageSizeChange = (size: AdminPageSize) => {
+    setPageSize(size);
+    setPage(1);
+  };
 
   const { data, isLoading, isError, error, isFetching } = useClaimList({
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
     status,
   });
 
@@ -66,16 +78,16 @@ export default function AdminClaimListPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
+        <SkeletonRows rows={6} />
       ) : isError || data === undefined ? (
         <Alert variant="destructive">{getApiErrorMessages(error)[0]}</Alert>
       ) : data.items.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Filtrelerle eşleşen hasar bulunamadı.
-          </CardContent>
+          <EmptyState
+            icon={<AlertTriangleIcon />}
+            title="Hasar bulunamadı"
+            description="Filtrelerle eşleşen hasar kaydı yok. Durum filtresini değiştirmeyi deneyin."
+          />
         </Card>
       ) : (
         <>
@@ -117,7 +129,9 @@ export default function AdminClaimListPage() {
               </table>
             </CardContent>
           </Card>
-          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} totalCount={data.totalCount}>
+            <PageSizeSelector value={pageSize} onChange={handlePageSizeChange} />
+          </Pagination>
         </>
       )}
 

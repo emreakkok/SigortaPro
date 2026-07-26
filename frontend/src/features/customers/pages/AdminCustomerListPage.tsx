@@ -8,18 +8,22 @@ import {
   Drawer,
   Input,
   Label,
+  EmptyState,
+  PageSizeSelector,
   Pagination,
-  Spinner,
+  SkeletonRows,
+  UsersIcon,
 } from "@/shared/components";
+import { useAdminPageSize } from "@/shared/hooks/useAdminPageSize";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
+import type { AdminPageSize } from "@/shared/lib/pagination";
 import { formatDate } from "@/shared/utils/format";
 
-const PAGE_SIZE = 20;
-
-/** Müşteri yönetimi: arama (ad/soyad/TCKN) + il filtresi + tablo + detay çekmecesi. */
+/** Müşteri yönetimi: arama (ad/soyad/TCKN/e-posta/telefon — ADR-040) + il filtresi + tablo + detay çekmecesi. */
 export default function AdminCustomerListPage() {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useAdminPageSize();
   const [searchTerm, setSearchTerm] = useState("");
   const [city, setCity] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -27,9 +31,14 @@ export default function AdminCustomerListPage() {
   const debouncedSearch = useDebounce(searchTerm);
   const debouncedCity = useDebounce(city);
 
+  const handlePageSizeChange = (size: AdminPageSize) => {
+    setPageSize(size);
+    setPage(1);
+  };
+
   const { data, isLoading, isError, error, isFetching } = useCustomerList({
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
     searchTerm: debouncedSearch === "" ? undefined : debouncedSearch,
     city: debouncedCity === "" ? undefined : debouncedCity,
   });
@@ -46,7 +55,7 @@ export default function AdminCustomerListPage() {
           <Label htmlFor="customerSearch">Ara</Label>
           <Input
             id="customerSearch"
-            placeholder="Ad, soyad veya TCKN"
+            placeholder="Ad, soyad, TCKN, e-posta veya telefon"
             value={searchTerm}
             onChange={(event) => {
               setSearchTerm(event.target.value);
@@ -69,16 +78,16 @@ export default function AdminCustomerListPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
+        <SkeletonRows rows={6} />
       ) : isError || data === undefined ? (
         <Alert variant="destructive">{getApiErrorMessages(error)[0]}</Alert>
       ) : data.items.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Filtrelerle eşleşen müşteri bulunamadı.
-          </CardContent>
+          <EmptyState
+            icon={<UsersIcon />}
+            title="Müşteri bulunamadı"
+            description="Filtrelerle eşleşen müşteri yok. Ad, soyad, e-posta veya telefon ile aramayı değiştirin."
+          />
         </Card>
       ) : (
         <>
@@ -114,7 +123,9 @@ export default function AdminCustomerListPage() {
               </table>
             </CardContent>
           </Card>
-          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} totalCount={data.totalCount}>
+            <PageSizeSelector value={pageSize} onChange={handlePageSizeChange} />
+          </Pagination>
         </>
       )}
 

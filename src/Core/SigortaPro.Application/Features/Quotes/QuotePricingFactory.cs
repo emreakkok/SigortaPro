@@ -6,19 +6,64 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Quotes;
 
-// Teklif modülünün fiyatlama köprüsü: domain verisinden Task 8 fiyatlama motorunun (saf/deterministik)
-// girdisini kurar, teminat paketi ölçeğini uygular ve prim dökümü + ölçekli teminatları üretir.
-// Aynı referans tarihiyle çağrıldığında aynı sonucu verir; bu sayede teklif detayı, saklanan seçim +
-// CreatedAt referansıyla oluşturma anındaki fiyatı birebir yeniden üretir (ADR-021).
+// Teklif modülünün fiyatlama köprüsü: fiyatlama motorunun (saf/deterministik) girdisini kurar, teminat
+// paketi ölçeğini uygular ve prim dökümü + ölçekli teminatları üretir.
+//
+// ADR-053: Girdiler artık teklifte SAKLANIR (PricingSnapshot). Yeniden hesap öncelikle snapshot'tan okur;
+// snapshot yoksa (bu alan eklenmeden önce oluşmuş kayıtlar) eski davranışa — canlı entity'den okumaya —
+// düşer. Böylece müşteri adresini/aracını sonradan değiştirse bile eski teklifin risk skoru ve prim
+// dökümü DEĞİŞMEZ, mevcut kayıtlar da bit-aynı kalır.
 internal static class QuotePricingFactory
 {
-    // Task 9 kapsamında hasarsızlık basamağı ve sigara beyanı alınmaz; motor varsayılanlarıyla çalışılır
-    // (ileride teklif sihirbazı/yenileme akışında beyan olarak eklenebilir).
-    private const int DefaultNoClaimTier = 0;
-    private const bool DefaultIsSmoker = false;
+    // Beyanı alınmamış (eski) sağlık tekliflerinde motor girdisi: sigara faktörü etkisiz kalır ve
+    // dökümde gösterilmez — kullanıcıya sorulmamış bir sağlık beyanı gerçekmiş gibi sunulmaz (ADR-054).
+    private const bool NoSmokerDeclaration = false;
+
+    // Gerçek veriye dayanmadığı sürece kullanıcıya gösterilmeyecek döküm kalemi (motor adıyla birebir).
+    private const string SmokerFactorName = "Sigara Kullanımı";
+
+    /// <summary>
+    /// Teklif oluşturulurken fiyatlama girdilerini dondurur (ADR-053). Yalnızca fiyatı DOĞRUDAN belirleyen
+    /// primitifler kopyalanır; kişisel veri (TCKN, telefon, tam adres) ve fiyata etkisiz alanlar (plaka,
+    /// marka, model) taşınmaz.
+    /// </summary>
+    public static PricingSnapshot BuildSnapshot(
+        InsuranceBranch branch,
+        Customer customer,
+        Vehicle? vehicle,
+        Property? property,
+        DateTime referenceDate,
+        DateTime? insuredBirthDate = null,
+        bool? isSmoker = null,
+        int? earthquakeZone = null,
+        int bonusMalusStep = 0) => branch switch
+    {
+        InsuranceBranch.Kasko or InsuranceBranch.Trafik => PricingSnapshot.ForVehicle(
+            referenceDate,
+            AgeInYears(customer.BirthDate, referenceDate),
+            VehicleAgeInYears(vehicle!.ManufactureYear, referenceDate),
+            vehicle.EnginePowerHp,
+            // MVP: müşterinin adres ili, aracın kullanım ili için vekildir (teknik borç — ADR-053).
+            customer.Address.City,
+            bonusMalusStep,
+            // ADR-057: Kullanım amacı beyanı teklif anında dondurulur → araç sonradan güncellense bile
+            // bu teklifin fiyatı ve dökümü değişmez.
+            vehicle.UsagePurpose),
+        InsuranceBranch.Konut or InsuranceBranch.Dask => PricingSnapshot.ForProperty(
+            referenceDate,
+            property!.BuildingAge,
+            property.SquareMeters,
+            earthquakeZone ?? EarthquakeZoneDefaults.Unknown),
+        InsuranceBranch.Saglik => PricingSnapshot.ForHealth(
+            referenceDate,
+            AgeInYears(insuredBirthDate ?? customer.BirthDate, referenceDate),
+            isSmoker),
+        _ => throw new ArgumentOutOfRangeException(nameof(branch), branch, "Bilinmeyen sigorta branşı."),
+    };
 
     // claimHistoryFactor: yenileme tekliflerinde hasar geçmişi ek prim çarpanı (varsayılan 1.00 = etkisiz).
-    // CoveragePackage gibi teklifte saklı bir girdi olduğundan yeniden hesapta aynı sonucu verir (ADR-021/ADR-025).
+    // rates (ADR-048): teklifin sabitlediği tarife versiyonunun baz primleri.
+    // snapshot (ADR-053): teklifin dondurulmuş girdileri; null ise canlı veriden hesaplanır (eski kayıtlar).
     public static QuotePricingOutcome Compute(
         IPricingEngine pricingEngine,
         InsuranceBranch branch,
@@ -28,17 +73,27 @@ internal static class QuotePricingFactory
         IEnumerable<Coverage> coverages,
         CoveragePackage package,
         DateTime referenceDate,
-        decimal claimHistoryFactor = 1.00m)
+        decimal claimHistoryFactor = 1.00m,
+        DateTime? insuredBirthDate = null,
+        PricingRateSet? rates = null,
+        PricingSnapshot? snapshot = null)
     {
-        var request = BuildRequest(branch, customer, vehicle, property, referenceDate);
-        var result = pricingEngine.CalculatePremium(request);
+        var request = snapshot is null
+            ? BuildRequest(branch, customer, vehicle, property, referenceDate, insuredBirthDate)
+            : BuildRequestFromSnapshot(branch, snapshot);
+
+        var result = pricingEngine.CalculatePremium(request, rates);
 
         var premiumFactor = CoveragePackageFactors.PremiumFactor(package);
 
-        var breakdown = new List<PricingBreakdownItem>(result.Breakdown)
-        {
-            new("Teminat Paketi", premiumFactor, $"{PackageDisplay(package)} paketi kapsam çarpanı."),
-        };
+        // Gerçek veriye dayanmayan kalemler dökümden çıkarılır. Tutar motorun kendi hesabından geldiği için
+        // (aşağıdaki totalPremium) bu filtre HİÇBİR fiyatı değiştirmez — yalnızca sunumu dürüstleştirir.
+        var breakdown = result.Breakdown
+            .Where(item => IsBackedByRealData(item, snapshot))
+            .ToList();
+
+        breakdown.Add(new PricingBreakdownItem(
+            "Teminat Paketi", premiumFactor, $"{PackageDisplay(package)} paketi kapsam çarpanı."));
 
         // Hasar geçmişi çarpanı yalnızca etkiliyse (yenileme) prim dökümüne eklenir; 1.00 ise dökümü değiştirmez.
         if (claimHistoryFactor != 1.00m)
@@ -61,12 +116,50 @@ internal static class QuotePricingFactory
         return new QuotePricingOutcome(result.BasePremium, totalPremium, result.RiskScore, breakdown, scaledCoverages);
     }
 
+    // Kullanıcıya yalnızca gerçek veriye dayanan faktörler gösterilir (ADR-054).
+    // Hasarsızlık basamağı ADR-059'dan itibaren gerçek veriden türetildiğinden artık burada filtrelenmez;
+    // motor zaten yalnızca basamak nötr DEĞİLSE kalem üretir (nötr/eski kayıtlarda döküm değişmez).
+    private static bool IsBackedByRealData(PricingBreakdownItem item, PricingSnapshot? snapshot)
+    {
+        if (item.Factor == SmokerFactorName)
+        {
+            return snapshot?.IsSmoker is not null;
+        }
+
+        return true;
+    }
+
+    // Snapshot'tan motor girdisi (ADR-053) — canlı entity'ye HİÇ dokunulmaz.
+    private static PricingRequest BuildRequestFromSnapshot(InsuranceBranch branch, PricingSnapshot snapshot) =>
+        branch switch
+        {
+            InsuranceBranch.Kasko or InsuranceBranch.Trafik => new VehiclePricingRequest(
+                branch,
+                snapshot.DriverAge ?? 0,
+                snapshot.VehicleAge ?? 0,
+                snapshot.EnginePowerHp ?? 0,
+                snapshot.RiskCity ?? string.Empty,
+                snapshot.NoClaimTier ?? 0,
+                snapshot.UsagePurpose),
+            InsuranceBranch.Konut or InsuranceBranch.Dask => new PropertyPricingRequest(
+                branch,
+                snapshot.BuildingAge ?? 0,
+                snapshot.SquareMeters ?? 0,
+                snapshot.EarthquakeZone ?? EarthquakeZoneDefaults.Unknown),
+            InsuranceBranch.Saglik => new HealthPricingRequest(
+                snapshot.InsuredAge ?? 0,
+                snapshot.IsSmoker ?? NoSmokerDeclaration),
+            _ => throw new ArgumentOutOfRangeException(nameof(branch), branch, "Bilinmeyen sigorta branşı."),
+        };
+
+    // Eski (snapshot'sız) kayıtlar ve teklif oluşmadan yapılan önizleme (karşılaştırma) için canlı veriden girdi.
     public static PricingRequest BuildRequest(
         InsuranceBranch branch,
         Customer customer,
         Vehicle? vehicle,
         Property? property,
-        DateTime referenceDate) => branch switch
+        DateTime referenceDate,
+        DateTime? insuredBirthDate = null) => branch switch
     {
         InsuranceBranch.Kasko or InsuranceBranch.Trafik => new VehiclePricingRequest(
             branch,
@@ -74,15 +167,21 @@ internal static class QuotePricingFactory
             VehicleAgeInYears(vehicle!.ManufactureYear, referenceDate),
             vehicle.EnginePowerHp,
             customer.Address.City,
-            DefaultNoClaimTier),
+            // ADR-059: Snapshot'sız (eski) kayıtlarda Bonus-Malus basamağı BİLİNÇLİ olarak 0'dır —
+            // müşterinin bugünkü hasar geçmişini geçmiş teklife yansıtmak, o teklifin primini ve dökümünü
+            // geriye dönük değiştirirdi.
+            BonusMalusScale.NeutralStep,
+            // ADR-057: Snapshot'sız kayıtlarda kullanım amacı da uygulanmaz (aynı gerekçe).
+            UsagePurpose: null),
         InsuranceBranch.Konut or InsuranceBranch.Dask => new PropertyPricingRequest(
             branch,
             property!.BuildingAge,
             property.SquareMeters,
             property.EarthquakeZone),
+        // Sağlıkta yaş, "başkası adına" teklifte sigortalının doğum tarihinden hesaplanır (ADR-041).
         InsuranceBranch.Saglik => new HealthPricingRequest(
-            AgeInYears(customer.BirthDate, referenceDate),
-            DefaultIsSmoker),
+            AgeInYears(insuredBirthDate ?? customer.BirthDate, referenceDate),
+            NoSmokerDeclaration),
         _ => throw new ArgumentOutOfRangeException(nameof(branch), branch, "Bilinmeyen sigorta branşı."),
     };
 

@@ -53,7 +53,8 @@ public sealed class UpdateVehicleCommandHandler : ICommandHandler<UpdateVehicleC
             request.Brand,
             request.Model,
             request.ManufactureYear,
-            request.EnginePowerHp);
+            request.EnginePowerHp,
+            request.UsagePurpose);
 
         _vehicleWriteRepository.Update(vehicle);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

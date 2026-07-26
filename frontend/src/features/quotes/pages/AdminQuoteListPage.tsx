@@ -7,12 +7,20 @@ import {
   Card,
   CardContent,
   Drawer,
+  EmptyState,
+  FileTextIcon,
+  Input,
   Label,
+  PageSizeSelector,
   Pagination,
   Select,
-  Spinner,
+  SkeletonRows,
 } from "@/shared/components";
+import { useAdminPageSize } from "@/shared/hooks/useAdminPageSize";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import { useFocusedRecord } from "@/shared/hooks/useFocusedRecord";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
+import type { AdminPageSize } from "@/shared/lib/pagination";
 import {
   COVERAGE_PACKAGE_LABELS,
   INSURANCE_BRANCH_LABELS,
@@ -20,24 +28,34 @@ import {
   QUOTE_STATUS_LABELS,
   QuoteStatus,
 } from "@/shared/types/insurance.types";
-import { formatCurrency, formatDate } from "@/shared/utils/format";
+import { formatCurrency, formatDate, formatPhoneNumber } from "@/shared/utils/format";
 
-const PAGE_SIZE = 20;
 const STATUS_OPTIONS = Object.values(QuoteStatus);
 const BRANCH_OPTIONS = Object.values(InsuranceBranch);
 
 /** Teklif yönetimi: durum + branş filtresi, tüm müşterilerin teklifleri, detay çekmecesi. */
 export default function AdminQuoteListPage() {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useAdminPageSize();
   const [status, setStatus] = useState<QuoteStatus | undefined>(undefined);
   const [branch, setBranch] = useState<InsuranceBranch | undefined>(undefined);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  // ADR-047: bildirimden `?focus=<id>` ile gelindiğinde ilgili teklifin çekmecesi doğrudan açılır.
+  const [selectedId, setSelectedId] = useFocusedRecord();
+
+  const debouncedSearch = useDebounce(searchTerm);
+
+  const handlePageSizeChange = (size: AdminPageSize) => {
+    setPageSize(size);
+    setPage(1);
+  };
 
   const { data, isLoading, isError, error, isFetching } = useQuoteList({
     page,
-    pageSize: PAGE_SIZE,
+    pageSize,
     status,
     branch,
+    search: debouncedSearch === "" ? undefined : debouncedSearch,
   });
 
   return (
@@ -48,6 +66,18 @@ export default function AdminQuoteListPage() {
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
+        <div className="w-64 space-y-2">
+          <Label htmlFor="quoteCustomerSearch">Müşteri Ara</Label>
+          <Input
+            id="quoteCustomerSearch"
+            placeholder="Ad, soyad veya telefon"
+            value={searchTerm}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setPage(1);
+            }}
+          />
+        </div>
         <div className="w-48 space-y-2">
           <Label htmlFor="quoteStatusFilter">Durum</Label>
           <Select
@@ -89,16 +119,16 @@ export default function AdminQuoteListPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
+        <SkeletonRows rows={6} />
       ) : isError || data === undefined ? (
         <Alert variant="destructive">{getApiErrorMessages(error)[0]}</Alert>
       ) : data.items.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Filtrelerle eşleşen teklif bulunamadı.
-          </CardContent>
+          <EmptyState
+            icon={<FileTextIcon />}
+            title="Teklif bulunamadı"
+            description="Filtrelerle eşleşen teklif yok. Durum filtresini değiştirmeyi deneyin."
+          />
         </Card>
       ) : (
         <>
@@ -107,6 +137,7 @@ export default function AdminQuoteListPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
+                    <th className="px-4 py-3 font-medium">Müşteri</th>
                     <th className="px-4 py-3 font-medium">Tarih</th>
                     <th className="px-4 py-3 font-medium">Ürün</th>
                     <th className="px-4 py-3 font-medium">Paket</th>
@@ -122,6 +153,14 @@ export default function AdminQuoteListPage() {
                       onClick={() => setSelectedId(quote.id)}
                       className="cursor-pointer border-b last:border-0 transition-colors hover:bg-accent/50"
                     >
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{quote.customerFullName || "—"}</div>
+                        {quote.customerPhone !== null && (
+                          <div className="text-xs text-muted-foreground tabular-nums">
+                            {formatPhoneNumber(quote.customerPhone)}
+                          </div>
+                        )}
+                      </td>
                       <td className="px-4 py-3">{formatDate(quote.createdAt)}</td>
                       <td className="px-4 py-3 font-medium">{quote.productName}</td>
                       <td className="px-4 py-3">{COVERAGE_PACKAGE_LABELS[quote.coveragePackage]}</td>
@@ -138,7 +177,9 @@ export default function AdminQuoteListPage() {
               </table>
             </CardContent>
           </Card>
-          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} totalCount={data.totalCount}>
+            <PageSizeSelector value={pageSize} onChange={handlePageSizeChange} />
+          </Pagination>
         </>
       )}
 

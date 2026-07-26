@@ -20,7 +20,7 @@ public sealed class GetPolicyReportQueryHandler
         var paging = new PaginationParams { Page = request.Page, PageSize = request.PageSize };
 
         var page = await _dashboardRepository.GetPoliciesByDateRangeAsync(
-            request.From, request.To, paging, cancellationToken);
+            request.From, request.To, request.Search, paging, cancellationToken);
 
         var items = page.Items.Select(DashboardMappings.ToReportItem).ToList();
 

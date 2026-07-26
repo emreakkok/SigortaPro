@@ -21,7 +21,7 @@ public class GetQuoteListQueryHandlerTests
     {
         _quoteRepository.SearchAsync(
                 Arg.Any<Guid?>(), Arg.Any<QuoteStatus?>(), Arg.Any<InsuranceBranch?>(),
-                Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>())
+                Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResult<Quote>(Array.Empty<Quote>(), 1, 20, 0));
 
         _handler = new GetQuoteListQueryHandler(_quoteRepository, _customerRepository, _currentUserService);
@@ -37,7 +37,7 @@ public class GetQuoteListQueryHandlerTests
         // Personel tüm teklifleri görür → müşteri filtresi yok (null).
         await _quoteRepository.Received(1).SearchAsync(
             null, Arg.Any<QuoteStatus?>(), Arg.Any<InsuranceBranch?>(),
-            Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>());
+            Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -53,6 +53,6 @@ public class GetQuoteListQueryHandlerTests
 
         await _quoteRepository.Received(1).SearchAsync(
             customer.Id, Arg.Any<QuoteStatus?>(), Arg.Any<InsuranceBranch?>(),
-            Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>());
+            Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>());
     }
 }

@@ -2,13 +2,22 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { RenewalCard } from "@/features/renewals/components/RenewalCard";
 import { useRenewalList } from "@/features/renewals/hooks/useRenewals";
-import { Alert, Button, Card, CardContent, Spinner } from "@/shared/components";
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  Pagination,
+  RefreshIcon,
+  SkeletonRows,
+} from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
+import { PORTAL_PAGE_SIZE } from "@/shared/lib/pagination";
 
 /** Yenilemeler: süresi yaklaşan poliçeler için otomatik üretilen yenileme teklifleri ve onay akışı. */
 export default function RenewalListPage() {
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError, error, isFetching } = useRenewalList({ page, pageSize: 10 });
+  const { data, isLoading, isError, error, isFetching } = useRenewalList({ page, pageSize: PORTAL_PAGE_SIZE });
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -20,20 +29,21 @@ export default function RenewalListPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
+        <SkeletonRows rows={3} />
       ) : isError || data === undefined ? (
         <Alert variant="destructive">{getApiErrorMessages(error)[0]}</Alert>
       ) : data.items.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Şu anda bekleyen yenileme teklifiniz yok. Yenileme teklifleri, poliçenizin bitişine 30 gün
-            kaladığında otomatik olarak hazırlanır ve burada görünür.{" "}
-            <Link to="/portal/policies" className="font-medium text-primary hover:underline">
-              Poliçelerim
-            </Link>
-          </CardContent>
+          <EmptyState
+            icon={<RefreshIcon />}
+            title="Bekleyen yenileme yok"
+            description="Yenileme teklifleri, poliçenizin bitişine 30 gün kaldığında otomatik hazırlanır ve burada görünür."
+            action={
+              <Link to="/portal/policies">
+                <Button variant="outline">Poliçelerim</Button>
+              </Link>
+            }
+          />
         </Card>
       ) : (
         <>
@@ -43,22 +53,12 @@ export default function RenewalListPage() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-              Önceki
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Sayfa {data.page} / {data.totalPages === 0 ? 1 : data.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= data.totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Sonraki
-            </Button>
-          </div>
+          <Pagination
+            page={data.page}
+            totalPages={data.totalPages}
+            onPageChange={setPage}
+            totalCount={data.totalCount}
+          />
         </>
       )}
     </div>

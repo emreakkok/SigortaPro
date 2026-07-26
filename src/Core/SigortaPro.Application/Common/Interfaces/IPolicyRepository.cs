@@ -36,4 +36,10 @@ public interface IPolicyRepository : IReadRepository<Policy>, IWriteRepository<P
         DateTime asOf,
         DateTime renewalWindowEnd,
         CancellationToken cancellationToken = default);
+
+    // ADR-059: Bonus-Malus girdisi — aynı branşta HASARSIZ tamamlanmış poliçe dönemi sayısı.
+    // "Tamamlanmış" = dönemi biten (EndDate < asOf); iptal edilen poliçeler bonus kazandırmaz.
+    // "Hasarsız" = o poliçeye bağlı onaylanmış/ödenmiş hasar bulunmayan.
+    Task<int> CountClaimFreeCompletedPeriodsAsync(
+        Guid customerId, InsuranceBranch branch, DateTime asOf, CancellationToken cancellationToken = default);
 }

@@ -4,6 +4,7 @@ import { useMyProfile } from "@/features/profile/hooks/useProfile";
 import { BranchStep } from "@/features/quotes/components/wizard/BranchStep";
 import { ComparisonStep } from "@/features/quotes/components/wizard/ComparisonStep";
 import { RiskObjectStep } from "@/features/quotes/components/wizard/RiskObjectStep";
+import type { InsuredPersonRequest } from "@/features/quotes/types/quote.types";
 import { Alert, Spinner } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
 import { cn } from "@/shared/lib/utils";
@@ -25,6 +26,10 @@ export default function QuoteWizardPage() {
   const [step, setStep] = useState<WizardStep>("branch");
   const [branch, setBranch] = useState<InsuranceBranch | null>(null);
   const [riskObjectId, setRiskObjectId] = useState<string | null>(null);
+  // Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); null = kendim için.
+  const [insuredPerson, setInsuredPerson] = useState<InsuredPersonRequest | null>(null);
+  // ADR-054: Sağlıkta sigara beyanı; null = henüz beyan edilmedi (varsayılan atanmaz).
+  const [isSmoker, setIsSmoker] = useState<boolean | null>(null);
 
   if (isLoading) {
     return (
@@ -40,8 +45,10 @@ export default function QuoteWizardPage() {
 
   const handleBranchSelect = (selected: InsuranceBranch) => {
     setBranch(selected);
-    // Branş değişince önceki risk objesi seçimi geçersizdir.
+    // Branş değişince önceki risk objesi/sigortalı seçimi geçersizdir.
     setRiskObjectId(null);
+    setInsuredPerson(null);
+    setIsSmoker(null);
     setStep("risk");
   };
 
@@ -84,6 +91,10 @@ export default function QuoteWizardPage() {
           properties={profile.properties}
           selectedId={riskObjectId}
           onSelect={setRiskObjectId}
+          insuredPerson={insuredPerson}
+          onInsuredPersonChange={setInsuredPerson}
+          isSmoker={isSmoker}
+          onIsSmokerChange={setIsSmoker}
           onBack={() => setStep("branch")}
           onNext={() => setStep("comparison")}
         />
@@ -93,6 +104,8 @@ export default function QuoteWizardPage() {
         <ComparisonStep
           branch={branch}
           riskObjectId={branchRiskKind(branch) === "none" ? null : riskObjectId}
+          insuredPerson={insuredPerson}
+          isSmoker={isSmoker}
           onBack={() => setStep("risk")}
           onCreated={(quoteId) => navigate(`/portal/quotes/${quoteId}`)}
         />

@@ -57,4 +57,26 @@ public sealed class RefreshTokenService : IRefreshTokenService
 
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task RevokeAllForUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+
+        // Yalnızca hâlâ aktif olan (revoke edilmemiş, süresi dolmamış) token'lar iptal edilir (ADR-061).
+        var activeTokens = await _context.RefreshTokens
+            .Where(token => token.UserId == userId && token.RevokedAt == null && now < token.ExpiresAt)
+            .ToListAsync(cancellationToken);
+
+        if (activeTokens.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var token in activeTokens)
+        {
+            token.RevokedAt = now;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

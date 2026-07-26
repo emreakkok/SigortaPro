@@ -31,9 +31,35 @@ internal static class PricingRuleTables
 
     public const decimal DefaultCityRiskCoefficient = 1.00m;
 
-    // Hasarsızlık basamağı: her basamak %5 indirim; en fazla 7 basamak (taban çarpan 0.65).
-    public const decimal NoClaimDiscountPerTier = 0.05m;
-    public const int MaxNoClaimTier = 7;
+    // Kullanım amacı katsayıları (ADR-057). Hususi referans seviyedir (1.00); ticari ve taksi kullanım
+    // daha yüksek yıllık kilometre/kaza sıklığı taşıdığından ek prim uygular.
+    // NOT: Bu değerler MVP SİMÜLASYONUDUR — gerçek aktüeryal tarife verisi değildir (PRICING.md).
+    public static readonly IReadOnlyDictionary<VehicleUsage, decimal> VehicleUsageCoefficients =
+        new Dictionary<VehicleUsage, decimal>
+        {
+            [VehicleUsage.Hususi] = 1.00m,
+            [VehicleUsage.Ticari] = 1.30m,
+            [VehicleUsage.Taksi] = 1.60m,
+        };
+
+    // ADR-059: Bonus-Malus basamak çarpanları (−3 … +6). Negatif basamak MALUS (ek prim), pozitif
+    // basamak BONUS (indirim), 0 nötrdür (yeni müşteri / geçmişi bilinmeyen).
+    // Malus tavanı (1.60), emekliye ayrılan ClaimHistoryFactor'ın tavanıyla BİREBİR aynıdır → ekonomik etki kontrollü.
+    // NOT: Değerler MVP SİMÜLASYONUDUR — gerçek aktüeryal tarife verisi değildir (PRICING.md).
+    public static readonly IReadOnlyDictionary<int, decimal> BonusMalusCoefficients =
+        new Dictionary<int, decimal>
+        {
+            [-3] = 1.60m,
+            [-2] = 1.40m,
+            [-1] = 1.20m,
+            [0] = 1.00m,
+            [1] = 0.95m,
+            [2] = 0.90m,
+            [3] = 0.85m,
+            [4] = 0.80m,
+            [5] = 0.75m,
+            [6] = 0.70m,
+        };
 
     // Risk skoru eşikleri: toplam çarpan (Total/Base) bu eşiklere göre sınıflandırılır.
     public const decimal MediumRiskThreshold = 1.10m;

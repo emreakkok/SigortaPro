@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" role="img" aria-label="Kasko - araç sigortası">
+  <defs>
+    <linearGradient id="k-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#211a20"/>
+      <stop offset="1" stop-color="#12100f"/>
+    </linearGradient>
+    <radialGradient id="k-glow" cx="0.78" cy="0.22" r="0.6">
+      <stop offset="0" stop-color="#8c3140" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#8c3140" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="k-body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c25667"/>
+      <stop offset="1" stop-color="#8c3140"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" fill="url(#k-bg)"/>
+  <rect width="400" height="240" fill="url(#k-glow)"/>
+  <ellipse cx="200" cy="196" rx="150" ry="16" fill="#000000" opacity="0.35"/>
+  <line x1="40" y1="196" x2="360" y2="196" stroke="#f0e6dd" stroke-opacity="0.18" stroke-width="2"/>
+  <!-- car body -->
+  <path d="M78 176 L96 132 Q102 120 118 118 L188 112 Q204 111 218 122 L262 150 L318 158 Q336 161 336 178 L336 184 Q336 190 328 190 L86 190 Q78 190 78 182 Z" fill="url(#k-body)"/>
+  <path d="M118 120 L182 116 Q196 115 208 124 L236 145 L150 148 Z" fill="#f0e6dd" opacity="0.9"/>
+  <path d="M150 148 L236 145 L246 150 L146 152 Z" fill="#0e0d0c" opacity="0.25"/>
+  <line x1="184" y1="117" x2="176" y2="148" stroke="#8c3140" stroke-width="3"/>
+  <!-- highlight -->
+  <path d="M96 168 L330 168 L330 176 L94 176 Z" fill="#ffffff" opacity="0.10"/>
+  <!-- wheels -->
+  <circle cx="140" cy="190" r="24" fill="#1a1618"/>
+  <circle cx="140" cy="190" r="24" fill="none" stroke="#c25667" stroke-width="3"/>
+  <circle cx="140" cy="190" r="9" fill="#f0e6dd"/>
+  <circle cx="288" cy="190" r="24" fill="#1a1618"/>
+  <circle cx="288" cy="190" r="24" fill="none" stroke="#c25667" stroke-width="3"/>
+  <circle cx="288" cy="190" r="9" fill="#f0e6dd"/>
+  <!-- headlight -->
+  <path d="M330 160 L336 162 Q340 164 338 170 L330 170 Z" fill="#ffe9b0"/>
+  <!-- shield emblem -->
+  <path d="M300 44 L332 54 L332 82 Q332 104 300 116 Q268 104 268 82 L268 54 Z" fill="#8c3140" opacity="0.92"/>
+  <path d="M300 44 L332 54 L332 82 Q332 104 300 116 Q268 104 268 82 L268 54 Z" fill="none" stroke="#c9727f" stroke-width="2"/>
+  <path d="M286 80 L297 91 L316 66" fill="none" stroke="#f0e6dd" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

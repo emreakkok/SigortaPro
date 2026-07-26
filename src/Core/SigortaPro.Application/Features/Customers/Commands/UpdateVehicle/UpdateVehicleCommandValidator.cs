@@ -32,5 +32,11 @@ public sealed class UpdateVehicleCommandValidator : AbstractValidator<UpdateVehi
         RuleFor(command => command.EnginePowerHp)
             .InclusiveBetween(1, MaxEnginePowerHp)
             .WithMessage($"Motor gücü 1 ile {MaxEnginePowerHp} beygir arasında olmalıdır.");
+
+        // ADR-057: Kullanım amacı beyanı ZORUNLUDUR ve varsayılan atanmaz — prim doğrudan etkilendiğinden
+        // kullanıcı bilinçli seçim yapmalıdır (sessiz varsayım yasak).
+        RuleFor(command => command.UsagePurpose)
+            .NotNull().WithMessage("Aracın kullanım amacı seçilmelidir.")
+            .IsInEnum().WithMessage("Geçersiz kullanım amacı.");
     }
 }

@@ -21,5 +21,19 @@ public sealed class GetQuoteComparisonQueryValidator : AbstractValidator<GetQuot
             RuleFor(query => query.PropertyId)
                 .NotEmpty().WithMessage("Konut/DASK karşılaştırması için konut seçimi zorunludur.");
         });
+
+        // ADR-056: Kurallar teklif OLUŞTURMA ile birebir aynıdır. Aksi hâlde önizleme, beyanı olmayan bir
+        // girdiyle fiyatlanır ve gösterilen prim oluşacak teklifin priminden sapardı.
+        When(query => query.Branch == InsuranceBranch.Saglik, () =>
+        {
+            RuleFor(query => query.IsSmoker)
+                .NotNull().WithMessage("Sağlık karşılaştırması için sigara kullanım beyanı zorunludur.");
+        });
+
+        When(query => query.Branch != InsuranceBranch.Saglik, () =>
+        {
+            RuleFor(query => query.IsSmoker)
+                .Null().WithMessage("Sigara beyanı yalnızca Sağlık branşında gönderilebilir.");
+        });
     }
 }

@@ -18,7 +18,19 @@ internal static class ClaimMappings
         claim.ApprovedAmount,
         claim.Status,
         claim.ReviewNote,
-        claim.CreatedAt);
+        claim.CreatedAt,
+        claim.Documents
+            .OrderBy(document => document.CreatedAt)
+            .Select(ToDocumentDto)
+            .ToList());
+
+    public static ClaimDocumentDto ToDocumentDto(ClaimDocument document) => new(
+        document.Id,
+        document.FileName,
+        document.ContentType,
+        document.FileSizeBytes,
+        ClaimDocumentStorage.IsImage(document.ContentType),
+        document.CreatedAt);
 
     public static ClaimSummaryDto ToSummaryDto(Claim claim) => new(
         claim.Id,

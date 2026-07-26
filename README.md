@@ -15,7 +15,7 @@ Tek acenteli, B2C sigorta poliçe yönetim sistemi (MVP). Müşteriler self-serv
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Katman yapısı, domain modeli, modül detayları, test altyapısı |
 | [`API.md`](API.md) | Tüm API uçlarının özeti (yetkiler, parametreler, enum sözleşmesi, durum kodları) |
 | [`PRICING.md`](PRICING.md) | Fiyatlama motoru kuralları (baz primler, çarpanlar, risk skoru) |
-| `docs/ai/DECISIONS.md` | Mimari karar kayıtları, ADR-001…034 (yerel geliştirme dokümanı — `.gitignore` ile repo dışında) |
+| `docs/ai/DECISIONS.md` | Mimari karar kayıtları, ADR-001…059 (yerel geliştirme dokümanı — `.gitignore` ile repo dışında) |
 | [`frontend/README.md`](frontend/README.md) | SPA kurulumu, klasör yapısı, frontend mimari notları |
 
 ## Proje Yapısı
@@ -83,6 +83,28 @@ Detaylı kurulum, klasör yapısı ve mimari notlar için bkz. [`frontend/README
 >
 > JWT imzalama anahtarı Development'ta `appsettings.Development.json > JwtSettings:SecretKey` içinde bir **placeholder**'dır; yerel çalıştırmadan önce en az 32 karakterlik bir değerle değiştirin (ör. `dotnet user-secrets`). **Üretimde** `appsettings.json`'daki `SecretKey` boştur ve deploy sırasında ortam değişkeni / user-secrets ile sağlanmalıdır (boşsa uygulama başlangıçta hata verir — fail-fast).
 
+### E-posta / SMTP Yapılandırması (Task 23)
+
+Şifre sıfırlama e-postaları `EmailSettings` bölümünden yapılandırılır. **Gerçek SMTP kullanıcı adı/parola `appsettings*.json` dosyalarına YAZILMAZ** — `appsettings.json` yalnızca boş placeholder yapısını, `appsettings.Development.json` yalnızca hassas olmayan alanları (host/port/`ResetPasswordBaseUrl`) taşır. Kimlik bilgileri geliştirmede `dotnet user-secrets`, üretimde ortam değişkeni/secret store ile sağlanır (ADR-035).
+
+Gmail App Password ile yerel geliştirme kurulumu (WebAPI projesinden; gerçek değerleri kendiniz girin, placeholder'ları değiştirin):
+
+```bash
+cd src/Presentation/SigortaPro.WebAPI
+dotnet user-secrets set "EmailSettings:Username" "YOUR_GMAIL_ADDRESS"
+dotnet user-secrets set "EmailSettings:Password" "YOUR_GMAIL_APP_PASSWORD"
+dotnet user-secrets set "EmailSettings:FromEmail" "YOUR_GMAIL_ADDRESS"
+cd ../../..
+```
+
+> Gmail App Password, hesabınızda 2 adımlı doğrulama açıkken **Google Hesabı → Güvenlik → Uygulama Şifreleri** üzerinden üretilir (normal hesap şifreniz değildir, 16 hanelidir). SMTP host/port/`ResetPasswordBaseUrl` gibi hassas olmayan alanlar `appsettings.Development.json`'da tanımlıdır; yalnızca `Username`/`Password`/`FromEmail` user-secrets'tan okunur. `ResetPasswordBaseUrl` (varsayılan `http://localhost:5173`), e-postadaki bağlantının işaret ettiği SPA adresidir. **Token, parola veya bağlantı hiçbir log kaydına yazılmaz.**
+>
+> **User-secrets yalnızca Development ortamında yüklenir** (`WebApplication.CreateBuilder` davranışı); dolayısıyla gerçek SMTP kimlik bilgileri yalnızca `dotnet run` ile Development ortamında etkindir. SMTP yapılandırılmadıysa (host/kullanıcı boş) sıfırlama e-postası gönderilemez; bu durumda uç yine **generic `200`** döner ve hata yalnızca loglanır (kullanıcıya sızdırılmaz).
+>
+> ### Testlerde e-posta gönderimi devre dışıdır
+>
+> **Hiçbir otomatik test gerçek SMTP kullanmaz ve internete çıkmaz.** Entegrasyon/`WebApplicationFactory` test host'u ("Testing" ortamı), gerçek `SmtpEmailService` yerine no-op **`NullEmailService`** enjekte eder (`SigortaProWebApplicationFactory.ReplaceEmailServiceWithNull`); ayrıca "Testing" ortamında user-secrets yüklenmez. Birim testler zaten `IEmailService`/`IPasswordResetNotifier`'ı mock'lar. Böylece `dotnet test` sırasında rastgele/gerçek e-posta adreslerine **mail gönderilmesi imkânsızdır**. Gerçek SMTP yalnızca siz Development'ta Şifremi Unuttum ekranından kendi adresinizi girerek manuel test yaptığınızda çalışır.
+
 ## Ekran Görüntüleri
 
 > Yer tutucular — görüntüler `docs/screenshots/` altına eklendiğinde otomatik görünür.
@@ -96,11 +118,11 @@ Detaylı kurulum, klasör yapısı ve mimari notlar için bkz. [`frontend/README
 ## Testler (Task 21)
 
 ```bash
-dotnet test                 # tüm paket: 263 test (birim + entegrasyon)
+dotnet test                 # tüm paket: 317 test (MVP 263 + Post-MVP 54: şifre akışları, kataloglar, arama, bildirim merkezi, sigortalı)
 ```
 
 - **Birim testler** — `tests/SigortaPro.{Domain,Application,Infrastructure}.Tests`: fiyatlama motoru kural senaryoları, domain durum makineleri (Quote/Policy/Claim/Payment/Renewal), handler/validator/pipeline testleri (xUnit + FluentAssertions + NSubstitute).
-- **Entegrasyon testleri** — `tests/SigortaPro.WebAPI.Tests/Integration`: `WebApplicationFactory` + **SQLite in-memory** ile gerçek HTTP pipeline (middleware → JWT → MediatR → EF Core → Identity) test edilir; **hiçbir dış bağımlılık gerekmez** (SQL Server/Docker kurulumu olmadan çalışır). Kapsam: auth akışı (register → login → refresh rotasyonu + negatifler) ve teklif→satın alma akışı (teklif → onay → mock POS → aktif poliçe; 402/409/403 senaryoları). Tasarım kararları için bkz. ADR-034.
+- **Entegrasyon testleri** — `tests/SigortaPro.WebAPI.Tests/Integration`: `WebApplicationFactory` + **SQLite in-memory** ile gerçek HTTP pipeline (middleware → JWT → MediatR → EF Core → Identity) test edilir; **hiçbir dış bağımlılık gerekmez** (SQL Server/Docker kurulumu olmadan çalışır). Kapsam: auth akışı (register → login → refresh rotasyonu + negatifler), teklif→satın alma akışı (teklif → onay → mock POS → aktif poliçe; 402/409/403 senaryoları), **şifre sıfırlama akışı** (Task 23 — `forgot-password` generic 200, `reset-password` gerçek Identity token'ıyla şifre değişimi) **araç kataloğu** (Task 24 — `GET /vehicle-catalog` gömülü JSON'dan 200 + markalar, yetkisiz 401) ve **il kataloğu** (`GET /city-catalog` anonim 200 + 81 il — ADR-039). Tasarım kararları için bkz. ADR-034…039.
 
 > **Tüm API uçlarının derli toplu özeti** (müşteri/teklif uçları dahil, yetki ve parametreleriyle) için bkz. [`API.md`](API.md); canlı şema dokümantasyonu için Development'ta Swagger (`/swagger`). Aşağıdaki bölümler öne çıkan akışların bağlamlı özetidir.
 
@@ -111,8 +133,13 @@ dotnet test                 # tüm paket: 263 test (birim + entegrasyon)
 | `POST` | `/api/v1/auth/register` | Müşteri kaydı (Customer profili ile birlikte) — access + refresh token döner |
 | `POST` | `/api/v1/auth/login` | Giriş — access + refresh token döner |
 | `POST` | `/api/v1/auth/refresh-token` | Refresh token ile yeni access + refresh token (rotasyonlu) |
+| `POST` | `/api/v1/auth/forgot-password` | Şifre sıfırlama talebi — kayıtlı e-postaya bağlantı gönderir (Task 23) |
+| `POST` | `/api/v1/auth/reset-password` | Token + yeni şifre ile şifreyi günceller (Task 23) |
+| `POST` | `/api/v1/auth/change-password` | Oturum sahibi, mevcut şifresini doğrulayarak şifresini değiştirir (ADR-040) |
 
 Access token 15 dakika, refresh token 7 gün geçerlidir; token yenilendiğinde eski refresh token iptal edilir. Kimlik doğrulama uçları rate limit ile korunur (IP başına dakikada 10 istek; aşımda `429`).
+
+**Şifre sıfırlama (Task 23, ADR-035):** `forgot-password`, güvenlik gereği e-posta kayıtlı olsun ya da olmasın **her zaman aynı generic `200`** yanıtını döner (kullanıcı varlığı sızdırılmaz). Reset token'ı ASP.NET Core Identity'nin `DataProtectorTokenProvider`'ıyla üretilir ve **1 saat** geçerlidir. E-posta, sağlayıcıdan bağımsız `IEmailService` (MVP: SMTP/MailKit) üzerinden gönderilir; SMTP yapılandırması aşağıdaki gibi sağlanır (bkz. [E-posta / SMTP Yapılandırması](#e-posta--smtp-yapılandırması-task-23)).
 
 ## API Altyapısı (Task 6)
 
@@ -128,6 +155,7 @@ Access token 15 dakika, refresh token 7 gün geçerlidir; token yenilendiğinde 
 | Rol | E-posta | Şifre |
 |-----|---------|-------|
 | Admin | `admin@sigortapro.com` | `Admin!2345` |
+| Personel | `personel@sigortapro.com` | `Personel!2345` |
 | Customer | `musteri@sigortapro.com` | `Musteri!2345` |
 
 > ⚠️ Bu kimlik bilgileri yalnızca geliştirme seed'i içindir; üretimde kullanılmamalıdır.
@@ -160,7 +188,7 @@ Access token 15 dakika, refresh token 7 gün geçerlidir; token yenilendiğinde 
 
 ## Hasar (Claim) Endpoint'leri (Task 12)
 
-İki taraflı hasar süreci: müşteri bildirir, acente personeli (Admin/Personel) inceleyip karara bağlar ve öder. Hasar durum makinesi: `Submitted → UnderReview → Approved/Rejected → Paid`.
+İki taraflı hasar süreci: müşteri bildirir, acente personeli (Admin/Personel) inceleyip karara bağlar; **ödeme yalnızca Admin tarafından** yapılır (ADR-060 — görevler ayrılığı). Hasar durum makinesi: `Submitted → UnderReview → Approved/Rejected → Paid`.
 
 | Metot | Endpoint | Açıklama | Yetki |
 |-------|----------|----------|-------|
@@ -170,7 +198,7 @@ Access token 15 dakika, refresh token 7 gün geçerlidir; token yenilendiğinde 
 | `POST` | `/api/v1/claims/{id}/start-review` | İncelemeye al (Submitted → UnderReview) | `Admin`, `Personel` |
 | `POST` | `/api/v1/claims/{id}/approve` | Onayla (→ Approved; onay tutarı + değerlendirme notu) | `Admin`, `Personel` |
 | `POST` | `/api/v1/claims/{id}/reject` | Reddet (→ Rejected; gerekçe) | `Admin`, `Personel` |
-| `POST` | `/api/v1/claims/{id}/pay` | Ödeme yap (Approved → Paid) | `Admin`, `Personel` |
+| `POST` | `/api/v1/claims/{id}/pay` | Ödeme yap (Approved → Paid) | **Yalnızca `Admin`** (ADR-060) |
 
 > **Not:** Hasar yalnızca **aktif** poliçeye ve poliçe **dönemi içindeki** (gelecekte olmayan) bir olaya açılabilir; aksi halde `409` döner. **Foto yükleme mock'tur:** yüklenen dosya adları doğrulanır (`.jpg/.jpeg/.png/.pdf`, en fazla 10) ancak saklanmaz — gerçek hasar fotoğraf depolama MVP kapsamı dışıdır. Onaylanan/ödenen hasarların sayısı, ileride yenileme fiyatlamasına (Task 13) beslenmek üzere repository seviyesinde erişilebilir.
 
@@ -193,8 +221,8 @@ Acente personeli (Admin/Personel) için admin panelinin veri kaynağı. Tüm uç
 |-------|----------|----------|-------|
 | `GET` | `/api/v1/dashboard/summary` | Özet metrikler: prim üretimi, aktif poliçe, bekleyen teklif/hasar, yenileme oranı, hasar/prim oranı, aylık satış trendi (son 12 ay), branş dağılımı | `Staff` |
 | `GET` | `/api/v1/dashboard/reports/policies?from=&to=&page=&pageSize=` | Tarih aralıklı poliçe raporu (başlangıç tarihine göre, sayfalı) | `Staff` |
-| `GET` | `/api/v1/dashboard/reports/payments?from=&to=&page=&pageSize=` | Tarih aralıklı ödeme raporu (işlem tarihine göre, sayfalı) | `Staff` |
-| `GET` | `/api/v1/dashboard/reports/riskiest-customers?top=` | En riskli müşteri segmentleri (hasar sayısına göre ilk N) | `Staff` |
+| `GET` | `/api/v1/dashboard/reports/payments?from=&to=&page=&pageSize=` | Tarih aralıklı ödeme/ciro raporu (işlem tarihine göre, sayfalı) | **Yalnızca `Admin`** (ADR-060) |
+| `GET` | `/api/v1/dashboard/reports/riskiest-customers?top=` | En riskli müşteri segmentleri (hasar sayısına göre ilk N) | **Yalnızca `Admin`** (ADR-062) |
 
 > **Not:** Oranlar 0–1 aralığında ondalık döner (frontend biçimlendirir): yenileme oranı = onaylanan/sunulan yenileme; hasar/prim oranı = ödenen hasar tutarı/üretilen prim. Rapor uçlarında `from`/`to` **dahil** (inclusive) tarih aralığıdır ve `to`, `from`'dan önce olamaz (`400`).
 

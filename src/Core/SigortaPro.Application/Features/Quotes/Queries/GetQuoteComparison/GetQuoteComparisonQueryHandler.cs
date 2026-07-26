@@ -12,6 +12,8 @@ public sealed class GetQuoteComparisonQueryHandler : IQueryHandler<GetQuoteCompa
     private readonly IReadRepository<Vehicle> _vehicleRepository;
     private readonly IReadRepository<Property> _propertyRepository;
     private readonly IPricingEngine _pricingEngine;
+    private readonly IPricingRateResolver _pricingRateResolver;
+    private readonly IQuotePricingInputBuilder _pricingInputBuilder;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
 
@@ -21,6 +23,8 @@ public sealed class GetQuoteComparisonQueryHandler : IQueryHandler<GetQuoteCompa
         IReadRepository<Vehicle> vehicleRepository,
         IReadRepository<Property> propertyRepository,
         IPricingEngine pricingEngine,
+        IPricingRateResolver pricingRateResolver,
+        IQuotePricingInputBuilder pricingInputBuilder,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService)
     {
@@ -29,6 +33,8 @@ public sealed class GetQuoteComparisonQueryHandler : IQueryHandler<GetQuoteCompa
         _vehicleRepository = vehicleRepository;
         _propertyRepository = propertyRepository;
         _pricingEngine = pricingEngine;
+        _pricingRateResolver = pricingRateResolver;
+        _pricingInputBuilder = pricingInputBuilder;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
     }
@@ -50,12 +56,28 @@ public sealed class GetQuoteComparisonQueryHandler : IQueryHandler<GetQuoteCompa
 
         var now = _dateTimeProvider.UtcNow;
 
+        // ADR-048: Karşılaştırma bir ÖNİZLEMEDİR (henüz teklif yok) → o an yürürlükteki tarife kullanılır.
+        // Müşteri teklifi oluşturduğunda aynı tarife teklifte sabitlenir; gösterilen fiyatla tutarlıdır.
+        var effectivePricing = await _pricingRateResolver.ResolveEffectiveAsync(now, cancellationToken);
+
+        // ADR-056: Girdi, teklif oluşturmayla AYNI builder'dan kurulur (aynı yaş/il/araç primitifleri,
+        // aynı sigara beyanı, adresten AYNI şekilde türetilen deprem bölgesi). Önizleme snapshot'ı
+        // KALICILAŞTIRILMAZ — yalnızca fiyatı oluşturmayla birebir aynı hesaplamak için kullanılır.
+        var snapshot = await _pricingInputBuilder.BuildAsync(
+            request.Branch, customer, vehicle, property, now,
+            insuredBirthDate: request.InsuredBirthDate,
+            isSmoker: request.IsSmoker,
+            cancellationToken: cancellationToken);
+
         var packages = CoveragePackageFactors.ComparablePackages
             .Select(package =>
             {
                 var pricing = QuotePricingFactory.Compute(
                     _pricingEngine, request.Branch, customer, vehicle, property,
-                    product.Coverages, package, now);
+                    product.Coverages, package, now,
+                    insuredBirthDate: request.InsuredBirthDate,
+                    rates: effectivePricing.Rates,
+                    snapshot: snapshot);
 
                 return new QuotePackageDto(
                     package,

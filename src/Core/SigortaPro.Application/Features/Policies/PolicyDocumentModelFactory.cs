@@ -1,5 +1,6 @@
 using SigortaPro.Application.Common.Documents;
 using SigortaPro.Application.Common.Interfaces;
+using SigortaPro.Application.Common.Pricing;
 using SigortaPro.Application.Common.Security;
 using SigortaPro.Application.Features.Quotes;
 using SigortaPro.Domain.Entities;
@@ -11,7 +12,10 @@ namespace SigortaPro.Application.Features.Policies;
 // hesaplanır (ADR-021 ile tutarlı: teklif detayı ve poliçe sertifikası aynı primi/dökümü üretir).
 internal static class PolicyDocumentModelFactory
 {
-    public static PolicyDocumentModel Build(Policy policy, IPricingEngine pricingEngine, DateTime issuedAt)
+    // rates (ADR-048): poliçenin kaynaklandığı teklifin sabitlediği tarife — PDF'teki geçmiş prim/döküm
+    // tarife değişikliklerinden etkilenmez.
+    public static PolicyDocumentModel Build(
+        Policy policy, IPricingEngine pricingEngine, DateTime issuedAt, PricingRateSet? rates = null)
     {
         var quote = policy.Quote
             ?? throw new InvalidOperationException("Poliçe belgesi için teklif verisi yüklenmemiş.");
@@ -22,9 +26,14 @@ internal static class PolicyDocumentModelFactory
 
         var pricing = QuotePricingFactory.Compute(
             pricingEngine, quote.Branch, customer, quote.Vehicle, quote.Property,
-            product.Coverages, quote.CoveragePackage, quote.CreatedAt, quote.ClaimHistoryFactor);
+            product.Coverages, quote.CoveragePackage, quote.CreatedAt, quote.ClaimHistoryFactor,
+            insuredBirthDate: quote.InsuredPerson?.BirthDate,
+            rates: rates,
+            // ADR-053: PDF de dondurulmuş girdilerden üretilir → yeniden basımda risk skoru/döküm değişmez.
+            snapshot: quote.PricingSnapshot);
 
-        var riskObject = QuoteMappings.BuildRiskObject(quote.Vehicle, quote.Property);
+        // ADR-041: "başkası adına" teklifte PDF risk objesi satırı sigortalıyı gösterir.
+        var riskObject = QuoteMappings.BuildRiskObject(quote.Vehicle, quote.Property, quote.InsuredPerson);
 
         var coverages = pricing.Coverages
             .Select(coverage => new PolicyCoverageLine(coverage.Name, coverage.Description ?? string.Empty, coverage.Limit))
@@ -54,6 +63,10 @@ internal static class PolicyDocumentModelFactory
             pricing.BasePremium,
             policy.TotalPremium,
             coverages,
-            pricing.Breakdown);
+            pricing.Breakdown,
+            // ADR-042: sigortalı ≠ sigorta ettiren ise PDF'te ayrı gösterilir (TCKN maskeli).
+            InsuredPersonSummary: quote.InsuredPerson is null
+                ? null
+                : $"{quote.InsuredPerson.FullName} ({quote.InsuredPerson.Relationship}) · TCKN {SensitiveDataMasker.MaskTckn(quote.InsuredPerson.Tckn)}");
     }
 }

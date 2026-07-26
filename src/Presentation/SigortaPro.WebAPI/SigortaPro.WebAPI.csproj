@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <!-- Swagger/OpenAPI, XML doc yorumlarını uç nokta dokümantasyonuna dahil eder (DEVELOPMENT_RULES.md §2.3). -->
@@ -6,6 +6,7 @@
     <!-- CS1591: Her public üye için XML doc zorunlu değildir; Swagger yalnızca sağlanan yorumları kullanır,
          eksik olanlar için uyarı üretilmesi zero-warning hedefiyle çeliştiğinden bu proje için kapatılır. -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <UserSecretsId>bbbe7cf9-fa72-4da8-9923-90749d16f2e2</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -23,7 +23,9 @@ public interface IClaimRepository : IReadRepository<Claim>, IWriteRepository<Cla
         PaginationParams paging,
         CancellationToken cancellationToken = default);
 
-    // Müşterinin fiyatlamaya etki eden hasar geçmişi: onaylanmış/ödenmiş hasar sayısı. Yenileme
-    // fiyatlaması (Task 13) bunu hasarsızlık basamağı/ek prim çarpanına besler (TASKS.md Task 12).
-    Task<int> CountReportableClaimsByCustomerAsync(Guid customerId, CancellationToken cancellationToken = default);
+    // Müşterinin fiyatlamaya etki eden hasar geçmişi: onaylanmış/ödenmiş hasar sayısı.
+    // ADR-054: Sayım **branşa göre kapsanır** — bir Kasko hasarı Sağlık yenilemesini pahalılaştıramaz.
+    // Hasarın branşı, hasarın bağlı olduğu poliçenin teklifinden (Policy → Quote.Branch) belirlenir.
+    Task<int> CountReportableClaimsByCustomerAsync(
+        Guid customerId, InsuranceBranch branch, CancellationToken cancellationToken = default);
 }

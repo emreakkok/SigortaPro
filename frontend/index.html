@@ -5,6 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SigortaPro</title>
+    <!--
+      Tema FOUC-önleme (ADR-043): ilk boyamadan önce localStorage tercihini (yoksa sistem)
+      okuyup .dark sınıfını uygular. Anahtar/mantık src/shared/theme/useTheme.tsx ile birebir aynıdır.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("sigortapro.theme");
+          var mode =
+            stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+          var dark =
+            mode === "dark" ||
+            (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var root = document.documentElement;
+          root.classList.toggle("dark", dark);
+          root.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {
+          /* erişilemezse açık tema ile devam edilir */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

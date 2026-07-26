@@ -41,6 +41,27 @@ export function branchRiskKind(branch: InsuranceBranch): "vehicle" | "property" 
   return "none";
 }
 
+/** Aracın kullanım amacı (backend `VehicleUsage` — ADR-057). Kasko/Trafik primini etkiler. */
+export const VehicleUsage = {
+  Hususi: 0,
+  Ticari: 1,
+  Taksi: 2,
+} as const;
+export type VehicleUsage = (typeof VehicleUsage)[keyof typeof VehicleUsage];
+
+export const VEHICLE_USAGE_LABELS: Record<VehicleUsage, string> = {
+  [VehicleUsage.Hususi]: "Hususi",
+  [VehicleUsage.Ticari]: "Ticari",
+  [VehicleUsage.Taksi]: "Taksi",
+};
+
+/** Kullanıcının bilinçli seçim yapabilmesi için sade Türkçe açıklamalar. */
+export const VEHICLE_USAGE_DESCRIPTIONS: Record<VehicleUsage, string> = {
+  [VehicleUsage.Hususi]: "Kişisel kullanım — işe gidiş-geliş ve günlük ihtiyaçlar.",
+  [VehicleUsage.Ticari]: "İş amaçlı kullanım — esnaf/şirket aracı, yük veya hizmet taşıma.",
+  [VehicleUsage.Taksi]: "Ticari yolcu taşımacılığı — taksi, transfer ve benzeri.",
+};
+
 export const CoveragePackage = {
   Standart: 0,
   Genisletilmis: 1,

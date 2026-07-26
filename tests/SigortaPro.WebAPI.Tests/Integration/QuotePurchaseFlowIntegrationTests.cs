@@ -153,7 +153,8 @@ public sealed class QuotePurchaseFlowIntegrationTests
             "Toyota",
             "Corolla",
             2022,
-            132);
+            132,
+            VehicleUsage.Hususi);
 
         var response = await client.PostAsJsonAsync("/api/v1/customers/me/vehicles", command);
         response.StatusCode.Should().Be(HttpStatusCode.Created);

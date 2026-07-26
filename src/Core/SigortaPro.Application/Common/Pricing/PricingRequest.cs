@@ -8,13 +8,16 @@ namespace SigortaPro.Application.Common.Pricing;
 public abstract record PricingRequest(InsuranceBranch Branch);
 
 // Kasko / Trafik risk objesi (araç) girdisi.
+// UsagePurpose (ADR-057): kullanım amacı beyanı. **null = beyan yok** → faktör uygulanmaz ve prim
+// dökümünde gösterilmez (bu alan eklenmeden önce oluşmuş kayıtların fiyatı geriye dönük değişmez).
 public sealed record VehiclePricingRequest(
     InsuranceBranch Branch,
     int DriverAge,
     int VehicleAge,
     int EnginePowerHp,
     string City,
-    int NoClaimTier) : PricingRequest(Branch);
+    int NoClaimTier,
+    VehicleUsage? UsagePurpose = null) : PricingRequest(Branch);
 
 // Konut / DASK risk objesi (bina) girdisi.
 public sealed record PropertyPricingRequest(

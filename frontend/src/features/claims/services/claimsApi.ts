@@ -21,10 +21,19 @@ export async function getClaims(params: ClaimListParams): Promise<PagedResult<Cl
   return response.data;
 }
 
-/** `GET /claims/{id}` — hasar detayı (durum + değerlendirme notu). */
+/** `GET /claims/{id}` — hasar detayı (durum + değerlendirme notu + belgeler). */
 export async function getClaimById(id: string): Promise<Claim> {
   const response = await api.get<Claim>(`/claims/${id}`);
   return response.data;
+}
+
+/**
+ * `GET /claims/{id}/documents/{documentId}` — belge içeriğini blob olarak indirir (Authorization header
+ * axios interceptor ile eklenir; korumalı görsel/PDF `<img>`/`<a>` ile gösterilemeyeceğinden blob çekilir).
+ */
+export async function getClaimDocumentBlob(claimId: string, documentId: string): Promise<Blob> {
+  const response = await api.get(`/claims/${claimId}/documents/${documentId}`, { responseType: "blob" });
+  return response.data as Blob;
 }
 
 /** `POST /claims/{id}/start-review` — hasarı incelemeye alır (Submitted → UnderReview; personel). */

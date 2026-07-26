@@ -17,11 +17,12 @@ public sealed class ClaimRepository : GenericRepository<Claim>, IClaimRepository
         _context = context;
     }
 
-    // Salt okunur detay: poliçesiyle (poliçe numarası gösterimi için).
+    // Salt okunur detay: poliçesiyle (poliçe numarası gösterimi için) ve eklenen belgeleriyle (foto/PDF).
     public Task<Claim?> GetDetailByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         _context.Claims
             .AsNoTracking()
             .Include(claim => claim.Policy)
+            .Include(claim => claim.Documents)
             .FirstOrDefaultAsync(claim => claim.Id == id, cancellationToken);
 
     // Durum geçişi komutları için izlemeli hasar; özet yanıtta poliçe numarası için poliçe yüklenir.
@@ -70,10 +71,15 @@ public sealed class ClaimRepository : GenericRepository<Claim>, IClaimRepository
     }
 
     // Fiyatlamaya etki eden hasar geçmişi: onaylanmış + ödenmiş hasar sayısı (Task 13 yenileme fiyatlaması besler).
-    public Task<int> CountReportableClaimsByCustomerAsync(Guid customerId, CancellationToken cancellationToken = default) =>
+    // ADR-054: Hasar geçmişi BRANŞ KAPSAMLI sayılır (Policy → Quote.Branch join'i ile). Önceden müşterinin
+    // tüm branşlardaki hasarları sayılıyordu; bu, bir Kasko hasarının Sağlık yenileme primini artırmasına
+    // yol açıyordu (branşlar arası risk kirlenmesi).
+    public Task<int> CountReportableClaimsByCustomerAsync(
+        Guid customerId, InsuranceBranch branch, CancellationToken cancellationToken = default) =>
         _context.Claims
             .CountAsync(
                 claim => claim.CustomerId == customerId
-                    && (claim.Status == ClaimStatus.Approved || claim.Status == ClaimStatus.Paid),
+                    && (claim.Status == ClaimStatus.Approved || claim.Status == ClaimStatus.Paid)
+                    && claim.Policy!.Quote!.Branch == branch,
                 cancellationToken);
 }

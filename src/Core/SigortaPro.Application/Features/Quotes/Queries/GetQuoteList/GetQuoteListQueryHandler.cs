@@ -40,7 +40,7 @@ public sealed class GetQuoteListQueryHandler : IQueryHandler<GetQuoteListQuery, 
         var paging = new PaginationParams { Page = request.Page, PageSize = request.PageSize };
 
         var page = await _quoteRepository.SearchAsync(
-            customerFilter, request.Status, request.Branch, paging, cancellationToken);
+            customerFilter, request.Status, request.Branch, request.Search, paging, cancellationToken);
 
         var items = page.Items.Select(QuoteMappings.ToSummaryDto).ToList();
 

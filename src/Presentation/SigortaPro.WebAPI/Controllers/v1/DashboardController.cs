@@ -24,12 +24,18 @@ public sealed class DashboardController : ControllerBase
         _sender = sender;
     }
 
-    /// <summary>Dashboard özet metriklerini getirir (prim üretimi, aktif poliçe, bekleyenler, oranlar, aylık trend, branş dağılımı).</summary>
+    /// <summary>
+    /// Operasyon dashboard'ının tüm blokları tek çağrıda (ADR-052): seçilen aralığın KPI'ları + önceki eşit
+    /// uzunluktaki dönemle karşılaştırma, aksiyon merkezi, prim üretimi zaman serisi, satış hunisi,
+    /// branş performansı, hasar operasyonu ve portföy. Aralık verilmezse son 30 gün kullanılır.
+    /// </summary>
     [HttpGet("summary")]
     [ProducesResponseType(typeof(DashboardSummaryDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSummary(CancellationToken cancellationToken)
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetSummary(
+        [FromQuery] GetDashboardSummaryQuery query, CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new GetDashboardSummaryQuery(), cancellationToken);
+        var result = await _sender.Send(query, cancellationToken);
         return Ok(result);
     }
 
@@ -44,8 +50,9 @@ public sealed class DashboardController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Tarih aralıklı ödeme raporu (işlem tarihine göre; sayfalı).</summary>
+    /// <summary>Tarih aralıklı ödeme/ciro raporu (işlem tarihine göre; sayfalı). Yalnızca Admin (ADR-060: ciro görünürlüğü yönetimseldir; sınıf düzeyi Staff yetkisini Admin'e daraltır).</summary>
     [HttpGet("reports/payments")]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(PagedResult<PaymentReportItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetPaymentReport(
@@ -55,8 +62,9 @@ public sealed class DashboardController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>En riskli müşteri segmentleri (hasar sayısına göre ilk N).</summary>
+    /// <summary>En riskli müşteri segmentleri (hasar sayısına göre ilk N). Yalnızca Admin (P1 kararı D3: hasar tutarı + müşteri profilleme birleşimi yönetimsel/KVKK hassasiyetlidir).</summary>
     [HttpGet("reports/riskiest-customers")]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(IReadOnlyList<CustomerRiskSegmentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetRiskiestCustomers(

@@ -14,4 +14,6 @@ public sealed record ClaimDto(
     decimal? ApprovedAmount,
     ClaimStatus Status,
     string? ReviewNote,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    // Müşterinin eklediği belgeler (foto/PDF). Hem müşteri hem Admin/Personel detayında döner.
+    IReadOnlyList<ClaimDocumentDto> Documents);

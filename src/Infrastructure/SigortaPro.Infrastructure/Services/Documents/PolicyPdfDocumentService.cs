@@ -13,9 +13,14 @@ namespace SigortaPro.Infrastructure.Services.Documents;
 public sealed class PolicyPdfDocumentService : IPolicyDocumentService
 {
     private static readonly CultureInfo Tr = new("tr-TR");
-    private static readonly Color Accent = Color.FromHex("#1E3A5F");
-    private static readonly Color Muted = Color.FromHex("#6B7280");
-    private static readonly Color LightBg = Color.FromHex("#F3F4F6");
+
+    // ADR-040: Kurumsal palet — web temasıyla (globals.css token'ları) aynı kimlik.
+    // Bordo (primary), koyu gri (metin), nötr gri (ikincil) ve kırık beyaz (zemin).
+    private static readonly Color Accent = Color.FromHex("#7A1F2B");      // bordo / koyu kırmızı
+    private static readonly Color DarkText = Color.FromHex("#26262B");    // koyu gri (gövde metni)
+    private static readonly Color Muted = Color.FromHex("#6E6E76");       // nötr gri (ikincil metin)
+    private static readonly Color LightBg = Color.FromHex("#F7F5F2");     // kırık beyaz (kutu zeminleri)
+    private static readonly Color BorderGray = Color.FromHex("#DCDAD5");  // açık gri (çizgi/çerçeve)
 
     public byte[] Generate(PolicyDocumentModel model)
     {
@@ -25,7 +30,7 @@ public sealed class PolicyPdfDocumentService : IPolicyDocumentService
             {
                 page.Size(PageSizes.A4);
                 page.Margin(36);
-                page.DefaultTextStyle(style => style.FontSize(10).FontColor(Colors.Black));
+                page.DefaultTextStyle(style => style.FontSize(10).FontColor(DarkText));
 
                 page.Header().Element(header => ComposeHeader(header, model));
                 page.Content().PaddingVertical(12).Element(content => ComposeContent(content, model));
@@ -79,15 +84,12 @@ public sealed class PolicyPdfDocumentService : IPolicyDocumentService
                     ("Bitiş", Date(model.EndDate)),
                 }));
 
-                row.RelativeItem().Element(box => InfoBox(box, "SİGORTALI", new[]
-                {
-                    ("Ad Soyad", model.CustomerFullName),
-                    ("TCKN", model.CustomerMaskedTckn),
-                    ("Telefon", model.CustomerPhone),
-                    ("Adres", model.CustomerAddress),
-                    (model.RiskObjectKind, model.RiskObjectDisplay),
-                    ("Risk Skoru", RiskLabel(model.RiskScore)),
-                }));
+                // ADR-042: "Başkası adına" poliçede sigorta ettiren ile sigortalı ayrı gösterilir;
+                // sigortalı poliçe sahibinin kendisiyse kutu başlığı birleşik kalır.
+                row.RelativeItem().Element(box => InfoBox(
+                    box,
+                    model.InsuredPersonSummary is null ? "SİGORTA ETTİREN / SİGORTALI" : "SİGORTA ETTİREN",
+                    BuildPolicyholderRows(model)));
             });
 
             column.Item().Element(section => CoverageTable(section, model));
@@ -95,9 +97,30 @@ public sealed class PolicyPdfDocumentService : IPolicyDocumentService
         });
     }
 
+    // Sigorta ettiren satırları; "başkası adına" poliçede sigortalı ayrı satır olarak eklenir (ADR-042).
+    private static (string Label, string Value)[] BuildPolicyholderRows(PolicyDocumentModel model)
+    {
+        var rows = new List<(string Label, string Value)>
+        {
+            ("Ad Soyad", model.CustomerFullName),
+            ("TCKN", model.CustomerMaskedTckn),
+            ("Telefon", model.CustomerPhone),
+            ("Adres", model.CustomerAddress),
+        };
+
+        if (model.InsuredPersonSummary is not null)
+        {
+            rows.Add(("Sigortalı", model.InsuredPersonSummary));
+        }
+
+        rows.Add((model.RiskObjectKind, model.RiskObjectDisplay));
+        rows.Add(("Risk Skoru", RiskLabel(model.RiskScore)));
+        return rows.ToArray();
+    }
+
     private static void InfoBox(IContainer container, string title, IEnumerable<(string Label, string Value)> rows)
     {
-        container.Border(1).BorderColor(Colors.Grey.Lighten2).Column(column =>
+        container.Border(1).BorderColor(BorderGray).Column(column =>
         {
             column.Item().Background(LightBg).PaddingHorizontal(8).PaddingVertical(4)
                 .Text(title).Bold().FontSize(9).FontColor(Accent);
@@ -182,7 +205,7 @@ public sealed class PolicyPdfDocumentService : IPolicyDocumentService
             column.Item().PaddingTop(8).Row(row =>
             {
                 row.RelativeItem();
-                row.ConstantItem(220).Border(1).BorderColor(Colors.Grey.Lighten2).Column(box =>
+                row.ConstantItem(220).Border(1).BorderColor(BorderGray).Column(box =>
                 {
                     SummaryRow(box, "Baz Prim", Money(model.BasePremium));
                     SummaryRow(box, "Risk Skoru", RiskLabel(model.RiskScore));
@@ -209,7 +232,7 @@ public sealed class PolicyPdfDocumentService : IPolicyDocumentService
     {
         container.Column(column =>
         {
-            column.Item().PaddingBottom(4).LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten1);
+            column.Item().PaddingBottom(4).LineHorizontal(0.5f).LineColor(BorderGray);
             column.Item().Row(row =>
             {
                 row.RelativeItem().Text(model.AgencyContact).FontSize(7).FontColor(Muted);
@@ -233,9 +256,9 @@ public sealed class PolicyPdfDocumentService : IPolicyDocumentService
 
     private static void BodyCell(TableDescriptor table, string text, Color? color = null, bool alignRight = false)
     {
-        var cell = table.Cell().BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten2).PaddingHorizontal(6).PaddingVertical(4);
+        var cell = table.Cell().BorderBottom(0.5f).BorderColor(BorderGray).PaddingHorizontal(6).PaddingVertical(4);
         var aligned = alignRight ? cell.AlignRight() : cell;
-        aligned.Text(text).FontSize(9).FontColor(color ?? Colors.Black);
+        aligned.Text(text).FontSize(9).FontColor(color ?? DarkText);
     }
 
     private static string Money(decimal value) => $"{value.ToString("N2", Tr)} ₺";

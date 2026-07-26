@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useUpdateProfile } from "@/features/profile/hooks/useProfile";
 import { profileSchema, type ProfileFormValues } from "@/features/profile/types/profile.schemas";
 import type { CustomerProfile } from "@/features/profile/types/profile.types";
-import { Alert, Button, FormField, Input, Spinner } from "@/shared/components";
+import { Alert, Button, CityCombobox, FormField, Input, Spinner } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
 
 /** Profil düzenleme formu: ad/soyad, telefon ve adres (TCKN ve doğum tarihi değiştirilemez). */
@@ -11,6 +11,7 @@ export function ProfileForm({ profile }: { profile: CustomerProfile }) {
   const updateMutation = useUpdateProfile();
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isDirty },
   } = useForm<ProfileFormValues>({
@@ -58,7 +59,13 @@ export function ProfileForm({ profile }: { profile: CustomerProfile }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField htmlFor="city" label="İl" error={errors.city?.message}>
-          <Input id="city" {...register("city")} />
+          <Controller
+            control={control}
+            name="city"
+            render={({ field }) => (
+              <CityCombobox id="city" value={field.value ?? ""} onChange={field.onChange} />
+            )}
+          />
         </FormField>
         <FormField htmlFor="district" label="İlçe" error={errors.district?.message}>
           <Input id="district" {...register("district")} />

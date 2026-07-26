@@ -3,6 +3,9 @@ import { PropertyForm } from "@/features/profile/components/PropertyForm";
 import { VehicleForm } from "@/features/profile/components/VehicleForm";
 import { useAddProperty, useAddVehicle } from "@/features/profile/hooks/useProfile";
 import type { Property, Vehicle } from "@/features/profile/types/profile.types";
+import { InsuredPersonForm } from "@/features/quotes/components/wizard/InsuredPersonForm";
+import { resolveRelationship } from "@/features/quotes/types/insuredPerson.schemas";
+import type { InsuredPersonRequest } from "@/features/quotes/types/quote.types";
 import { Alert, Button, Card, CardContent } from "@/shared/components";
 import { cn } from "@/shared/lib/utils";
 import { branchRiskKind, type InsuranceBranch } from "@/shared/types/insurance.types";
@@ -13,6 +16,12 @@ interface RiskObjectStepProps {
   properties: Property[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  /** Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); kendim için null. */
+  insuredPerson: InsuredPersonRequest | null;
+  onInsuredPersonChange: (insured: InsuredPersonRequest | null) => void;
+  /** Sağlıkta sigara kullanım beyanı (ADR-054); null = henüz beyan edilmedi (varsayılan yok). */
+  isSmoker: boolean | null;
+  onIsSmokerChange: (value: boolean) => void;
   onBack: () => void;
   onNext: () => void;
 }
@@ -28,15 +37,27 @@ export function RiskObjectStep({
   properties,
   selectedId,
   onSelect,
+  insuredPerson,
+  onInsuredPersonChange,
+  isSmoker,
+  onIsSmokerChange,
   onBack,
   onNext,
 }: RiskObjectStepProps) {
   const kind = branchRiskKind(branch);
   const [adding, setAdding] = useState(false);
+  // Sağlık: "Kendim için" (self) / "Başkası adına" (other) — gerçek sigortacılık akışı (ADR-041).
+  const [healthMode, setHealthMode] = useState<"self" | "other">(
+    insuredPerson === null ? "self" : "other",
+  );
   const addVehicle = useAddVehicle();
   const addProperty = useAddProperty();
 
-  const canProceed = kind === "none" || selectedId !== null;
+  // ADR-054: Sağlıkta sigara beyanı ZORUNLUDUR — beyan alınmadan ilerlenemez (varsayılan atanmaz).
+  const canProceed =
+    kind === "none"
+      ? (healthMode === "self" || insuredPerson !== null) && isSmoker !== null
+      : selectedId !== null;
 
   return (
     <div className="space-y-4">
@@ -45,12 +66,117 @@ export function RiskObjectStep({
         <p className="text-muted-foreground">
           {kind === "vehicle" && "Teklif almak istediğiniz aracı seçin."}
           {kind === "property" && "Teklif almak istediğiniz konutu seçin."}
-          {kind === "none" && "Sağlık sigortası için risk objesi gerekmez."}
+          {kind === "none" && "Poliçeyi kimin için oluşturacağınızı seçin."}
         </p>
       </div>
 
       {kind === "none" && (
-        <Alert>Sağlık sigortası teklifiniz doğrudan sizin profil bilgilerinize göre hesaplanır.</Alert>
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <SelectableRow
+              selected={healthMode === "self"}
+              onClick={() => {
+                setHealthMode("self");
+                onInsuredPersonChange(null);
+              }}
+              title="Kendim için"
+              subtitle="Sigortalı sizsiniz; prim profil bilgilerinize göre hesaplanır."
+            />
+            <SelectableRow
+              selected={healthMode === "other"}
+              onClick={() => setHealthMode("other")}
+              title="Başkası adına"
+              subtitle="Eş, çocuk veya bir yakınınız için poliçe oluşturun."
+            />
+          </div>
+
+          {healthMode === "self" && (
+            <Alert>Sağlık sigortası teklifiniz doğrudan sizin profil bilgilerinize göre hesaplanır.</Alert>
+          )}
+
+          {healthMode === "other" && insuredPerson !== null && (
+            <Card>
+              <CardContent className="flex items-center justify-between py-4">
+                <div>
+                  <p className="font-medium">
+                    {insuredPerson.firstName} {insuredPerson.lastName}{" "}
+                    <span className="text-muted-foreground">({insuredPerson.relationship})</span>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Doğum tarihi {insuredPerson.birthDate} · {insuredPerson.phoneNumber}
+                  </p>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => onInsuredPersonChange(null)}>
+                  Değiştir
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {healthMode === "other" && insuredPerson === null && (
+            <Card>
+              <CardContent className="space-y-3 pt-6">
+                <p className="text-sm text-muted-foreground">
+                  Sigortalının bilgilerini girin. Gizlilik gereği sistemdeki diğer müşteriler
+                  aranamaz; bilgiler sizin beyanınızdır.
+                </p>
+                <InsuredPersonForm
+                  submitLabel="Sigortalıyı Kaydet"
+                  onSubmit={(values) =>
+                    onInsuredPersonChange({
+                      firstName: values.firstName,
+                      lastName: values.lastName,
+                      tckn: values.tckn,
+                      birthDate: values.birthDate,
+                      phoneNumber: values.phoneNumber,
+                      // "Diğer" seçildiyse açıklama, yakınlık derecesi olarak gönderilir (ADR-042).
+                      relationship: resolveRelationship(values),
+                    })
+                  }
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/*
+            ADR-054: Sigara beyanı fiyatı doğrudan etkiler (×1,25). Önceden hiç sorulmadan "içmiyor"
+            varsayılıyordu. Varsayılan seçim YOKTUR; beyan alınmadan devam edilemez. Sağlık verisinde
+            veri minimizasyonu: yalnızca bu tek soru sorulur (tanı/tedavi bilgisi istenmez).
+          */}
+          <Card>
+            <CardContent className="space-y-3 pt-6">
+              <div>
+                <p className="font-medium">
+                  {healthMode === "self"
+                    ? "Sigara kullanıyor musunuz?"
+                    : "Sigortalı sigara kullanıyor mu?"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Prim hesabını etkiler. Beyanınız yalnızca fiyatlandırma için kullanılır.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <SelectableRow
+                  selected={isSmoker === true}
+                  onClick={() => onIsSmokerChange(true)}
+                  title="Evet"
+                  subtitle="Sigara kullanıyorum/kullanıyor."
+                />
+                <SelectableRow
+                  selected={isSmoker === false}
+                  onClick={() => onIsSmokerChange(false)}
+                  title="Hayır"
+                  subtitle="Sigara kullanmıyorum/kullanmıyor."
+                />
+              </div>
+              {isSmoker === null && (
+                <p className="text-xs text-muted-foreground">
+                  Devam etmek için bu beyanı yapmanız gerekir.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {kind === "vehicle" && (
@@ -107,7 +233,7 @@ export function RiskObjectStep({
               selected={selectedId === property.id}
               onClick={() => onSelect(property.id)}
               title={`${property.address.city} / ${property.address.district}`}
-              subtitle={`${property.address.neighborhood} · ${property.squareMeters} m² · ${property.earthquakeZone}. deprem bölgesi`}
+              subtitle={`${property.address.neighborhood} · ${property.squareMeters} m² · ${property.earthquakeZone}. deprem bölgesi (otomatik)`}
             />
           ))}
           {properties.length === 0 && !adding && (
