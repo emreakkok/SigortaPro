@@ -7,6 +7,7 @@ using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Features.Policies.Queries.GetPolicyDocument;
 using SigortaPro.Application.Tests.Features.Customers;
 using SigortaPro.Domain.Entities;
+using SigortaPro.Application.Tests.Common;
 
 namespace SigortaPro.Application.Tests.Features.Policies;
 
@@ -36,7 +37,7 @@ public class GetPolicyDocumentQueryHandlerTests
 
         _handler = new GetPolicyDocumentQueryHandler(
             _policyRepository, _policyDocumentRepository, _customerRepository, _documentService, _fileStorage,
-            _pricingEngine, _dateTimeProvider, _currentUserService, _unitOfWork,
+            _pricingEngine, PricingTestDoubles.BaselineResolver(), _dateTimeProvider, _currentUserService, _unitOfWork,
             Substitute.For<ILogger<GetPolicyDocumentQueryHandler>>());
     }
 

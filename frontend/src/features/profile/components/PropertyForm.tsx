@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   propertySchema,
   type PropertyFormValues,
 } from "@/features/profile/types/profile.schemas";
-import { Alert, Button, FormField, Input, Select, Spinner } from "@/shared/components";
+import { Alert, Button, CityCombobox, FormField, Input, Spinner } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
 
 interface PropertyFormProps {
@@ -15,7 +15,6 @@ interface PropertyFormProps {
   onCancel?: () => void;
 }
 
-const EARTHQUAKE_ZONES = [1, 2, 3, 4, 5];
 
 /** Konut ekleme formu. */
 export function PropertyForm({
@@ -27,6 +26,7 @@ export function PropertyForm({
 }: PropertyFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<PropertyFormValues>({
@@ -49,7 +49,13 @@ export function PropertyForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField htmlFor="city" label="İl" error={errors.city?.message}>
-          <Input id="city" {...register("city")} />
+          <Controller
+            control={control}
+            name="city"
+            render={({ field }) => (
+              <CityCombobox id="city" value={field.value ?? ""} onChange={field.onChange} />
+            )}
+          />
         </FormField>
         <FormField htmlFor="district" label="İlçe" error={errors.district?.message}>
           <Input id="district" {...register("district")} />
@@ -72,22 +78,13 @@ export function PropertyForm({
         <FormField htmlFor="squareMeters" label="Metrekare" error={errors.squareMeters?.message}>
           <Input id="squareMeters" type="number" inputMode="numeric" {...register("squareMeters")} />
         </FormField>
-        <FormField
-          htmlFor="earthquakeZone"
-          label="Deprem Bölgesi"
-          error={errors.earthquakeZone?.message}
-        >
-          <Select id="earthquakeZone" defaultValue="" {...register("earthquakeZone")}>
-            <option value="" disabled>
-              Seçiniz
-            </option>
-            {EARTHQUAKE_ZONES.map((zone) => (
-              <option key={zone} value={zone}>
-                {zone}. Bölge
-              </option>
-            ))}
-          </Select>
-        </FormField>
+      </div>
+
+      {/* ADR-055/058: Deprem bölgesi kullanıcı beyanı değildir; adresin ilinden sistem türetir. */}
+      <div className="rounded-lg border bg-muted/30 px-4 py-3">
+        <p className="text-sm text-muted-foreground">
+          Deprem bölgesi, adresinizin il bilgisine göre otomatik belirlenir.
+        </p>
       </div>
 
       <div className="flex gap-3">

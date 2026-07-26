@@ -18,8 +18,14 @@ export const api = axios.create({
   },
 });
 
-/** Kimlik uçları: 401 dönseler bile token yenileme döngüsüne girmemeli. */
-const AUTH_ENDPOINTS = ["/auth/login", "/auth/register", "/auth/refresh-token"];
+/** Kimlik uçları: 401/400 dönseler bile token yenileme döngüsüne girmemeli (hepsi anonim). */
+const AUTH_ENDPOINTS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh-token",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+];
 
 interface RetriableRequestConfig extends AxiosRequestConfig {
   /** Bu istek refresh sonrası bir kez tekrarlandı mı? (sonsuz döngü koruması) */

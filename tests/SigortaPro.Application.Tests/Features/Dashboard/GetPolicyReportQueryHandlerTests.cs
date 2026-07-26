@@ -29,7 +29,7 @@ public class GetPolicyReportQueryHandlerTests
             new DateTime(2027, 3, 1, 0, 0, 0, DateTimeKind.Utc), 24750m);
 
         _dashboardRepository.GetPoliciesByDateRangeAsync(
-                _from, _to, Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>())
+                _from, _to, Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResult<Policy>(new[] { policy }, 1, 20, 1));
 
         var result = await _handler.Handle(new GetPolicyReportQuery(_from, _to), CancellationToken.None);
@@ -43,6 +43,6 @@ public class GetPolicyReportQueryHandlerTests
         item.CustomerFullName.Should().BeEmpty();
 
         await _dashboardRepository.Received(1).GetPoliciesByDateRangeAsync(
-            _from, _to, Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>());
+            _from, _to, Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>());
     }
 }

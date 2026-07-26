@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Infrastructure.BackgroundJobs;
 using SigortaPro.Persistence.Context;
 using SigortaPro.Persistence.Identity;
@@ -51,6 +53,7 @@ public sealed class SigortaProWebApplicationFactory : WebApplicationFactory<Prog
         {
             ReplaceSqlServerWithSqlite(services);
             RemovePolicyLifecycleBackgroundService(services);
+            ReplaceEmailServiceWithNull(services);
         });
     }
 
@@ -94,7 +97,19 @@ public sealed class SigortaProWebApplicationFactory : WebApplicationFactory<Prog
         {
             options.UseSqlite(_connection);
             options.AddInterceptors(serviceProvider.GetRequiredService<AuditableEntityInterceptor>());
+            // SQLite decimal üzerinde SUM yapamaz (üretimdeki SQL Server yapar); dashboard'ın SQL tarafı
+            // toplamlarının testlerde de çalışması için decimal'lar test bağlamında double'a dönüştürülür.
+            options.ReplaceService<IModelCustomizer, SqliteDecimalModelCustomizer>();
         });
+    }
+
+    // Gerçek SmtpEmailService yerine no-op NullEmailService enjekte edilir: hiçbir otomatik test gerçek SMTP'ye
+    // bağlanamaz / internete çıkamaz (rastgele/gerçek adreslere mail gönderimi imkânsız). Gerçek SMTP yalnızca
+    // Development ortamında, manuel test sırasında çalışır.
+    private static void ReplaceEmailServiceWithNull(IServiceCollection services)
+    {
+        services.RemoveAll<IEmailService>();
+        services.AddScoped<IEmailService, NullEmailService>();
     }
 
     private static void RemovePolicyLifecycleBackgroundService(IServiceCollection services)

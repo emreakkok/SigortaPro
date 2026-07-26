@@ -6,10 +6,6 @@ namespace SigortaPro.Application.Features.Claims.Commands.CreateClaim;
 // bağlamsal iş kuralları poliçe + saat gerektirdiğinden handler'da uygulanır (BusinessRuleException → 409).
 public sealed class CreateClaimCommandValidator : AbstractValidator<CreateClaimCommand>
 {
-    // Mock foto yükleme sınırları — gerçek depolama MVP dışı (PROJECT_CONTEXT §9); yalnızca metadata doğrulanır.
-    private const int MaxPhotoCount = 10;
-    private static readonly string[] AllowedPhotoExtensions = { ".jpg", ".jpeg", ".png", ".pdf" };
-
     public CreateClaimCommandValidator()
     {
         RuleFor(command => command.PolicyId)
@@ -25,26 +21,30 @@ public sealed class CreateClaimCommandValidator : AbstractValidator<CreateClaimC
         RuleFor(command => command.EstimatedAmount)
             .GreaterThan(0).WithMessage("Tahmini hasar tutarı 0'dan büyük olmalıdır.");
 
-        When(command => command.PhotoFileNames is not null, () =>
+        // Belge (foto/PDF) yükleme sınırları: adet, tür ve boyut. Baytlar depolamaya yazılır (ADR-023).
+        When(command => command.Documents is not null, () =>
         {
-            RuleFor(command => command.PhotoFileNames!)
-                .Must(photos => photos.Count <= MaxPhotoCount)
-                .WithMessage($"En fazla {MaxPhotoCount} foto yüklenebilir.");
+            RuleFor(command => command.Documents!)
+                .Must(documents => documents.Count <= ClaimDocumentStorage.MaxDocumentCount)
+                .WithMessage($"En fazla {ClaimDocumentStorage.MaxDocumentCount} belge yüklenebilir.");
 
-            RuleForEach(command => command.PhotoFileNames!)
-                .Must(HaveAllowedExtension)
-                .WithMessage("Yalnızca .jpg, .jpeg, .png veya .pdf uzantılı foto yüklenebilir.");
+            RuleForEach(command => command.Documents!).ChildRules(document =>
+            {
+                document.RuleFor(item => item.FileName)
+                    .NotEmpty().WithMessage("Belge adı zorunludur.")
+                    .MaximumLength(260).WithMessage("Belge adı en fazla 260 karakter olabilir.");
+
+                document.RuleFor(item => item.ContentType)
+                    .Must(contentType => ClaimDocumentStorage.AllowedContentTypes.Contains(contentType))
+                    .WithMessage("Yalnızca JPEG, PNG, WEBP görsel veya PDF belge yüklenebilir.");
+
+                document.RuleFor(item => item.Content)
+                    .NotNull().WithMessage("Belge içeriği zorunludur.")
+                    .Must(content => content is { Length: > 0 })
+                    .WithMessage("Boş belge yüklenemez.")
+                    .Must(content => content is null || content.LongLength <= ClaimDocumentStorage.MaxDocumentSizeBytes)
+                    .WithMessage("Her belge en fazla 3 MB olabilir.");
+            });
         });
-    }
-
-    private static bool HaveAllowedExtension(string? fileName)
-    {
-        if (string.IsNullOrWhiteSpace(fileName))
-        {
-            return false;
-        }
-
-        return AllowedPhotoExtensions.Any(extension =>
-            fileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
     }
 }

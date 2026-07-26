@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PackageCard } from "@/features/quotes/components/PackageCard";
 import { RiskScoreBadge } from "@/features/quotes/components/RiskScoreBadge";
 import { useCreateQuote, useQuoteComparison } from "@/features/quotes/hooks/useQuotes";
-import type { QuoteComparisonParams } from "@/features/quotes/types/quote.types";
+import type { InsuredPersonRequest, QuoteComparisonParams } from "@/features/quotes/types/quote.types";
 import { Alert, Button, Spinner } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
 import {
@@ -15,6 +15,10 @@ interface ComparisonStepProps {
   branch: InsuranceBranch;
   /** Seçilen risk objesi (araç veya konut) kimliği; Sağlık için null. */
   riskObjectId: string | null;
+  /** Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); kendim için null. */
+  insuredPerson: InsuredPersonRequest | null;
+  /** Sağlıkta sigara kullanım beyanı (ADR-054); diğer branşlarda gönderilmez. */
+  isSmoker: boolean | null;
   onBack: () => void;
   onCreated: (quoteId: string) => void;
 }
@@ -23,12 +27,16 @@ interface ComparisonStepProps {
  * Sihirbaz 3. adım: anlık prim + risk skoru göstergesi ve paket karşılaştırma kartları.
  * Paket seçimi teklifi oluşturur (Priced) ve detay sayfasına yönlendirir.
  */
-export function ComparisonStep({ branch, riskObjectId, onBack, onCreated }: ComparisonStepProps) {
+export function ComparisonStep({ branch, riskObjectId, insuredPerson, isSmoker, onBack, onCreated }: ComparisonStepProps) {
   const kind = branchRiskKind(branch);
   const params: QuoteComparisonParams = {
     branch,
     vehicleId: kind === "vehicle" ? (riskObjectId ?? undefined) : undefined,
     propertyId: kind === "property" ? (riskObjectId ?? undefined) : undefined,
+    // "Başkası adına" sağlıkta önizleme primi sigortalının yaşından hesaplanır (ADR-041).
+    insuredBirthDate: insuredPerson?.birthDate,
+    // ADR-056: Beyan önizlemeye de iletilir → gösterilen prim, oluşturulacak teklifin primiyle aynıdır.
+    isSmoker: kind === "none" ? isSmoker : null,
   };
 
   const comparison = useQuoteComparison(params, true);
@@ -43,6 +51,9 @@ export function ComparisonStep({ branch, riskObjectId, onBack, onCreated }: Comp
         vehicleId: params.vehicleId ?? null,
         propertyId: params.propertyId ?? null,
         coveragePackage,
+        insuredPerson,
+        // Beyan yalnızca Sağlıkta gönderilir; diğer branşlarda backend bunu reddeder (ADR-054).
+        isSmoker: kind === "none" ? isSmoker : null,
       },
       {
         onSuccess: (quote) => onCreated(quote.id),

@@ -12,6 +12,8 @@ using SigortaPro.Application.Features.Customers.Queries.GetCustomerById;
 using SigortaPro.Application.Features.Customers.Queries.GetCustomerList;
 using SigortaPro.Application.Features.Customers.Queries.GetMyProfile;
 
+using SigortaPro.Domain.Enums;
+
 namespace SigortaPro.WebAPI.Controllers.v1;
 
 [ApiController]
@@ -78,7 +80,8 @@ public sealed class CustomersController : ControllerBase
             request.Brand,
             request.Model,
             request.ManufactureYear,
-            request.EnginePowerHp);
+            request.EnginePowerHp,
+            request.UsagePurpose);
 
         var result = await _sender.Send(command, cancellationToken);
         return Ok(result);
@@ -120,9 +123,11 @@ public sealed class CustomersController : ControllerBase
 }
 
 // Araç güncelleme istek gövdesi; araç kimliği route'tan alınır (gövdede tekrar edilmez).
+// UsagePurpose (ADR-057): kullanım amacı beyanı — zorunludur (Kasko/Trafik primini etkiler).
 public sealed record UpdateVehicleRequest(
     string PlateNumber,
     string Brand,
     string Model,
     int ManufactureYear,
-    int EnginePowerHp);
+    int EnginePowerHp,
+    VehicleUsage? UsagePurpose);

@@ -1,5 +1,6 @@
 import type {
   QuoteCoverage,
+  QuoteInsuredPerson,
   QuoteRiskObject,
 } from "@/features/quotes/types/quote.types";
 import type {
@@ -34,6 +35,12 @@ export interface PolicyDetail {
   quoteId: string;
   riskObject: QuoteRiskObject;
   coverages: QuoteCoverage[];
+  /** Müşteri (Sigorta Ettiren) kimliği — admin detayında ad + telefon özeti (additive). */
+  customerId?: string;
+  customerFullName?: string;
+  customerPhone?: string | null;
+  /** Sağlıkta "başkası adına" poliçede Sigortalı özeti (ADR-041); Ettiren = müşteri. Değilse null. */
+  insuredPerson?: QuoteInsuredPerson | null;
 }
 
 /** `GET /policies` sorgu parametreleri. */

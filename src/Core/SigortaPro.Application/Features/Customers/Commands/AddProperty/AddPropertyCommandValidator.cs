@@ -8,8 +8,6 @@ public sealed class AddPropertyCommandValidator : AbstractValidator<AddPropertyC
     private const int MaxSquareMeters = 10000;
 
     // Türkiye deprem bölgesi haritası: 1 (en yüksek risk) – 5 (en düşük risk).
-    private const int MinEarthquakeZone = 1;
-    private const int MaxEarthquakeZone = 5;
 
     public AddPropertyCommandValidator()
     {
@@ -37,8 +35,5 @@ public sealed class AddPropertyCommandValidator : AbstractValidator<AddPropertyC
             .InclusiveBetween(1, MaxSquareMeters)
             .WithMessage($"Metrekare 1 ile {MaxSquareMeters} arasında olmalıdır.");
 
-        RuleFor(command => command.EarthquakeZone)
-            .InclusiveBetween(MinEarthquakeZone, MaxEarthquakeZone)
-            .WithMessage($"Deprem bölgesi {MinEarthquakeZone} ile {MaxEarthquakeZone} arasında olmalıdır.");
     }
 }

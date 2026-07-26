@@ -44,7 +44,7 @@ export function Drawer({ open, onClose, title, description, children, className 
   return (
     <div className="fixed inset-0 z-50">
       <div
-        className="absolute inset-0 bg-foreground/40"
+        className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />

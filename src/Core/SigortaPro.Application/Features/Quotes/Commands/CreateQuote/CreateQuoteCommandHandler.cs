@@ -15,6 +15,8 @@ public sealed class CreateQuoteCommandHandler : ICommandHandler<CreateQuoteComma
     private readonly IReadRepository<Property> _propertyRepository;
     private readonly IQuoteRepository _quoteRepository;
     private readonly IPricingEngine _pricingEngine;
+    private readonly IPricingRateResolver _pricingRateResolver;
+    private readonly IQuotePricingInputBuilder _pricingInputBuilder;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
@@ -27,6 +29,8 @@ public sealed class CreateQuoteCommandHandler : ICommandHandler<CreateQuoteComma
         IReadRepository<Property> propertyRepository,
         IQuoteRepository quoteRepository,
         IPricingEngine pricingEngine,
+        IPricingRateResolver pricingRateResolver,
+        IQuotePricingInputBuilder pricingInputBuilder,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
@@ -38,6 +42,8 @@ public sealed class CreateQuoteCommandHandler : ICommandHandler<CreateQuoteComma
         _propertyRepository = propertyRepository;
         _quoteRepository = quoteRepository;
         _pricingEngine = pricingEngine;
+        _pricingRateResolver = pricingRateResolver;
+        _pricingInputBuilder = pricingInputBuilder;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
@@ -61,12 +67,46 @@ public sealed class CreateQuoteCommandHandler : ICommandHandler<CreateQuoteComma
 
         var now = _dateTimeProvider.UtcNow;
 
+        // ADR-048: Yeni teklif her zaman O AN yürürlükte olan tarifeyle fiyatlanır ve bu versiyon teklifte
+        // sabitlenir; sonraki tarife değişiklikleri bu teklifin primini/dökümünü etkileyemez.
+        var effectivePricing = await _pricingRateResolver.ResolveEffectiveAsync(now, cancellationToken);
+
+        // ADR-053/056: Fiyatlama girdileri teklif oluşturulurken DONDURULUR. Girdi, karşılaştırma
+        // önizlemesiyle AYNI builder'dan kurulur → önizlemede gösterilen fiyat ile oluşan teklifin fiyatı
+        // yapısal olarak eşittir. Sonraki tüm yeniden hesaplar da bu snapshot'tan okur.
+        var snapshot = await _pricingInputBuilder.BuildAsync(
+            request.Branch, customer, vehicle, property, now,
+            insuredBirthDate: request.InsuredPerson?.BirthDate,
+            isSmoker: request.IsSmoker,
+            cancellationToken: cancellationToken);
+
         var pricing = QuotePricingFactory.Compute(
             _pricingEngine, request.Branch, customer, vehicle, property,
-            product.Coverages, request.CoveragePackage, now);
+            product.Coverages, request.CoveragePackage, now,
+            insuredBirthDate: request.InsuredPerson?.BirthDate,
+            rates: effectivePricing.Rates,
+            snapshot: snapshot);
 
         var quote = new Quote(customer.Id, product.Id, request.Branch, vehicle?.Id, property?.Id);
         quote.SelectCoveragePackage(request.CoveragePackage);
+        quote.CapturePricingSnapshot(snapshot);
+
+        if (effectivePricing.VersionId is not null)
+        {
+            quote.PinPricingVersion(effectivePricing.VersionId.Value);
+        }
+
+        if (request.InsuredPerson is not null)
+        {
+            quote.SetInsuredPerson(new InsuredPerson(
+                request.InsuredPerson.FirstName,
+                request.InsuredPerson.LastName,
+                request.InsuredPerson.Tckn,
+                request.InsuredPerson.BirthDate,
+                request.InsuredPerson.PhoneNumber,
+                request.InsuredPerson.Relationship));
+        }
+
         quote.MarkAsPriced(pricing.TotalPremium, now.AddDays(BusinessConstants.MaxQuoteValidityDays));
 
         await _quoteRepository.AddAsync(quote, cancellationToken);

@@ -1,4 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  EmptyState,
+  Skeleton,
+  UsersIcon,
+} from "@/shared/components";
 import { useRiskiestCustomers } from "@/features/dashboard/hooks/useDashboard";
 import { formatCurrency } from "@/shared/utils/format";
 
@@ -16,11 +25,26 @@ export function RiskiestCustomersCard() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="py-4 text-sm text-muted-foreground">Yükleniyor…</p>
+          <div className="space-y-3 py-1" aria-hidden="true">
+            {Array.from({ length: TOP_SEGMENT_COUNT }).map((_, index) => (
+              <div key={index} className="flex items-center justify-between gap-4">
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <Skeleton className="h-3.5 w-2/5" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ))}
+          </div>
         ) : isError || data === undefined ? (
           <p className="py-4 text-sm text-destructive">Segment verisi alınamadı.</p>
         ) : data.length === 0 ? (
-          <p className="py-4 text-sm text-muted-foreground">Hasarlı müşteri kaydı yok.</p>
+          <EmptyState
+            className="py-8"
+            icon={<UsersIcon />}
+            title="Hasarlı müşteri yok"
+            description="Onaylanan veya ödenen hasarı olan müşteri bulunmuyor."
+          />
         ) : (
           <ul className="divide-y divide-border text-sm">
             {data.map((segment) => (

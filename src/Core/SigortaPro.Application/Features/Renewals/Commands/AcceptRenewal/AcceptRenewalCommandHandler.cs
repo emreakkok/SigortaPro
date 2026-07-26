@@ -4,6 +4,7 @@ using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Features.Quotes;
 using SigortaPro.Application.Features.Renewals.DTOs;
 using SigortaPro.Domain.Entities;
+using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Renewals.Commands.AcceptRenewal;
 
@@ -49,22 +50,43 @@ public sealed class AcceptRenewalCommandHandler : ICommandHandler<AcceptRenewalC
         await QuoteAuthorization.EnsureCanAccessAsync(
             newQuote.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 
-        if (newQuote.ValidUntil is not null && now > newQuote.ValidUntil)
+        // İDEMPOTENT ONAY: Yeni dönem teklifi başka bir yoldan da (teklif detay ekranı — POST /quotes/{id}/approve)
+        // onaylanmış olabilir. Bu durumda tekrar Approve edilmez (aksi halde Priced şartı nedeniyle DomainException 409
+        // oluşurdu); yenileme kaydı da yalnızca gerekiyorsa işaretlenir. Böylece müşteri hangi yoldan onaylarsa
+        // onaylasın renewal ↔ quote durumu tutarlı kalır ve ödeme aşamasına ilerleyebilir.
+        switch (newQuote.Status)
         {
-            throw new BusinessRuleException("Yenileme teklifinin geçerlilik süresi dolmuş, onaylanamaz.");
+            case QuoteStatus.Priced:
+                // Geçerlilik süresi yalnızca henüz onaylanmamış (Priced) teklif için anlamlıdır.
+                if (newQuote.ValidUntil is not null && now > newQuote.ValidUntil)
+                {
+                    throw new BusinessRuleException("Yenileme teklifinin geçerlilik süresi dolmuş, onaylanamaz.");
+                }
+
+                newQuote.Approve();
+                _quoteRepository.Update(newQuote);
+                break;
+
+            case QuoteStatus.Approved:
+                // Zaten ödeme aşamasına hazır — idempotent (tekrar onaylama yapılmaz).
+                break;
+
+            default:
+                // Satın alınmış / reddedilmiş / süresi dolmuş teklif onaylanamaz.
+                throw new BusinessRuleException("Yenileme teklifi bu durumda onaylanamaz.");
         }
 
-        // Zaten onaylanmış → DomainException 409; teklif Priced değilse Approve() DomainException 409 (ADR-013).
-        renewal.Accept(now);
-        newQuote.Approve();
+        if (!renewal.IsAccepted)
+        {
+            renewal.Accept(now);
+            _renewalRepository.Update(renewal);
+        }
 
-        _renewalRepository.Update(renewal);
-        _quoteRepository.Update(newQuote);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
-            "Yenileme teklifi onaylandı. RenewalId: {RenewalId}, NewQuoteId: {QuoteId}",
-            renewal.Id, newQuote.Id);
+            "Yenileme teklifi onaylandı. RenewalId: {RenewalId}, NewQuoteId: {QuoteId}, QuoteStatus: {Status}",
+            renewal.Id, newQuote.Id, newQuote.Status);
 
         return RenewalMappings.ToDto(renewal);
     }

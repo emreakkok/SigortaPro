@@ -10,6 +10,7 @@ using SigortaPro.Application.Features.Claims.Commands.RejectClaim;
 using SigortaPro.Application.Features.Claims.Commands.StartClaimReview;
 using SigortaPro.Application.Features.Claims.DTOs;
 using SigortaPro.Application.Features.Claims.Queries.GetClaimById;
+using SigortaPro.Application.Features.Claims.Queries.GetClaimDocument;
 using SigortaPro.Application.Features.Claims.Queries.GetClaimList;
 
 namespace SigortaPro.WebAPI.Controllers.v1;
@@ -59,6 +60,18 @@ public sealed class ClaimsController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>Hasara eklenen bir belgenin (foto/PDF) içeriğini döndürür. Sahibi müşteri veya acente personeli erişebilir.</summary>
+    [HttpGet("{id:guid}/documents/{documentId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetClaimDocument(Guid id, Guid documentId, CancellationToken cancellationToken)
+    {
+        var document = await _sender.Send(new GetClaimDocumentQuery(id, documentId), cancellationToken);
+        // Tarayıcıda satır içi görüntülenebilsin (görsel önizleme / PDF açma); indirme adı da korunur.
+        return File(document.Content, document.ContentType, document.FileName, enableRangeProcessing: false);
+    }
+
     /// <summary>Bildirilen hasarı incelemeye alır (Submitted → UnderReview).</summary>
     [HttpPost("{id:guid}/start-review")]
     [Authorize(Roles = Roles.Staff)]
@@ -97,9 +110,9 @@ public sealed class ClaimsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Onaylanmış hasarın ödemesini gerçekleştirir (Approved → Paid).</summary>
+    /// <summary>Onaylanmış hasarın ödemesini gerçekleştirir (Approved → Paid). Yalnızca Admin (ADR-060: görevler ayrılığı — para çıkışı Personel'e kapalı).</summary>
     [HttpPost("{id:guid}/pay")]
-    [Authorize(Roles = Roles.Staff)]
+    [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(ClaimSummaryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]

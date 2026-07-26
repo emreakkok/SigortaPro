@@ -29,7 +29,9 @@ public class PricingEngineTests
         result.BasePremium.Should().Be(expectedBase);
         result.TotalPremium.Should().Be(expectedBase);
         result.RiskScore.Should().Be(RiskScore.Low);
-        result.Breakdown.Should().HaveCount(5);
+        // ADR-059: Basamak 0 (nötr) iken Bonus-Malus kalemi ÜRETİLMEZ → 4 kalem.
+        result.Breakdown.Should().HaveCount(4);
+        result.Breakdown.Should().NotContain(item => item.Factor == "Hasarsızlık Basamağı");
     }
 
     [Fact]
@@ -83,24 +85,34 @@ public class PricingEngineTests
     }
 
     [Fact]
-    public void CalculatePremium_Should_ApplyNoClaimDiscount_When_TierIsPositive()
+    public void CalculatePremium_Should_ApplyBonus_When_StepIsPositive()
     {
+        // ADR-059: +4 basamak → 0.80 indirim.
         var result = _engine.CalculatePremium(StandardVehicle() with { NoClaimTier = 4 });
 
-        result.Breakdown.Single(item => item.Factor == "Hasarsızlık İndirimi").Multiplier.Should().Be(0.80m);
-        // 15000 × 0.80 = 12000; toplam çarpan 0.80 → Low.
+        result.Breakdown.Single(item => item.Factor == "Hasarsızlık Basamağı").Multiplier.Should().Be(0.80m);
         result.TotalPremium.Should().Be(12000.00m);
         result.RiskScore.Should().Be(RiskScore.Low);
     }
 
     [Fact]
-    public void CalculatePremium_Should_CapNoClaimDiscount_When_TierExceedsMaximum()
+    public void CalculatePremium_Should_ApplyMalus_When_StepIsNegative()
     {
-        var result = _engine.CalculatePremium(StandardVehicle() with { NoClaimTier = 20 });
+        // ADR-059: −2 basamak → 1.40 ek prim (eski sistemde bonus tarafı hiç çalışmıyordu).
+        var result = _engine.CalculatePremium(StandardVehicle() with { NoClaimTier = -2 });
 
-        // En fazla 7 basamak → 1.00 − 7×0.05 = 0.65.
-        result.Breakdown.Single(item => item.Factor == "Hasarsızlık İndirimi").Multiplier.Should().Be(0.65m);
-        result.TotalPremium.Should().Be(9750.00m);
+        result.Breakdown.Single(item => item.Factor == "Hasarsızlık Basamağı").Multiplier.Should().Be(1.40m);
+        result.TotalPremium.Should().Be(21000.00m); // 15000 × 1.40
+    }
+
+    [Theory]
+    [InlineData(20, 0.70)]   // +6 tavanına sıkışır
+    [InlineData(-20, 1.60)]  // −3 tabanına sıkışır
+    public void CalculatePremium_Should_ClampBonusMalusStep(int step, decimal expected)
+    {
+        var result = _engine.CalculatePremium(StandardVehicle() with { NoClaimTier = step });
+
+        result.Breakdown.Single(item => item.Factor == "Hasarsızlık Basamağı").Multiplier.Should().Be(expected);
     }
 
     [Fact]

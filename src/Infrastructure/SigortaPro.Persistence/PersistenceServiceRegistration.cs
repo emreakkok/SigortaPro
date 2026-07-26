@@ -37,7 +37,18 @@ public static class PersistenceServiceRegistration
                 options.Password.RequiredLength = 8;
             })
             .AddRoles<IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<AppDbContext>();
+            .AddEntityFrameworkStores<AppDbContext>()
+            // ADR-035: Şifre sıfırlama token'ları DataProtectorTokenProvider'a dayanır; default token
+            // provider'ları kayıtlı olmadan GeneratePasswordResetTokenAsync çalışmaz.
+            .AddDefaultTokenProviders();
+
+        // ADR-035: Şifre sıfırlama token ömrü, güvenlik için varsayılan 1 günden 1 saate düşürülür.
+        // DataProtectionTokenProviderOptions tüm default token provider'larını etkiler; MVP'de yalnızca
+        // şifre sıfırlama kullanıldığından kapsam bu akıştır.
+        services.Configure<DataProtectionTokenProviderOptions>(options =>
+        {
+            options.TokenLifespan = TimeSpan.FromHours(1);
+        });
 
         services.AddScoped(typeof(IReadRepository<>), typeof(GenericRepository<>));
         services.AddScoped(typeof(IWriteRepository<>), typeof(GenericRepository<>));
@@ -49,6 +60,9 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IClaimRepository, ClaimRepository>();
         services.AddScoped<IRenewalRepository, RenewalRepository>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        // ADR-048: versiyonlanmış tarife deposu.
+        services.AddScoped<IPricingVersionRepository, PricingVersionRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IIdentityService, IdentityService>();

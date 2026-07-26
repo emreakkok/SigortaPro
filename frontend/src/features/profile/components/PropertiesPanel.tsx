@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PropertyForm } from "@/features/profile/components/PropertyForm";
 import { useAddProperty } from "@/features/profile/hooks/useProfile";
 import type { Property } from "@/features/profile/types/profile.types";
-import { Button, Card, CardContent } from "@/shared/components";
+import { Button, Card, CardContent, EmptyState, HomeIcon } from "@/shared/components";
 
 /** Konut listesi + inline ekleme (Konut/DASK risk objeleri). Backend güncelleme ucu yok → yalnızca ekleme. */
 export function PropertiesPanel({ properties }: { properties: Property[] }) {
@@ -40,7 +40,18 @@ export function PropertiesPanel({ properties }: { properties: Property[] }) {
       )}
 
       {properties.length === 0 && !adding && (
-        <p className="text-sm text-muted-foreground">Henüz konut eklemediniz.</p>
+        <Card className="border-dashed">
+          <EmptyState
+            icon={<HomeIcon />}
+            title="Henüz konut eklemediniz"
+            description="Konut ve DASK teklifleri için konutunuzu ekleyin; teklif sihirbazında hazır seçilir."
+            action={
+              <Button size="sm" onClick={() => setAdding(true)}>
+                Konut Ekle
+              </Button>
+            }
+          />
+        </Card>
       )}
 
       <div className="space-y-3">
@@ -52,7 +63,7 @@ export function PropertiesPanel({ properties }: { properties: Property[] }) {
               </p>
               <p className="text-sm text-muted-foreground">
                 {property.address.neighborhood} · {property.squareMeters} m² · Bina yaşı{" "}
-                {property.buildingAge} · {property.earthquakeZone}. deprem bölgesi
+                {property.buildingAge} · {property.earthquakeZone}. deprem bölgesi (otomatik)
               </p>
             </CardContent>
           </Card>

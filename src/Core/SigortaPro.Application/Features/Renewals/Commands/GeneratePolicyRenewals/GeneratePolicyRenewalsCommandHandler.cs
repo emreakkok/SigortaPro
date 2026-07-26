@@ -13,6 +13,8 @@ public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<Gener
     private readonly IRenewalRepository _renewalRepository;
     private readonly IClaimRepository _claimRepository;
     private readonly IPricingEngine _pricingEngine;
+    private readonly IPricingRateResolver _pricingRateResolver;
+    private readonly IQuotePricingInputBuilder _pricingInputBuilder;
     private readonly INotificationService _notificationService;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IUnitOfWork _unitOfWork;
@@ -24,6 +26,8 @@ public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<Gener
         IRenewalRepository renewalRepository,
         IClaimRepository claimRepository,
         IPricingEngine pricingEngine,
+        IPricingRateResolver pricingRateResolver,
+        IQuotePricingInputBuilder pricingInputBuilder,
         INotificationService notificationService,
         IDateTimeProvider dateTimeProvider,
         IUnitOfWork unitOfWork,
@@ -34,6 +38,8 @@ public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<Gener
         _renewalRepository = renewalRepository;
         _claimRepository = claimRepository;
         _pricingEngine = pricingEngine;
+        _pricingRateResolver = pricingRateResolver;
+        _pricingInputBuilder = pricingInputBuilder;
         _notificationService = notificationService;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
@@ -51,6 +57,10 @@ public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<Gener
             return 0;
         }
 
+        // ADR-048: yenileme teklifleri yeni dönem için üretildiğinden güncel tarifeyle fiyatlanır
+        // (tüm parti için bir kez çözülür); kaynak poliçe/teklif fiyatlarına dokunulmaz.
+        var effectivePricing = await _pricingRateResolver.ResolveEffectiveAsync(now, cancellationToken);
+
         var notifications = new List<RenewalOfferedNotification>();
 
         foreach (var policy in duePolicies)
@@ -65,13 +75,21 @@ public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<Gener
                 continue;
             }
 
-            var reportableClaims = await _claimRepository.CountReportableClaimsByCustomerAsync(
-                customer.Id, cancellationToken);
-            var claimHistoryFactor = RenewalPricing.ClaimHistoryFactor(reportableClaims);
+            // ADR-056/058/059: Girdi (Bonus-Malus basamağı dahil) ORTAK builder'dan kurulur → yenileme,
+            // teklif oluşturma ve önizleme aynı fiyatlama girdisini üretir. Hasar geçmişi artık ayrı bir
+            // ClaimHistoryFactor ile değil, bu basamakla fiyatlanır (ADR-059).
+            // Sigara beyanı kaynak teklifin beyanından taşınır (arkaplan işinde müşteriye soru sorulamaz).
+            var snapshot = await _pricingInputBuilder.BuildAsync(
+                originalQuote.Branch, customer, originalQuote.Vehicle, originalQuote.Property, now,
+                insuredBirthDate: originalQuote.InsuredPerson?.BirthDate,
+                isSmoker: originalQuote.PricingSnapshot?.IsSmoker,
+                cancellationToken: cancellationToken);
 
+            // policy.EndDate: yenileme teklifi mevcut poliçe bitene kadar geçerli olmalı (aksi halde poliçe
+            // aktifken teklif "süresi doldu" görünürdü — bkz. RenewalQuoteFactory geçerlilik hesabı).
             var renewalQuote = RenewalQuoteFactory.Build(
                 originalQuote, customer, product, originalQuote.Vehicle, originalQuote.Property,
-                _pricingEngine, claimHistoryFactor, now);
+                _pricingEngine, now, policy.EndDate, snapshot, effectivePricing);
 
             await _quoteRepository.AddAsync(renewalQuote, cancellationToken);
 

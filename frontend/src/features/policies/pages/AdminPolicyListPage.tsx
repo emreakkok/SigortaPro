@@ -8,15 +8,20 @@ import {
   CardContent,
   Drawer,
   Input,
+  EmptyState,
   Label,
+  PageSizeSelector,
   Pagination,
-  Spinner,
+  ShieldCheckIcon,
+  SkeletonRows,
 } from "@/shared/components";
+import { useAdminPageSize } from "@/shared/hooks/useAdminPageSize";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import { useFocusedRecord } from "@/shared/hooks/useFocusedRecord";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
+import type { AdminPageSize } from "@/shared/lib/pagination";
 import { INSURANCE_BRANCH_LABELS } from "@/shared/types/insurance.types";
-import { formatCurrency, formatDate } from "@/shared/utils/format";
-
-const PAGE_SIZE = 20;
+import { formatCurrency, formatDate, formatPhoneNumber } from "@/shared/utils/format";
 
 /** `<input type="date">` değeri için yyyy-MM-dd biçimi (yerel saat). */
 function toDateInputValue(date: Date): string {
@@ -44,16 +49,26 @@ function defaultRange(): { from: string; to: string } {
 export default function AdminPolicyListPage() {
   const [range, setRange] = useState(defaultRange);
   const [page, setPage] = useState(1);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useAdminPageSize();
+  const [searchTerm, setSearchTerm] = useState("");
+  // ADR-047: bildirimden `?focus=<id>` ile gelindiğinde ilgili poliçenin çekmecesi doğrudan açılır.
+  const [selectedId, setSelectedId] = useFocusedRecord();
 
+  const debouncedSearch = useDebounce(searchTerm);
   const rangeValid = range.from !== "" && range.to !== "" && range.from <= range.to;
+
+  const handlePageSizeChange = (size: AdminPageSize) => {
+    setPageSize(size);
+    setPage(1);
+  };
 
   const { data, isLoading, isError, error, isFetching } = usePolicyReport(
     {
       from: range.from,
       to: range.to,
       page,
-      pageSize: PAGE_SIZE,
+      pageSize,
+      search: debouncedSearch === "" ? undefined : debouncedSearch,
     },
     rangeValid,
   );
@@ -68,6 +83,18 @@ export default function AdminPolicyListPage() {
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
+        <div className="w-64 space-y-2">
+          <Label htmlFor="policyCustomerSearch">Müşteri Ara</Label>
+          <Input
+            id="policyCustomerSearch"
+            placeholder="Ad, soyad, telefon veya poliçe no"
+            value={searchTerm}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setPage(1);
+            }}
+          />
+        </div>
         <div className="w-44 space-y-2">
           <Label htmlFor="policyFrom">Başlangıç (from)</Label>
           <Input
@@ -97,16 +124,16 @@ export default function AdminPolicyListPage() {
       {!rangeValid ? (
         <Alert variant="destructive">Bitiş tarihi başlangıç tarihinden önce olamaz.</Alert>
       ) : isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
+        <SkeletonRows rows={6} />
       ) : isError || data === undefined ? (
         <Alert variant="destructive">{getApiErrorMessages(error)[0]}</Alert>
       ) : data.items.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Seçilen tarih aralığında poliçe bulunamadı.
-          </CardContent>
+          <EmptyState
+            icon={<ShieldCheckIcon />}
+            title="Poliçe bulunamadı"
+            description="Seçilen tarih aralığında poliçe yok. Tarih aralığını genişletmeyi deneyin."
+          />
         </Card>
       ) : (
         <>
@@ -131,7 +158,14 @@ export default function AdminPolicyListPage() {
                       className="cursor-pointer border-b last:border-0 transition-colors hover:bg-accent/50"
                     >
                       <td className="px-4 py-3 font-mono text-primary">{policy.policyNumber}</td>
-                      <td className="px-4 py-3 font-medium">{policy.customerFullName}</td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{policy.customerFullName || "—"}</div>
+                        {policy.customerPhone !== null && policy.customerPhone !== undefined && (
+                          <div className="text-xs text-muted-foreground tabular-nums">
+                            {formatPhoneNumber(policy.customerPhone)}
+                          </div>
+                        )}
+                      </td>
                       <td className="px-4 py-3">{INSURANCE_BRANCH_LABELS[policy.branch]}</td>
                       <td className="px-4 py-3">
                         {formatDate(policy.startDate)} — {formatDate(policy.endDate)}
@@ -146,7 +180,9 @@ export default function AdminPolicyListPage() {
               </table>
             </CardContent>
           </Card>
-          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} totalCount={data.totalCount}>
+            <PageSizeSelector value={pageSize} onChange={handlePageSizeChange} />
+          </Pagination>
         </>
       )}
 

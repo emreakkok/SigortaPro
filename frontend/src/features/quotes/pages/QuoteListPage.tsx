@@ -3,15 +3,28 @@ import { Link } from "react-router-dom";
 import { QuoteStatusBadge } from "@/features/quotes/components/QuoteStatusBadge";
 import { QuoteValidity } from "@/features/quotes/components/QuoteValidity";
 import { useQuoteList } from "@/features/quotes/hooks/useQuotes";
-import { Alert, Badge, Button, Card, CardContent, Label, Select, Spinner } from "@/shared/components";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  EmptyState,
+  FileTextIcon,
+  Label,
+  Pagination,
+  Select,
+  SkeletonRows,
+} from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
+import { PORTAL_PAGE_SIZE } from "@/shared/lib/pagination";
 import {
   INSURANCE_BRANCH_LABELS,
   QUOTE_STATUS_LABELS,
   QuoteStatus,
   type InsuranceBranch,
 } from "@/shared/types/insurance.types";
-import { formatCurrency, formatDate } from "@/shared/utils/format";
+import { formatCurrency } from "@/shared/utils/format";
 
 const STATUS_FILTER_OPTIONS = Object.values(QuoteStatus);
 
@@ -22,7 +35,7 @@ export default function QuoteListPage() {
 
   const { data, isLoading, isError, error, isFetching } = useQuoteList({
     page,
-    pageSize: 10,
+    pageSize: PORTAL_PAGE_SIZE,
     status,
   });
 
@@ -61,19 +74,21 @@ export default function QuoteListPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
+        <SkeletonRows rows={4} />
       ) : isError || data === undefined ? (
         <Alert variant="destructive">{getApiErrorMessages(error)[0]}</Alert>
       ) : data.items.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            Henüz teklifiniz yok.{" "}
-            <Link to="/portal/quotes/new" className="font-medium text-primary hover:underline">
-              İlk teklifinizi alın.
-            </Link>
-          </CardContent>
+          <EmptyState
+            icon={<FileTextIcon />}
+            title="Henüz teklifiniz yok"
+            description="Aracınız, konutunuz veya sağlığınız için dakikalar içinde teklif alın; üç teminat paketini ücretsiz karşılaştırın."
+            action={
+              <Link to="/portal/quotes/new">
+                <Button>İlk Teklifinizi Alın</Button>
+              </Link>
+            }
+          />
         </Card>
       ) : (
         <>
@@ -88,7 +103,7 @@ export default function QuoteListPage() {
                         <Badge variant="outline">{INSURANCE_BRANCH_LABELS[quote.branch as InsuranceBranch]}</Badge>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {formatCurrency(quote.totalPremium)} · {formatDate(quote.createdAt)}
+                        {formatCurrency(quote.totalPremium)}
                       </p>
                       <p className="mt-1 text-xs">
                         <QuoteValidity validUntil={quote.validUntil} />
@@ -101,27 +116,12 @@ export default function QuoteListPage() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Önceki
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Sayfa {data.page} / {data.totalPages === 0 ? 1 : data.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= data.totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Sonraki
-            </Button>
-          </div>
+          <Pagination
+            page={data.page}
+            totalPages={data.totalPages}
+            onPageChange={setPage}
+            totalCount={data.totalCount}
+          />
         </>
       )}
     </div>

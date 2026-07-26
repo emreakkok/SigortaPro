@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SigortaPro.Application.Common.Exceptions;
 using SigortaPro.Application.Common.Interfaces;
+using SigortaPro.Application.Common.Pricing;
 using SigortaPro.Application.Features.Customers.DTOs;
 using SigortaPro.Domain.Common;
 using SigortaPro.Domain.Entities;
@@ -11,6 +12,7 @@ public sealed class AddPropertyCommandHandler : ICommandHandler<AddPropertyComma
 {
     private readonly ICustomerRepository _customerRepository;
     private readonly IWriteRepository<Property> _propertyRepository;
+    private readonly IEarthquakeZoneProvider _earthquakeZoneProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AddPropertyCommandHandler> _logger;
@@ -18,12 +20,14 @@ public sealed class AddPropertyCommandHandler : ICommandHandler<AddPropertyComma
     public AddPropertyCommandHandler(
         ICustomerRepository customerRepository,
         IWriteRepository<Property> propertyRepository,
+        IEarthquakeZoneProvider earthquakeZoneProvider,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         ILogger<AddPropertyCommandHandler> logger)
     {
         _customerRepository = customerRepository;
         _propertyRepository = propertyRepository;
+        _earthquakeZoneProvider = earthquakeZoneProvider;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -38,12 +42,18 @@ public sealed class AddPropertyCommandHandler : ICommandHandler<AddPropertyComma
             ?? throw new NotFoundException(nameof(Customer), appUserId);
 
         var address = new Address(request.City, request.District, request.Neighborhood, request.PostalCode);
+
+        // ADR-055: Deprem bölgesi kullanıcı beyanı değil, adresin İLİNDEN türetilir. İl tanınmıyorsa bölge
+        // atanmaz (0) → fiyatlama motoru "bilinmeyen bölge" davranışını açık açıklamasıyla uygular;
+        // sessizce yanlış (ve müşteri lehine) bir bölge atanmaz.
+        var earthquakeZone = _earthquakeZoneProvider.ResolveZone(address.City) ?? EarthquakeZoneDefaults.Unknown;
+
         var property = new Property(
             customer.Id,
             address,
             request.BuildingAge,
             request.SquareMeters,
-            request.EarthquakeZone);
+            earthquakeZone);
 
         await _propertyRepository.AddAsync(property, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

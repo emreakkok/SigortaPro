@@ -1,7 +1,7 @@
 import { useCustomer } from "@/features/customers/hooks/useCustomers";
 import { Alert, Spinner } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
-import { formatDate } from "@/shared/utils/format";
+import { formatDateOnly } from "@/shared/utils/format";
 
 /** Detay çekmecesinde tek satırlık künye kalemi. */
 function Row({ label, value }: { label: string; value: string }) {
@@ -36,7 +36,7 @@ export function CustomerDetailPanel({ customerId }: { customerId: string }) {
         <div className="divide-y divide-border">
           <Row label="Ad Soyad" value={`${data.firstName} ${data.lastName}`} />
           <Row label="TCKN" value={data.maskedTckn} />
-          <Row label="Doğum Tarihi" value={formatDate(data.birthDate)} />
+          <Row label="Doğum Tarihi" value={formatDateOnly(data.birthDate)} />
           <Row label="Telefon" value={data.phoneNumber} />
           <Row label="E-posta" value={data.email ?? "—"} />
           <Row
@@ -81,7 +81,7 @@ export function CustomerDetailPanel({ customerId }: { customerId: string }) {
                   {property.address.district} / {property.address.city}
                 </p>
                 <p className="text-muted-foreground">
-                  {property.squareMeters} m² · {property.buildingAge} yaş · Deprem bölgesi{" "}
+                  {property.squareMeters} m² · {property.buildingAge} yaş · Deprem bölgesi (otomatik){" "}
                   {property.earthquakeZone}
                 </p>
               </li>

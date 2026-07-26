@@ -37,3 +37,16 @@ export async function addProperty(request: PropertyRequest): Promise<Property> {
   const response = await api.post<Property>("/customers/me/properties", request);
   return response.data;
 }
+
+/**
+ * `POST /auth/change-password` — oturum sahibinin şifresini değiştirir (ADR-040).
+ * Hesap öz-yönetimi profil yüzeyinin parçası olduğundan bu feature'da yaşar
+ * (auth → profile bağımlılığı zaten var — ters import feature döngüsü yaratırdı).
+ * Mevcut şifre hatalıysa backend 400 `{ errors }` döner.
+ */
+export async function changePassword(request: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<void> {
+  await api.post("/auth/change-password", request);
+}

@@ -1,11 +1,21 @@
 import { forwardRef, type HTMLAttributes } from "react";
 import { cn } from "@/shared/lib/utils";
 
+/*
+ * Kart primitifi (ADR-044). Modern SaaS elevation sistemi: yumuşak gölge + ince border + hafif
+ * geçiş. Geçiş (`transition-*`) tabanda tanımlıdır → tüketicinin eklediği `hover:*` (border/gölge/
+ * transform) sınıfları her yerde otomatik olarak pürüzsüz animasyonlanır. Renk yalnızca token'lardan
+ * gelir (`bg-card`, `border`) → Dark Mode otomatik uyumlu.
+ */
 export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)}
+      className={cn(
+        "rounded-xl border bg-card text-card-foreground shadow-sm",
+        "transition-[transform,box-shadow,border-color] duration-200 ease-out",
+        className,
+      )}
       {...props}
     />
   ),

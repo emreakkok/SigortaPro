@@ -11,4 +11,7 @@ public sealed record PolicyReportItemDto(
     PolicyStatus Status,
     DateTime StartDate,
     DateTime EndDate,
-    decimal TotalPremium);
+    decimal TotalPremium,
+    // Müşteri kimliği (additive) — aynı isimli müşterileri ayırt etmek için telefon + stabil CustomerId.
+    Guid CustomerId = default,
+    string? CustomerPhone = null);

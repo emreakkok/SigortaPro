@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" role="img" aria-label="DASK - zorunlu deprem sigortası">
+  <defs>
+    <linearGradient id="d-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#211a20"/>
+      <stop offset="1" stop-color="#12100f"/>
+    </linearGradient>
+    <radialGradient id="d-glow" cx="0.5" cy="0.25" r="0.7">
+      <stop offset="0" stop-color="#8c3140" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#8c3140" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="d-wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0e6dd"/>
+      <stop offset="1" stop-color="#d8cabf"/>
+    </linearGradient>
+    <linearGradient id="d-roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c25667"/>
+      <stop offset="1" stop-color="#8c3140"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" fill="url(#d-bg)"/>
+  <rect width="400" height="240" fill="url(#d-glow)"/>
+  <line x1="40" y1="196" x2="360" y2="196" stroke="#f0e6dd" stroke-opacity="0.16" stroke-width="2"/>
+  <!-- seismic waves -->
+  <g fill="none" stroke="#c25667" stroke-linecap="round">
+    <path d="M40 150 Q52 120 64 150 T88 150" stroke-width="3" opacity="0.5"/>
+    <path d="M312 150 Q324 116 336 150 T360 150" stroke-width="3" opacity="0.5"/>
+  </g>
+  <!-- house protected on a shield base -->
+  <path d="M150 96 L200 78 L250 96 L250 150 Q250 186 200 202 Q150 186 150 150 Z" fill="#8c3140" opacity="0.18"/>
+  <rect x="160" y="120" width="80" height="66" fill="url(#d-wall)"/>
+  <path d="M150 122 L200 88 L250 122 Z" fill="url(#d-roof)"/>
+  <rect x="188" y="150" width="24" height="36" rx="2" fill="#8c3140"/>
+  <rect x="170" y="132" width="18" height="16" rx="2" fill="#2c262b"/>
+  <rect x="212" y="132" width="18" height="16" rx="2" fill="#2c262b"/>
+  <!-- crack (styled, not damaging look) -->
+  <path d="M200 122 L206 138 L196 150 L204 166 L198 186" fill="none" stroke="#8c3140" stroke-width="2.5" stroke-linejoin="round" opacity="0.55"/>
+  <!-- protective arc -->
+  <path d="M138 150 Q200 96 262 150" fill="none" stroke="#c9727f" stroke-width="3" stroke-linecap="round" opacity="0.85" stroke-dasharray="2 10"/>
+  <!-- check emblem -->
+  <circle cx="272" cy="86" r="22" fill="#8c3140" stroke="#c9727f" stroke-width="2"/>
+  <path d="M262 86 L270 94 L284 78" fill="none" stroke="#f0e6dd" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

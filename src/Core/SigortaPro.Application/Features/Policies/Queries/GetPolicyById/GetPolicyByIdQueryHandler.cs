@@ -11,17 +11,20 @@ public sealed class GetPolicyByIdQueryHandler : IQueryHandler<GetPolicyByIdQuery
     private readonly IPolicyRepository _policyRepository;
     private readonly ICustomerRepository _customerRepository;
     private readonly IPricingEngine _pricingEngine;
+    private readonly IPricingRateResolver _pricingRateResolver;
     private readonly ICurrentUserService _currentUserService;
 
     public GetPolicyByIdQueryHandler(
         IPolicyRepository policyRepository,
         ICustomerRepository customerRepository,
         IPricingEngine pricingEngine,
+        IPricingRateResolver pricingRateResolver,
         ICurrentUserService currentUserService)
     {
         _policyRepository = policyRepository;
         _customerRepository = customerRepository;
         _pricingEngine = pricingEngine;
+        _pricingRateResolver = pricingRateResolver;
         _currentUserService = currentUserService;
     }
 
@@ -39,6 +42,10 @@ public sealed class GetPolicyByIdQueryHandler : IQueryHandler<GetPolicyByIdQuery
         // Teminatlar (ölçekli limitler), poliçenin kaynaklandığı teklifin saklanan seçiminden (CoveragePackage)
         // teklifin oluşturma referansıyla (CreatedAt) deterministik yeniden hesaplanır — teklif detayı ve poliçe
         // PDF'iyle birebir tutarlıdır (ADR-021).
+        // ADR-048: baz primler poliçenin kaynaklandığı teklifin sabitlediği tarifeden okunur → satın
+        // alınmış poliçenin primi ve dökümü tarife değişikliklerinden etkilenmez.
+        var rates = await _pricingRateResolver.ResolveForQuoteAsync(quote.PricingVersionId, cancellationToken);
+
         var pricing = QuotePricingFactory.Compute(
             _pricingEngine,
             quote.Branch,
@@ -48,7 +55,11 @@ public sealed class GetPolicyByIdQueryHandler : IQueryHandler<GetPolicyByIdQuery
             quote.InsuranceProduct!.Coverages,
             quote.CoveragePackage,
             quote.CreatedAt,
-            quote.ClaimHistoryFactor);
+            quote.ClaimHistoryFactor,
+            insuredBirthDate: quote.InsuredPerson?.BirthDate,
+            rates: rates,
+            // ADR-053: poliçenin kaynaklandığı teklifin dondurulmuş girdileri kullanılır.
+            snapshot: quote.PricingSnapshot);
 
         return PolicyMappings.ToDetailDto(policy, pricing);
     }

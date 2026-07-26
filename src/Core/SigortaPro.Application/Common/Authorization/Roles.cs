@@ -14,5 +14,10 @@ public static class Roles
     // Acente personeli (Admin + Personel) tüm müşteri kayıtlarına erişebilir (PROJECT_CONTEXT.md §3).
     public const string Staff = Admin + "," + Personel;
 
+    // ADR-060: "acente çalışanı kümesi"nin (Admin ∪ Personel) TEK kod içi kaynağı. Attribute'ler derleme
+    // zamanı sabiti olan `Staff` string'ini kullanır; çalışma zamanı rol kontrolleri (IsInRole tekrarları,
+    // rol bazlı bildirim fan-out'u) bu diziyi kullanır. Böylece staff kümesi tek yerde tanımlıdır.
+    public static readonly IReadOnlyList<string> StaffRoles = new[] { Admin, Personel };
+
     public static readonly IReadOnlyList<string> All = new[] { Admin, Personel, Customer };
 }

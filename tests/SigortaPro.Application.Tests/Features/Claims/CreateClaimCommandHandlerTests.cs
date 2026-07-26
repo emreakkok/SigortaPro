@@ -32,8 +32,9 @@ public class CreateClaimCommandHandlerTests
         _dateTimeProvider.UtcNow.Returns(_now);
 
         _handler = new CreateClaimCommandHandler(
-            _customerRepository, _policyRepository, _claimRepository, _dateTimeProvider,
-            _currentUserService, _unitOfWork, Substitute.For<ILogger<CreateClaimCommandHandler>>());
+            _customerRepository, _policyRepository, _claimRepository, Substitute.For<IFileStorageService>(),
+            _dateTimeProvider, _currentUserService, _unitOfWork,
+            Substitute.For<ILogger<CreateClaimCommandHandler>>());
     }
 
     private Policy ActivePolicyOwnedByCustomer() =>
@@ -98,6 +99,80 @@ public class CreateClaimCommandHandlerTests
 
         await act.Should().ThrowAsync<BusinessRuleException>();
         await _claimRepository.DidNotReceive().AddAsync(Arg.Any<Claim>(), Arg.Any<CancellationToken>());
+    }
+
+    // --- Aynı gün senaryosu (saat hassasiyetli teminat penceresi) ---
+
+    // Poliçe bugün 08:00'de başlar; incelenen olay/karşılaştırma saat hassasiyetlidir.
+    private Policy PolicyStartingTodayAtEightAm(DateTime today) =>
+        ClaimTestData.CreateActivePolicy(
+            _customer.Id,
+            new DateTime(today.Year, today.Month, today.Day, 8, 0, 0, DateTimeKind.Utc),
+            new DateTime(today.Year, today.Month, today.Day, 8, 0, 0, DateTimeKind.Utc).AddYears(1));
+
+    [Fact]
+    public async Task Handle_Should_CreateClaim_When_IncidentIsSameDayAfterPolicyStart()
+    {
+        // KABUL KRİTERİ: 08:00 başlangıç + aynı gün 10:00 hasar → reddedilmemeli.
+        var today = new DateTime(2026, 7, 22, 0, 0, 0, DateTimeKind.Utc);
+        _dateTimeProvider.UtcNow.Returns(new DateTime(2026, 7, 22, 12, 0, 0, DateTimeKind.Utc)); // öğlen: olaydan sonra
+        var policy = PolicyStartingTodayAtEightAm(today);
+        _policyRepository.GetByIdAsync(policy.Id, Arg.Any<CancellationToken>()).Returns(policy);
+
+        var incidentAt = new DateTime(2026, 7, 22, 10, 0, 0, DateTimeKind.Utc);
+        var result = await _handler.Handle(CommandFor(policy.Id, incidentAt), CancellationToken.None);
+
+        result.Status.Should().Be(ClaimStatus.Submitted);
+        result.IncidentDate.Should().Be(incidentAt);
+        await _claimRepository.Received(1).AddAsync(Arg.Any<Claim>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowBusinessRule_When_IncidentIsSameDayBeforePolicyStart()
+    {
+        // 08:00 başlangıç + aynı gün 07:59 hasar → geçersiz (poliçe aktif olmadan önce).
+        var today = new DateTime(2026, 7, 22, 0, 0, 0, DateTimeKind.Utc);
+        _dateTimeProvider.UtcNow.Returns(new DateTime(2026, 7, 22, 12, 0, 0, DateTimeKind.Utc));
+        var policy = PolicyStartingTodayAtEightAm(today);
+        _policyRepository.GetByIdAsync(policy.Id, Arg.Any<CancellationToken>()).Returns(policy);
+
+        var incidentAt = new DateTime(2026, 7, 22, 7, 59, 0, DateTimeKind.Utc);
+        var act = () => _handler.Handle(CommandFor(policy.Id, incidentAt), CancellationToken.None);
+
+        await act.Should().ThrowAsync<BusinessRuleException>();
+        await _claimRepository.DidNotReceive().AddAsync(Arg.Any<Claim>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_CreateClaim_When_IncidentIsExactlyAtPolicyStartInstant()
+    {
+        // Sınır dahil: başlangıç anındaki olay geçerlidir.
+        var today = new DateTime(2026, 7, 22, 0, 0, 0, DateTimeKind.Utc);
+        _dateTimeProvider.UtcNow.Returns(new DateTime(2026, 7, 22, 12, 0, 0, DateTimeKind.Utc));
+        var policy = PolicyStartingTodayAtEightAm(today);
+        _policyRepository.GetByIdAsync(policy.Id, Arg.Any<CancellationToken>()).Returns(policy);
+
+        var result = await _handler.Handle(CommandFor(policy.Id, policy.StartDate), CancellationToken.None);
+
+        result.Status.Should().Be(ClaimStatus.Submitted);
+        await _claimRepository.Received(1).AddAsync(Arg.Any<Claim>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_CreateClaim_When_ReportedLaterThanIncident_AndIncidentAfterStart()
+    {
+        // Olay zamanı (09:00) ile bildirim zamanı (09:30 = now) farklıdır; olay poliçe aktifken gerçekleştiğinden
+        // geç bildirim tek başına reddi gerektirmez.
+        var today = new DateTime(2026, 7, 22, 0, 0, 0, DateTimeKind.Utc);
+        _dateTimeProvider.UtcNow.Returns(new DateTime(2026, 7, 22, 9, 30, 0, DateTimeKind.Utc)); // bildirim anı
+        var policy = PolicyStartingTodayAtEightAm(today);
+        _policyRepository.GetByIdAsync(policy.Id, Arg.Any<CancellationToken>()).Returns(policy);
+
+        var incidentAt = new DateTime(2026, 7, 22, 9, 0, 0, DateTimeKind.Utc);
+        var result = await _handler.Handle(CommandFor(policy.Id, incidentAt), CancellationToken.None);
+
+        result.Status.Should().Be(ClaimStatus.Submitted);
+        result.IncidentDate.Should().Be(incidentAt);
     }
 
     [Fact]

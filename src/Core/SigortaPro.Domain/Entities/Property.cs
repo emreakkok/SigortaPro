@@ -11,14 +11,20 @@ public class Property : BaseEntity, IAggregateRoot
     {
     }
 
-    public Property(Guid customerId, Address address, int buildingAge, int squareMeters, int earthquakeZone)
+    /// <param name="derivedEarthquakeZone">
+    /// ADR-055: Sistem tarafından <b>adresin ilinden türetilen</b> deprem bölgesi. Kullanıcı beyanı DEĞİLDİR;
+    /// bu değeri çözmek çağıranın (Application katmanı, <c>IEarthquakeZoneProvider</c>) sorumluluğundadır.
+    /// Çözülemeyen ilde <c>EarthquakeZoneDefaults.Unknown</c> geçilir.
+    /// </param>
+    public Property(
+        Guid customerId, Address address, int buildingAge, int squareMeters, int derivedEarthquakeZone)
     {
         Id = Guid.NewGuid();
         CustomerId = customerId;
         Address = address;
         BuildingAge = buildingAge;
         SquareMeters = squareMeters;
-        EarthquakeZone = earthquakeZone;
+        EarthquakeZone = derivedEarthquakeZone;
     }
 
     public Guid CustomerId { get; private set; }
@@ -26,13 +32,20 @@ public class Property : BaseEntity, IAggregateRoot
     public Address Address { get; private set; } = null!;
     public int BuildingAge { get; private set; }
     public int SquareMeters { get; private set; }
+    /// <summary>
+    /// Kayıt anında belirlenen deprem bölgesi (1 = en yüksek risk … 5 = en düşük; 0 = bilinmiyor).
+    /// <para>
+    /// ADR-055'ten itibaren bu değer <b>yalnızca sistem tarafından</b> adresin ilinden türetilir.
+    /// ADR-055 ÖNCESİ kaydedilmiş konutlarda ise müşterinin o gün yaptığı <b>beyandır</b> ve tarihsel
+    /// doğruluk için <b>olduğu gibi korunur</b> (geriye dönük düzeltilmez — ADR-058).
+    /// </para>
+    /// <para>
+    /// <b>Yeni tekliflerin fiyatı bu alandan okunmaz:</b> fiyatlama girdisi her seferinde adresin ilinden
+    /// yeniden türetilir (<c>QuotePricingInputBuilder</c>). Bu alan, snapshot'ı olmayan ESKİ tekliflerin
+    /// yeniden hesabında ve gösterimde kullanılır. Bu yüzden değeri değiştirmek, geçmiş tekliflerin
+    /// prim dökümünü bozardı.
+    /// </para>
+    /// Bölgeyi sonradan değiştirecek bir domain metodu <b>bilinçli olarak yoktur</b> (ADR-058).
+    /// </summary>
     public int EarthquakeZone { get; private set; }
-
-    public void UpdateDetails(Address address, int buildingAge, int squareMeters, int earthquakeZone)
-    {
-        Address = address;
-        BuildingAge = buildingAge;
-        SquareMeters = squareMeters;
-        EarthquakeZone = earthquakeZone;
-    }
 }

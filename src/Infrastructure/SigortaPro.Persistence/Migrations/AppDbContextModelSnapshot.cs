@@ -217,6 +217,58 @@ namespace SigortaPro.Persistence.Migrations
                     b.ToTable("Claims", (string)null);
                 });
 
+            modelBuilder.Entity("SigortaPro.Domain.Entities.ClaimDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClaimId")
+                        .HasDatabaseName("IX_ClaimDocuments_ClaimId");
+
+                    b.ToTable("ClaimDocuments", (string)null);
+                });
+
             modelBuilder.Entity("SigortaPro.Domain.Entities.Coverage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -366,6 +418,84 @@ namespace SigortaPro.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("InsuranceProducts", (string)null);
+                });
+
+            modelBuilder.Entity("SigortaPro.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActorName")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("RecipientUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ReferenceCode")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<Guid?>("RelatedEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RelatedEntityType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipientUserId", "CreatedAt")
+                        .HasDatabaseName("IX_Notifications_Recipient_CreatedAt");
+
+                    b.HasIndex("RecipientUserId", "ReadAt")
+                        .HasDatabaseName("IX_Notifications_Recipient_ReadAt");
+
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("SigortaPro.Domain.Entities.Payment", b =>
@@ -544,6 +674,100 @@ namespace SigortaPro.Persistence.Migrations
                     b.ToTable("PolicyDocuments", (string)null);
                 });
 
+            modelBuilder.Entity("SigortaPro.Domain.Entities.PricingBranchRate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("BasePremium")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Branch")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("PricingVersionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PricingVersionId", "Branch")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PricingBranchRates_Version_Branch");
+
+                    b.ToTable("PricingBranchRates", (string)null);
+                });
+
+            modelBuilder.Entity("SigortaPro.Domain.Entities.PricingVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("CreatedByName")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("VersionNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EffectiveFrom")
+                        .HasDatabaseName("IX_PricingVersions_EffectiveFrom");
+
+                    b.HasIndex("VersionNumber")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PricingVersions_VersionNumber");
+
+                    b.ToTable("PricingVersions", (string)null);
+                });
+
             modelBuilder.Entity("SigortaPro.Domain.Entities.Property", b =>
                 {
                     b.Property<Guid>("Id")
@@ -619,6 +843,9 @@ namespace SigortaPro.Persistence.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<Guid?>("PricingVersionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("PropertyId")
                         .HasColumnType("uniqueidentifier");
@@ -754,6 +981,9 @@ namespace SigortaPro.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<int?>("UsagePurpose")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId")
@@ -784,6 +1014,15 @@ namespace SigortaPro.Persistence.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -940,6 +1179,15 @@ namespace SigortaPro.Persistence.Migrations
                     b.Navigation("Policy");
                 });
 
+            modelBuilder.Entity("SigortaPro.Domain.Entities.ClaimDocument", b =>
+                {
+                    b.HasOne("SigortaPro.Domain.Entities.Claim", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("ClaimId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SigortaPro.Domain.Entities.Coverage", b =>
                 {
                     b.HasOne("SigortaPro.Domain.Entities.InsuranceProduct", "InsuranceProduct")
@@ -1043,6 +1291,17 @@ namespace SigortaPro.Persistence.Migrations
                     b.Navigation("Policy");
                 });
 
+            modelBuilder.Entity("SigortaPro.Domain.Entities.PricingBranchRate", b =>
+                {
+                    b.HasOne("SigortaPro.Domain.Entities.PricingVersion", "PricingVersion")
+                        .WithMany("Rates")
+                        .HasForeignKey("PricingVersionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PricingVersion");
+                });
+
             modelBuilder.Entity("SigortaPro.Domain.Entities.Property", b =>
                 {
                     b.HasOne("SigortaPro.Domain.Entities.Customer", "Customer")
@@ -1118,9 +1377,122 @@ namespace SigortaPro.Persistence.Migrations
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.OwnsOne("SigortaPro.Domain.Entities.InsuredPerson", "InsuredPerson", b1 =>
+                        {
+                            b1.Property<Guid>("QuoteId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<DateTime>("BirthDate")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("InsuredBirthDate");
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("InsuredFirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("InsuredLastName");
+
+                            b1.Property<string>("PhoneNumber")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("nvarchar(20)")
+                                .HasColumnName("InsuredPhoneNumber");
+
+                            b1.Property<string>("Relationship")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)")
+                                .HasColumnName("InsuredRelationship");
+
+                            b1.Property<string>("Tckn")
+                                .IsRequired()
+                                .HasMaxLength(11)
+                                .HasColumnType("nvarchar(11)")
+                                .HasColumnName("InsuredTckn");
+
+                            b1.HasKey("QuoteId");
+
+                            b1.ToTable("Quotes");
+
+                            b1.WithOwner()
+                                .HasForeignKey("QuoteId");
+                        });
+
+                    b.OwnsOne("SigortaPro.Domain.Entities.PricingSnapshot", "PricingSnapshot", b1 =>
+                        {
+                            b1.Property<Guid>("QuoteId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int?>("BuildingAge")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingBuildingAge");
+
+                            b1.Property<DateTime>("CapturedAt")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("PricingCapturedAt");
+
+                            b1.Property<int?>("DriverAge")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingDriverAge");
+
+                            b1.Property<int?>("EarthquakeZone")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingEarthquakeZone");
+
+                            b1.Property<int?>("EnginePowerHp")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingEnginePowerHp");
+
+                            b1.Property<int?>("InsuredAge")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingInsuredAge");
+
+                            b1.Property<bool?>("IsSmoker")
+                                .HasColumnType("bit")
+                                .HasColumnName("PricingIsSmoker");
+
+                            b1.Property<int?>("NoClaimTier")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingNoClaimTier");
+
+                            b1.Property<string>("RiskCity")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("PricingRiskCity");
+
+                            b1.Property<int?>("SquareMeters")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingSquareMeters");
+
+                            b1.Property<int?>("UsagePurpose")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingUsagePurpose");
+
+                            b1.Property<int?>("VehicleAge")
+                                .HasColumnType("int")
+                                .HasColumnName("PricingVehicleAge");
+
+                            b1.HasKey("QuoteId");
+
+                            b1.ToTable("Quotes");
+
+                            b1.WithOwner()
+                                .HasForeignKey("QuoteId");
+                        });
+
                     b.Navigation("Customer");
 
                     b.Navigation("InsuranceProduct");
+
+                    b.Navigation("InsuredPerson");
+
+                    b.Navigation("PricingSnapshot");
 
                     b.Navigation("Property");
 
@@ -1166,6 +1538,11 @@ namespace SigortaPro.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SigortaPro.Domain.Entities.Claim", b =>
+                {
+                    b.Navigation("Documents");
+                });
+
             modelBuilder.Entity("SigortaPro.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Claims");
@@ -1191,6 +1568,11 @@ namespace SigortaPro.Persistence.Migrations
                     b.Navigation("PolicyDocument");
 
                     b.Navigation("Renewals");
+                });
+
+            modelBuilder.Entity("SigortaPro.Domain.Entities.PricingVersion", b =>
+                {
+                    b.Navigation("Rates");
                 });
 
             modelBuilder.Entity("SigortaPro.Persistence.Identity.AppUser", b =>

@@ -6,6 +6,7 @@ using SigortaPro.Application.Features.Quotes.Queries.GetQuoteById;
 using SigortaPro.Application.Tests.Features.Customers;
 using SigortaPro.Domain.Entities;
 using SigortaPro.Domain.Enums;
+using SigortaPro.Application.Tests.Common;
 
 namespace SigortaPro.Application.Tests.Features.Quotes;
 
@@ -20,7 +21,7 @@ public class GetQuoteByIdQueryHandlerTests
     public GetQuoteByIdQueryHandlerTests()
     {
         _handler = new GetQuoteByIdQueryHandler(
-            _quoteRepository, _customerRepository, _pricingEngine, _currentUserService);
+            _quoteRepository, _customerRepository, _pricingEngine, PricingTestDoubles.BaselineResolver(), _currentUserService);
     }
 
     [Fact]

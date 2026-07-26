@@ -20,13 +20,19 @@ export default function LoginPage() {
         <CardContent>
           <LoginForm />
         </CardContent>
-        <CardFooter className="justify-center text-sm text-muted-foreground">
+        <CardFooter className="flex-col gap-2 text-center text-sm text-muted-foreground">
+          <Link to="/forgot-password" className="font-medium text-primary hover:underline">
+            Şifremi unuttum
+          </Link>
           <span>
             Hesabınız yok mu?{" "}
             <Link to="/register" className="font-medium text-primary hover:underline">
               Kayıt olun
             </Link>
           </span>
+          <Link to="/" className="text-xs hover:text-foreground hover:underline">
+            ← Ana sayfaya dön
+          </Link>
         </CardFooter>
       </Card>
     </div>

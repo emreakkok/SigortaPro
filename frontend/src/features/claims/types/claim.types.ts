@@ -1,5 +1,15 @@
 import type { ClaimStatus } from "@/shared/types/insurance.types";
 
+/** Hasara eklenen belge/görsel metadata'sı (backend `ClaimDocumentDto`). İçerik ayrı uçla indirilir. */
+export interface ClaimDocument {
+  id: string;
+  fileName: string;
+  contentType: string;
+  fileSizeBytes: number;
+  isImage: boolean;
+  createdAt: string;
+}
+
 /** Hasar detayı (backend `ClaimDto`). */
 export interface Claim {
   id: string;
@@ -13,6 +23,7 @@ export interface Claim {
   status: ClaimStatus;
   reviewNote: string | null;
   createdAt: string;
+  documents: ClaimDocument[];
 }
 
 /** Hasar listesi özeti (backend `ClaimSummaryDto`). */
@@ -27,13 +38,20 @@ export interface ClaimSummary {
   createdAt: string;
 }
 
+/** Hasar bildiriminde yüklenen belge (içerik base64 — backend `CreateClaimDocument`, byte[] olarak çözer). */
+export interface CreateClaimDocumentPayload {
+  fileName: string;
+  contentType: string;
+  content: string;
+}
+
 /** `POST /claims` istek gövdesi (backend `CreateClaimCommand`). */
 export interface CreateClaimRequest {
   policyId: string;
   incidentDate: string;
   description: string;
   estimatedAmount: number;
-  photoFileNames?: string[];
+  documents?: CreateClaimDocumentPayload[];
 }
 
 /** `GET /claims` sorgu parametreleri. */

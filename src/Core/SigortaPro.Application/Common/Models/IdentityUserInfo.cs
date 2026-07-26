@@ -2,4 +2,9 @@ namespace SigortaPro.Application.Common.Models;
 
 // IIdentityService'in dış dünyaya (Application handler'larına) döndürdüğü kullanıcı özeti.
 // Identity tipini (Persistence'taki AppUser) sızdırmadan yalnızca primitif değerleri taşır (ADR-014).
-public sealed record IdentityUserInfo(Guid Id, string Email, IReadOnlyList<string> Roles);
+public sealed record IdentityUserInfo(Guid Id, string Email, IReadOnlyList<string> Roles)
+{
+    // ADR-061: Hesap aktiflik durumu. Refresh akışı bunu okuyup pasif hesabın token yenilemesini engeller.
+    // Varsayılan true → mevcut yapım çağrıları ve testler davranışını değiştirmez (aktif kullanıcı).
+    public bool IsActive { get; init; } = true;
+}

@@ -30,6 +30,14 @@ internal static class PolicyMappings
         policy.EndDate,
         policy.TotalPremium,
         policy.QuoteId,
-        QuoteMappings.BuildRiskObject(policy.Quote!.Vehicle, policy.Quote!.Property),
-        pricing.Coverages);
+        // ADR-041 düzeltmesi: Sağlıkta "başkası adına" poliçede risk objesi/Sigortalı bilgisi teklifin
+        // InsuredPerson'ından gelir — poliçe detayı da (teklif detayı gibi) doğru Sigortalı'yı gösterir.
+        QuoteMappings.BuildRiskObject(policy.Quote!.Vehicle, policy.Quote!.Property, policy.Quote!.InsuredPerson),
+        pricing.Coverages,
+        // Additive: Sigorta Ettiren (müşteri) kimliği — ad + telefon; CustomerId stabil kimlik. Customer poliçe
+        // detayında zaten yüklüdür (fiyat yeniden hesabı için). Sağlıkta Sigortalı ayrı olarak InsuredPerson'da.
+        policy.CustomerId,
+        QuoteMappings.FullName(policy.Customer),
+        policy.Customer?.PhoneNumber,
+        QuoteMappings.ToInsuredPersonDto(policy.Quote!.InsuredPerson));
 }

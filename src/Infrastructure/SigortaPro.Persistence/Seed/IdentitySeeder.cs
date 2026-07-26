@@ -18,6 +18,11 @@ public static class IdentitySeeder
     public const string SampleCustomerEmail = "musteri@sigortapro.com";
     public const string SampleCustomerPassword = "Musteri!2345";
 
+    // ADR-060 (K13): Geliştirme/test kolaylığı için örnek Personel hesabı. Üretimde seed şifreleri kullanılmaz
+    // (bu sınıfın GÜVENLİK notu geçerlidir). Personel'in Customer profili yoktur — yalnızca kimlik hesabıdır.
+    public const string SampleStaffEmail = "personel@sigortapro.com";
+    public const string SampleStaffPassword = "Personel!2345";
+
     public static async Task SeedAsync(
         UserManager<AppUser> userManager,
         RoleManager<IdentityRole<Guid>> roleManager,
@@ -25,6 +30,7 @@ public static class IdentitySeeder
     {
         await SeedRolesAsync(roleManager);
         await SeedAdminAsync(userManager);
+        await SeedSampleStaffAsync(userManager);
         await SeedSampleCustomerUserAsync(userManager);
     }
 
@@ -58,6 +64,30 @@ public static class IdentitySeeder
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(admin, Roles.Admin);
+        }
+    }
+
+    private static async Task SeedSampleStaffAsync(UserManager<AppUser> userManager)
+    {
+        if (await userManager.FindByEmailAsync(SampleStaffEmail) is not null)
+        {
+            return;
+        }
+
+        var staff = new AppUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = SampleStaffEmail,
+            Email = SampleStaffEmail,
+            FullName = "Örnek Personel",
+            IsActive = true,
+            EmailConfirmed = true,
+        };
+
+        var result = await userManager.CreateAsync(staff, SampleStaffPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(staff, Roles.Personel);
         }
     }
 

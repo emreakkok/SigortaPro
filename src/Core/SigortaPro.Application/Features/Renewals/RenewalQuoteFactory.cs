@@ -11,6 +11,9 @@ internal static class RenewalQuoteFactory
 {
     // sourceQuote: yenilenen poliçenin teklifi (yalnızca skaler alanları — branş/ürün/risk objesi/paket — okunur).
     // product/vehicle/property/customer fiyatlama için ayrıca verilir (navigation'a bağımlı değildir → izole test edilebilir).
+    // effectivePricing (ADR-048): yenileme YENİ bir dönem teklifi ürettiğinden, güncel referans tarihiyle
+    // birlikte O AN yürürlükteki tarife kullanılır ve yeni teklifte sabitlenir. Kaynak teklifin/poliçenin
+    // fiyatı değişmez — yalnızca yeni dönem teklifi güncel tarifeyle fiyatlanır (ADR-021 determinizmi korunur).
     public static Quote Build(
         Quote sourceQuote,
         Customer customer,
@@ -18,20 +21,50 @@ internal static class RenewalQuoteFactory
         Vehicle? vehicle,
         Property? property,
         IPricingEngine pricingEngine,
-        decimal claimHistoryFactor,
-        DateTime now)
+        DateTime now,
+        DateTime policyEndDate,
+        PricingSnapshot snapshot,
+        EffectivePricing? effectivePricing = null)
     {
+        // ADR-056/058/059: Girdi (snapshot) çağıran handler tarafından ORTAK IQuotePricingInputBuilder ile
+        // kurulur ve buraya hazır verilir → yenileme, teklif oluşturma ve önizleme aynı yolu kullanır.
+        // ADR-059: Hasar geçmişi artık bu snapshot'taki Bonus-Malus basamağıyla fiyatlanır; ayrı bir
+        // ClaimHistoryFactor UYGULANMAZ (yeni tekliflerde 1.00 = nötr kalır).
         var pricing = QuotePricingFactory.Compute(
             pricingEngine, sourceQuote.Branch, customer, vehicle, property,
-            product.Coverages, sourceQuote.CoveragePackage, now, claimHistoryFactor);
+            product.Coverages, sourceQuote.CoveragePackage, now,
+            insuredBirthDate: sourceQuote.InsuredPerson?.BirthDate,
+            rates: effectivePricing?.Rates,
+            snapshot: snapshot);
 
         var renewalQuote = new Quote(
             customer.Id, sourceQuote.InsuranceProductId, sourceQuote.Branch,
             sourceQuote.VehicleId, sourceQuote.PropertyId);
 
         renewalQuote.SelectCoveragePackage(sourceQuote.CoveragePackage);
-        renewalQuote.ApplyClaimHistoryFactor(claimHistoryFactor);
-        renewalQuote.MarkAsPriced(pricing.TotalPremium, now.AddDays(BusinessConstants.MaxQuoteValidityDays));
+        renewalQuote.CapturePricingSnapshot(snapshot);
+
+        if (effectivePricing?.VersionId is not null)
+        {
+            renewalQuote.PinPricingVersion(effectivePricing.VersionId.Value);
+        }
+
+        // ADR-041: "başkası adına" sağlık poliçesinin yenilemesi aynı sigortalı için düzenlenir
+        // (owned instance entity'ler arasında paylaşılmaz; kaynak beyandan kopyalanır).
+        if (sourceQuote.InsuredPerson is not null)
+        {
+            renewalQuote.SetInsuredPerson(new Domain.Entities.InsuredPerson(
+                sourceQuote.InsuredPerson.FirstName,
+                sourceQuote.InsuredPerson.LastName,
+                sourceQuote.InsuredPerson.Tckn,
+                sourceQuote.InsuredPerson.BirthDate,
+                sourceQuote.InsuredPerson.PhoneNumber,
+                sourceQuote.InsuredPerson.Relationship));
+        }
+        // Yenileme teklifinin geçerliliği (kabul son tarihi) poliçe bitişine dayanır (bkz. RenewalOfferValidity):
+        // müşteri mevcut poliçesi sona erene kadar kabul edebilmelidir. Böylece teklif, poliçe hâlâ AKTİFken
+        // "geçerlilik süresi doldu" görünmez. Normal (yenileme dışı) tekliflerin 7 günlük vadesi değişmez.
+        renewalQuote.MarkAsPriced(pricing.TotalPremium, RenewalOfferValidity.Compute(now, policyEndDate));
 
         return renewalQuote;
     }

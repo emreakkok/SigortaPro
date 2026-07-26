@@ -77,6 +77,9 @@ try
     app.MapControllers();
     app.MapSigortaProHealthChecks();
 
+    // ADR-041: Gerçek zamanlı bildirim hub'ı (hub sınıfı Infrastructure'da; uç nokta composition root'ta).
+    app.MapHub<SigortaPro.Infrastructure.RealTime.NotificationHub>("/hubs/notifications");
+
     app.Run();
 }
 catch (Exception exception)

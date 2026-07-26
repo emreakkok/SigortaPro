@@ -2,6 +2,8 @@ using FluentAssertions;
 using FluentValidation.TestHelper;
 using SigortaPro.Application.Features.Customers.Commands.AddVehicle;
 
+using SigortaPro.Domain.Enums;
+
 namespace SigortaPro.Application.Tests.Features.Customers;
 
 public class AddVehicleCommandValidatorTests
@@ -13,7 +15,17 @@ public class AddVehicleCommandValidatorTests
         Brand: "Toyota",
         Model: "Corolla",
         ManufactureYear: 2022,
-        EnginePowerHp: 132);
+        EnginePowerHp: 132,
+        UsagePurpose: VehicleUsage.Hususi);
+
+    [Fact]
+    public void Validate_Should_HaveError_When_UsagePurposeMissing()
+    {
+        // ADR-057: Kullanım amacı beyanı zorunludur — sessizce varsayılan atanmaz.
+        var command = Valid() with { UsagePurpose = null };
+
+        _validator.TestValidate(command).ShouldHaveValidationErrorFor(c => c.UsagePurpose);
+    }
 
     [Fact]
     public void Validate_Should_Pass_When_CommandIsValid()

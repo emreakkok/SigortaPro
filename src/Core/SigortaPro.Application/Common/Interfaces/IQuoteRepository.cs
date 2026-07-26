@@ -15,11 +15,13 @@ public interface IQuoteRepository : IReadRepository<Quote>, IWriteRepository<Quo
     Task<Quote?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     // Sayfalanmış liste: müşteri Id verilirse yalnızca o müşterinin teklifleri, verilmezse tümü (admin).
-    // Opsiyonel durum/branş filtreleriyle; ürün adı için InsuranceProduct yüklenir.
+    // Opsiyonel durum/branş filtreleriyle; ürün adı için InsuranceProduct, müşteri kimliği için Customer yüklenir.
+    // search: müşteri adı/soyadı/tam adı veya telefon (format bağımsız — PhoneNumberSearch ile normalize).
     Task<PagedResult<Quote>> SearchAsync(
         Guid? customerId,
         QuoteStatus? status,
         InsuranceBranch? branch,
+        string? search,
         PaginationParams paging,
         CancellationToken cancellationToken = default);
 

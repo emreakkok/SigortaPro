@@ -2,7 +2,7 @@ import { useState } from "react";
 import { VehicleForm } from "@/features/profile/components/VehicleForm";
 import { useAddVehicle, useUpdateVehicle } from "@/features/profile/hooks/useProfile";
 import type { Vehicle } from "@/features/profile/types/profile.types";
-import { Button, Card, CardContent } from "@/shared/components";
+import { Button, Card, CardContent, EmptyState, FileTextIcon } from "@/shared/components";
 
 /** Tek bir aracın düzenleme satırı; kendi güncelleme mutation'ını (id'ye bağlı) yönetir. */
 function VehicleEditRow({ vehicle, onClose }: { vehicle: Vehicle; onClose: () => void }) {
@@ -11,7 +11,8 @@ function VehicleEditRow({ vehicle, onClose }: { vehicle: Vehicle; onClose: () =>
     <Card>
       <CardContent className="pt-6">
         <VehicleForm
-          defaultValues={vehicle}
+          // Beyanı olmayan (eski) araçta alan boş açılır → kullanıcı bilinçli seçim yapar.
+          defaultValues={{ ...vehicle, usagePurpose: vehicle.usagePurpose ?? undefined }}
           submitLabel="Güncelle"
           isPending={updateMutation.isPending}
           error={updateMutation.isError ? updateMutation.error : undefined}
@@ -60,7 +61,18 @@ export function VehiclesPanel({ vehicles }: { vehicles: Vehicle[] }) {
       )}
 
       {vehicles.length === 0 && !adding && (
-        <p className="text-sm text-muted-foreground">Henüz araç eklemediniz.</p>
+        <Card className="border-dashed">
+          <EmptyState
+            icon={<FileTextIcon />}
+            title="Henüz araç eklemediniz"
+            description="Kasko ve Trafik teklifleri için aracınızı ekleyin; teklif sihirbazında hazır seçilir."
+            action={
+              <Button size="sm" onClick={() => setAdding(true)}>
+                Araç Ekle
+              </Button>
+            }
+          />
+        </Card>
       )}
 
       <div className="space-y-3">

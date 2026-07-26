@@ -7,6 +7,7 @@ using SigortaPro.Application.Features.Policies.Queries.GetPolicyById;
 using SigortaPro.Application.Tests.Features.Customers;
 using SigortaPro.Domain.Entities;
 using SigortaPro.Domain.Enums;
+using SigortaPro.Application.Tests.Common;
 
 namespace SigortaPro.Application.Tests.Features.Policies;
 
@@ -23,7 +24,7 @@ public class GetPolicyByIdQueryHandlerTests
     public GetPolicyByIdQueryHandlerTests()
     {
         _handler = new GetPolicyByIdQueryHandler(
-            _policyRepository, _customerRepository, _pricingEngine, _currentUserService);
+            _policyRepository, _customerRepository, _pricingEngine, PricingTestDoubles.BaselineResolver(), _currentUserService);
     }
 
     [Fact]

@@ -20,7 +20,8 @@ public interface ICustomerRepository : IReadRepository<Customer>, IWriteReposito
     // TCKN benzersizliği ön-kontrolü (kayıt akışı) — DB unique ihlalini (500) önlemek için insert öncesi kullanılır.
     Task<bool> ExistsByTcknAsync(string tckn, CancellationToken cancellationToken = default);
 
-    // Admin müşteri listesi: ad/soyad/TCKN araması ve il filtresiyle sayfalanmış sonuç.
+    // Admin müşteri listesi: ad/soyad/TCKN/e-posta/telefon (normalize) araması ve il filtresiyle
+    // sayfalanmış sonuç (ADR-040 — searchTerm sözleşmesi değişmeden genişletildi).
     Task<PagedResult<Customer>> SearchAsync(
         string? searchTerm,
         string? city,

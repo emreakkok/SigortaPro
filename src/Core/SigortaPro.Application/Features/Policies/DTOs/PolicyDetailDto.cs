@@ -18,4 +18,10 @@ public sealed record PolicyDetailDto(
     decimal TotalPremium,
     Guid QuoteId,
     QuoteRiskObjectDto RiskObject,
-    IReadOnlyList<QuoteCoverageDto> Coverages);
+    IReadOnlyList<QuoteCoverageDto> Coverages,
+    // Müşteri (Sigorta Ettiren) kimliği (additive) — admin detayında ad + telefon özeti; CustomerId stabil kimlik.
+    Guid CustomerId = default,
+    string CustomerFullName = "",
+    string? CustomerPhone = null,
+    // ADR-041 (additive): Sağlıkta "başkası adına" poliçede Sigortalı özeti; Ettiren = müşteri. Değilse null.
+    QuoteInsuredPersonDto? InsuredPerson = null);

@@ -11,4 +11,10 @@ public sealed record QuoteSummaryDto(
     CoveragePackage CoveragePackage,
     decimal TotalPremium,
     DateTime? ValidUntil,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    // Müşteri kimliği (additive) — admin listesinde aynı isimli müşterileri ayırt etmek için ad + telefon.
+    // CustomerId stabil kimliktir; telefon görsel ayırt edicidir (primary identity DEĞİL). Müşteri kendi
+    // listesinde kendi bilgisini görür (sızıntı yok). Navigasyon yüklü değilse boş döner (null-safe).
+    Guid CustomerId = default,
+    string CustomerFullName = "",
+    string? CustomerPhone = null);

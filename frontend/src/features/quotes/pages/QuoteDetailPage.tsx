@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { useMyProfile } from "@/features/profile/hooks/useProfile";
 import { CoverageList } from "@/features/quotes/components/CoverageList";
 import { PremiumBreakdownList } from "@/features/quotes/components/PremiumBreakdownList";
 import { QuoteStatusBadge } from "@/features/quotes/components/QuoteStatusBadge";
@@ -27,6 +28,8 @@ import { formatCurrency, formatDate } from "@/shared/utils/format";
 export default function QuoteDetailPage() {
   const { id = "" } = useParams();
   const { data: quote, isLoading, isError, error } = useQuote(id);
+  // "Başkası adına" teklifte Sigorta Ettiren satırı için poliçe sahibinin adı (ADR-042 — sunum).
+  const { data: profile } = useMyProfile();
   const approve = useApproveQuote();
   const reject = useRejectQuote();
 
@@ -82,6 +85,24 @@ export default function QuoteDetailPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
+          {quote.insuredPerson != null && (
+            <>
+              {/* Gerçek sigortacılık ayrımı: sigorta ettiren (poliçe sahibi) ≠ sigortalı (ADR-042). */}
+              <div className="flex items-baseline justify-between">
+                <span className="text-muted-foreground">Sigorta Ettiren</span>
+                <span className="font-medium">
+                  {profile !== undefined ? `${profile.firstName} ${profile.lastName}` : "Siz"}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between border-b pb-2">
+                <span className="text-muted-foreground">Sigortalı</span>
+                <span className="font-medium">
+                  {quote.insuredPerson.fullName} ({quote.insuredPerson.relationship}) ·{" "}
+                  {quote.insuredPerson.maskedTckn}
+                </span>
+              </div>
+            </>
+          )}
           <div className="flex items-baseline justify-between">
             <span className="text-muted-foreground">Teminat paketi</span>
             <span className="font-medium">{COVERAGE_PACKAGE_LABELS[quote.coveragePackage]}</span>

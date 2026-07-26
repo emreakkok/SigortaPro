@@ -1,5 +1,5 @@
 import type { AuthSession, UserRole } from "@/shared/types/auth.types";
-import { STAFF_ROLES } from "@/shared/types/auth.types";
+import { STAFF_ROLES, UserRoles } from "@/shared/types/auth.types";
 
 /**
  * Oturum saklama katmanı (ADR-028): oturum localStorage'da tek anahtar altında tutulur
@@ -37,4 +37,17 @@ export function hasAnyRole(session: AuthSession, roles: readonly UserRole[]): bo
 
 export function isStaff(session: AuthSession): boolean {
   return hasAnyRole(session, STAFF_ROLES);
+}
+
+/**
+ * Admin rolü kontrolü (ADR-060). Yalnızca navigasyon/aksiyon görünürlüğü içindir — gerçek yetki
+ * her zaman backend'de `[Authorize(Roles = Admin)]` ile sağlanır (fiyatlandırma, personel yönetimi,
+ * hasar ödeme, ciro raporu).
+ */
+export function isAdmin(session: AuthSession): boolean {
+  return hasAnyRole(session, [UserRoles.Admin]);
+}
+
+export function isCustomerRole(session: AuthSession): boolean {
+  return hasAnyRole(session, [UserRoles.Customer]);
 }

@@ -10,7 +10,7 @@ namespace SigortaPro.Application.Features.Quotes;
 internal static class QuoteAuthorization
 {
     public static bool IsStaff(ICurrentUserService currentUser) =>
-        currentUser.IsInRole(Roles.Admin) || currentUser.IsInRole(Roles.Personel);
+        Roles.StaffRoles.Any(currentUser.IsInRole);
 
     public static async Task EnsureCanAccessAsync(
         Guid quoteCustomerId,

@@ -8,6 +8,7 @@ using SigortaPro.Application.Features.Quotes.Commands.CreateQuote;
 using SigortaPro.Application.Tests.Features.Customers;
 using SigortaPro.Domain.Entities;
 using SigortaPro.Domain.Enums;
+using SigortaPro.Application.Tests.Common;
 
 namespace SigortaPro.Application.Tests.Features.Quotes;
 
@@ -40,7 +41,8 @@ public class CreateQuoteCommandHandlerTests
 
         _handler = new CreateQuoteCommandHandler(
             _customerRepository, _productRepository, _vehicleRepository, _propertyRepository,
-            _quoteRepository, _pricingEngine, _dateTimeProvider, _currentUserService, _unitOfWork,
+            _quoteRepository, _pricingEngine, PricingTestDoubles.BaselineResolver(),
+            PricingTestDoubles.InputBuilder(), _dateTimeProvider, _currentUserService, _unitOfWork,
             Substitute.For<ILogger<CreateQuoteCommandHandler>>());
     }
 

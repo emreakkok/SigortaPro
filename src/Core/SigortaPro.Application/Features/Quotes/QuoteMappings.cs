@@ -1,3 +1,4 @@
+using SigortaPro.Application.Common.Security;
 using SigortaPro.Application.Features.Quotes.DTOs;
 using SigortaPro.Domain.Entities;
 using SigortaPro.Domain.Enums;
@@ -24,9 +25,22 @@ internal static class QuoteMappings
         quote.TotalPremium,
         quote.ValidUntil,
         quote.CreatedAt,
-        BuildRiskObject(vehicle, property),
+        BuildRiskObject(vehicle, property, quote.InsuredPerson),
         pricing.Coverages,
-        pricing.Breakdown);
+        pricing.Breakdown,
+        ToInsuredPersonDto(quote.InsuredPerson),
+        CustomerFullName: FullName(quote.Customer),
+        CustomerPhone: quote.Customer?.PhoneNumber);
+
+    // ADR-041: sigortalı özeti — ham TCKN sızmaz, maskeli döner.
+    public static QuoteInsuredPersonDto? ToInsuredPersonDto(InsuredPerson? insuredPerson) =>
+        insuredPerson is null
+            ? null
+            : new QuoteInsuredPersonDto(
+                insuredPerson.FullName,
+                SensitiveDataMasker.MaskTckn(insuredPerson.Tckn),
+                insuredPerson.BirthDate,
+                insuredPerson.Relationship);
 
     public static QuoteSummaryDto ToSummaryDto(Quote quote) => new(
         quote.Id,
@@ -36,9 +50,21 @@ internal static class QuoteMappings
         quote.CoveragePackage,
         quote.TotalPremium,
         quote.ValidUntil,
-        quote.CreatedAt);
+        quote.CreatedAt,
+        // Admin listesi müşteriyi Include eder; durum geçişi komutları etmez → null-safe (o yanıtlar müşteriye
+        // aittir ve müşteri bilgisi gösterilmez). Telefon kanonik saklanır (+90…), gösterim frontend'de biçimlenir.
+        CustomerId: quote.CustomerId,
+        CustomerFullName: FullName(quote.Customer),
+        CustomerPhone: quote.Customer?.PhoneNumber);
 
-    public static QuoteRiskObjectDto BuildRiskObject(Vehicle? vehicle, Property? property)
+    // Müşteri (Sigorta Ettiren) tam adı; navigasyon yüklü değilse boş (null-safe).
+    public static string FullName(Customer? customer) =>
+        customer is null ? string.Empty : $"{customer.FirstName} {customer.LastName}";
+
+    public static QuoteRiskObjectDto BuildRiskObject(
+        Vehicle? vehicle,
+        Property? property,
+        InsuredPerson? insuredPerson = null)
     {
         if (vehicle is not null)
         {
@@ -54,6 +80,9 @@ internal static class QuoteMappings
                 $"{property.Address.City}/{property.Address.District} · {property.SquareMeters} m²");
         }
 
-        return new QuoteRiskObjectDto("Kişi", "Sağlık sigortası (sigortalı kişi)");
+        // ADR-041: "başkası adına" teklifte risk objesi sigortalının kendisidir.
+        return insuredPerson is null
+            ? new QuoteRiskObjectDto("Kişi", "Sağlık sigortası (sigortalı: poliçe sahibi)")
+            : new QuoteRiskObjectDto("Kişi", $"Sigortalı: {insuredPerson.FullName} ({insuredPerson.Relationship})");
     }
 }

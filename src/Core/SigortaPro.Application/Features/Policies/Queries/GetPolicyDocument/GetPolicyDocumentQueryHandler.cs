@@ -16,6 +16,7 @@ public sealed class GetPolicyDocumentQueryHandler : IQueryHandler<GetPolicyDocum
     private readonly IPolicyDocumentService _documentService;
     private readonly IFileStorageService _fileStorage;
     private readonly IPricingEngine _pricingEngine;
+    private readonly IPricingRateResolver _pricingRateResolver;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
@@ -28,6 +29,7 @@ public sealed class GetPolicyDocumentQueryHandler : IQueryHandler<GetPolicyDocum
         IPolicyDocumentService documentService,
         IFileStorageService fileStorage,
         IPricingEngine pricingEngine,
+        IPricingRateResolver pricingRateResolver,
         IDateTimeProvider dateTimeProvider,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
@@ -39,6 +41,7 @@ public sealed class GetPolicyDocumentQueryHandler : IQueryHandler<GetPolicyDocum
         _documentService = documentService;
         _fileStorage = fileStorage;
         _pricingEngine = pricingEngine;
+        _pricingRateResolver = pricingRateResolver;
         _dateTimeProvider = dateTimeProvider;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
@@ -86,7 +89,11 @@ public sealed class GetPolicyDocumentQueryHandler : IQueryHandler<GetPolicyDocum
 
     private async Task<byte[]> GenerateAndStore(Policy policy, string key, CancellationToken cancellationToken)
     {
-        var model = PolicyDocumentModelFactory.Build(policy, _pricingEngine, _dateTimeProvider.UtcNow);
+        // ADR-048: PDF, teklifin sabitlediği tarifeyle üretilir → sertifikadaki geçmiş prim/döküm değişmez.
+        var rates = await _pricingRateResolver.ResolveForQuoteAsync(
+            policy.Quote?.PricingVersionId, cancellationToken);
+
+        var model = PolicyDocumentModelFactory.Build(policy, _pricingEngine, _dateTimeProvider.UtcNow, rates);
         var content = _documentService.Generate(model);
         await _fileStorage.SaveAsync(key, content, cancellationToken);
         return content;

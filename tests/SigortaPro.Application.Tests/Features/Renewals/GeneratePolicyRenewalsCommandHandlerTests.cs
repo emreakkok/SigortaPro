@@ -5,6 +5,7 @@ using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Common.Notifications;
 using SigortaPro.Application.Features.Renewals.Commands.GeneratePolicyRenewals;
 using SigortaPro.Domain.Entities;
+using SigortaPro.Application.Tests.Common;
 
 namespace SigortaPro.Application.Tests.Features.Renewals;
 
@@ -29,6 +30,7 @@ public class GeneratePolicyRenewalsCommandHandlerTests
         _dateTimeProvider.UtcNow.Returns(_now);
         _handler = new GeneratePolicyRenewalsCommandHandler(
             _policyRepository, _quoteRepository, _renewalRepository, _claimRepository, _pricingEngine,
+            PricingTestDoubles.BaselineResolver(), PricingTestDoubles.InputBuilder(),
             _notificationService, _dateTimeProvider, _unitOfWork,
             Substitute.For<ILogger<GeneratePolicyRenewalsCommandHandler>>());
     }

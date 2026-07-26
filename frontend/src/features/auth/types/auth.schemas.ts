@@ -16,6 +16,35 @@ export const loginSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
 
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, "E-posta adresi zorunludur.")
+    .email("Geçerli bir e-posta adresi giriniz."),
+});
+
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+
+// Yeni şifre kuralları backend ResetPasswordCommandValidator (= RegisterCommandValidator) ile birebir aynı.
+// E-posta ve token form alanı değildir; sıfırlama linkinin query string'inden alınır.
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "Şifre en az 8 karakter olmalıdır.")
+      .regex(/[A-Z]/, "Şifre en az bir büyük harf içermelidir.")
+      .regex(/[a-z]/, "Şifre en az bir küçük harf içermelidir.")
+      .regex(/[0-9]/, "Şifre en az bir rakam içermelidir.")
+      .regex(/[^a-zA-Z0-9]/, "Şifre en az bir özel karakter içermelidir."),
+    confirmPassword: z.string().min(1, "Şifre tekrarı zorunludur."),
+  })
+  .refine((values) => values.newPassword === values.confirmPassword, {
+    message: "Şifreler eşleşmiyor.",
+    path: ["confirmPassword"],
+  });
+
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
 export const registerSchema = z.object({
   email: z
     .string()

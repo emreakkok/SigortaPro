@@ -49,6 +49,21 @@ public class RefreshTokenCommandHandlerTests
         await _refreshTokenService.Received(1).RevokeAsync("aktif", Arg.Any<string?>(), Arg.Any<CancellationToken>());
     }
 
+    [Fact] // ADR-061: pasif hesap token yenileyemez ve eldeki tüm token'ları iptal edilir.
+    public async Task Handle_Should_RevokeAllAndReturnFailure_When_UserIsInactive()
+    {
+        var userId = Guid.NewGuid();
+        _refreshTokenService.GetActiveUserIdAsync("aktif-token", Arg.Any<CancellationToken>()).Returns(userId);
+        _identityService.GetByIdAsync(userId, Arg.Any<CancellationToken>())
+            .Returns(new IdentityUserInfo(userId, "pasif@ornek.com", new[] { Roles.Personel }) { IsActive = false });
+
+        var result = await _handler.Handle(new RefreshTokenCommand("aktif-token"), CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        await _refreshTokenService.Received(1).RevokeAllForUserAsync(userId, Arg.Any<CancellationToken>());
+        _tokenService.DidNotReceive().CreateTokenPair(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<IEnumerable<string>>());
+    }
+
     [Fact]
     public async Task Handle_Should_RotateTokenAndReturnNewTokens_When_TokenIsActive()
     {

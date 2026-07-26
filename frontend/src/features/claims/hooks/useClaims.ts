@@ -3,6 +3,7 @@ import {
   approveClaim,
   createClaim,
   getClaimById,
+  getClaimDocumentBlob,
   getClaims,
   payClaim,
   rejectClaim,
@@ -33,6 +34,15 @@ export function useClaim(id: string) {
   return useQuery({
     queryKey: claimsQueryKeys.detail(id),
     queryFn: () => getClaimById(id),
+  });
+}
+
+/** Bir hasar belgesinin içeriğini (blob) getirir; sahiplik/rol kontrolü backend'dedir. */
+export function useClaimDocument(claimId: string, documentId: string) {
+  return useQuery({
+    queryKey: [...claimsQueryKeys.detail(claimId), "document", documentId],
+    queryFn: () => getClaimDocumentBlob(claimId, documentId),
+    staleTime: 5 * 60 * 1000,
   });
 }
 

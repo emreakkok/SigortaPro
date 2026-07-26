@@ -40,6 +40,14 @@ public sealed class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCom
             return Result<AuthResponse>.Failure("Geçersiz veya süresi dolmuş oturum. Lütfen tekrar giriş yapın.");
         }
 
+        // ADR-061: Pasifleştirilen hesap yeni token alamaz. Eldeki tüm refresh token'lar iptal edilir →
+        // en kötü erişim penceresi, mevcut access token'ın kalan ömrü kadardır (≤ 15 dk). Aktiflik sızdırılmaz.
+        if (!user.IsActive)
+        {
+            await _refreshTokenService.RevokeAllForUserAsync(user.Id, cancellationToken);
+            return Result<AuthResponse>.Failure("Geçersiz veya süresi dolmuş oturum. Lütfen tekrar giriş yapın.");
+        }
+
         var tokens = _tokenService.CreateTokenPair(user.Id, user.Email, user.Roles);
 
         // Rotasyon: eski token revoke edilir, yenisi saklanır (DEVELOPMENT_RULES.md §7).

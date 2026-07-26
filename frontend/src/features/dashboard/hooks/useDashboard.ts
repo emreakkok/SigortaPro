@@ -4,20 +4,28 @@ import {
   getPolicyReport,
   getRiskiestCustomers,
 } from "@/features/dashboard/services/dashboardApi";
-import type { PolicyReportParams } from "@/features/dashboard/types/dashboard.types";
+import type {
+  DashboardSummaryParams,
+  PolicyReportParams,
+} from "@/features/dashboard/types/dashboard.types";
 
 export const dashboardQueryKeys = {
   all: ["dashboard"] as const,
-  summary: ["dashboard", "summary"] as const,
+  summary: (params: DashboardSummaryParams) => ["dashboard", "summary", params] as const,
   policyReport: (params: PolicyReportParams) => ["dashboard", "policyReport", params] as const,
   riskiestCustomers: (top: number) => ["dashboard", "riskiestCustomers", top] as const,
 };
 
-/** Dashboard özet metrikleri (tek çağrı — metrik kartları + grafikler buradan beslenir). */
-export function useDashboardSummary() {
+/**
+ * Operasyon dashboard'ının tek veri kaynağı (ADR-052). Tarih aralığı query key'in parçasıdır →
+ * filtre değiştiğinde TÜM bloklar tek istekle tutarlı biçimde yenilenir (blok başına ayrı çağrı yoktur).
+ * `placeholderData` ile filtre değişiminde eski veri korunur → ekran boşalmaz/zıplamaz.
+ */
+export function useDashboardSummary(params: DashboardSummaryParams) {
   return useQuery({
-    queryKey: dashboardQueryKeys.summary,
-    queryFn: getDashboardSummary,
+    queryKey: dashboardQueryKeys.summary(params),
+    queryFn: () => getDashboardSummary(params),
+    placeholderData: (previous) => previous,
   });
 }
 

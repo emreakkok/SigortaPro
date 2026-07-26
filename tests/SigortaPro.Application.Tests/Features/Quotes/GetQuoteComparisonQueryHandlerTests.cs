@@ -6,6 +6,7 @@ using SigortaPro.Application.Features.Quotes.Queries.GetQuoteComparison;
 using SigortaPro.Application.Tests.Features.Customers;
 using SigortaPro.Domain.Entities;
 using SigortaPro.Domain.Enums;
+using SigortaPro.Application.Tests.Common;
 
 namespace SigortaPro.Application.Tests.Features.Quotes;
 
@@ -29,7 +30,8 @@ public class GetQuoteComparisonQueryHandlerTests
 
         _handler = new GetQuoteComparisonQueryHandler(
             _customerRepository, _productRepository, _vehicleRepository, _propertyRepository,
-            _pricingEngine, _dateTimeProvider, _currentUserService);
+            _pricingEngine, PricingTestDoubles.BaselineResolver(), PricingTestDoubles.InputBuilder(),
+            _dateTimeProvider, _currentUserService);
     }
 
     [Fact]

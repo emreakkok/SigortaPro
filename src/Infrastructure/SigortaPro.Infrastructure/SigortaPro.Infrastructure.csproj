@@ -5,7 +5,22 @@
     <ProjectReference Include="..\..\Core\SigortaPro.Application\SigortaPro.Application.csproj" />
   </ItemGroup>
 
+  <!-- ADR-036/ADR-037: Katalog verileri gömülü JSON kaynağı olarak paketlenir (migration/DB gerektirmez). -->
   <ItemGroup>
+    <EmbeddedResource Include="Services\VehicleCatalog\vehicle-catalog.json" />
+    <EmbeddedResource Include="Services\CityCatalog\city-catalog.json" />
+    <EmbeddedResource Include="Services\EarthquakeZone\earthquake-zone-catalog.json" />
+  </ItemGroup>
+
+  <!-- ADR-041: SignalR (Hub, IHubContext, AddSignalR) ASP.NET Core paylaşımlı framework'ünde bulunur.
+       Gerçek zamanlı yayın Infrastructure'dan yapıldığından (IRealTimeNotifier implementasyonu + hub)
+       framework referansı burada verilir (ADR-035'te Persistence için kurulan emsal). -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />

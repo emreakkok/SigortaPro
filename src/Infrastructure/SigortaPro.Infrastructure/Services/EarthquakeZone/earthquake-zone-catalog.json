@@ -1,0 +1,37 @@
+{
+  "_note": "ADR-055: İl bazlı deprem bölgesi eşlemesi (1 = en yüksek risk, 5 = en düşük). MVP YAKLAŞIMIDIR: gerçek deprem tehlike haritası ilçe/koordinat düzeyindedir; burada il düzeyinde genelleme yapılır. Amaç, bölgeyi kullanıcı beyanından çıkarıp doğrulanabilir bir kaynağa (adres ili) bağlamaktır. Listede olmayan il için bölge atanmaz; motor 'bilinmeyen bölge' davranışını uygular.",
+  "zones": [
+    {
+      "zone": 1,
+      "cities": [
+        "Adıyaman", "Ağrı", "Amasya", "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis",
+        "Bolu", "Burdur", "Bursa", "Çanakkale", "Denizli", "Düzce", "Elazığ", "Erzincan",
+        "Erzurum", "Hakkâri", "Hatay", "İstanbul", "İzmir", "Kahramanmaraş", "Kocaeli",
+        "Malatya", "Manisa", "Muğla", "Muş", "Osmaniye", "Sakarya", "Tokat", "Tunceli",
+        "Van", "Yalova"
+      ]
+    },
+    {
+      "zone": 2,
+      "cities": [
+        "Afyonkarahisar", "Ardahan", "Artvin", "Bartın", "Batman", "Bayburt", "Çankırı",
+        "Çorum", "Diyarbakır", "Giresun", "Gümüşhane", "Iğdır", "Isparta", "Karabük",
+        "Kars", "Kastamonu", "Kütahya", "Ordu", "Rize", "Samsun", "Siirt", "Sivas",
+        "Şırnak", "Tekirdağ", "Uşak", "Zonguldak"
+      ]
+    },
+    {
+      "zone": 3,
+      "cities": [
+        "Adana", "Ankara", "Antalya", "Eskişehir", "Gaziantep", "Kayseri", "Kırıkkale",
+        "Kırşehir", "Mardin", "Mersin", "Sinop", "Şanlıurfa", "Trabzon", "Yozgat"
+      ]
+    },
+    {
+      "zone": 4,
+      "cities": [
+        "Aksaray", "Edirne", "Karaman", "Kilis", "Kırklareli", "Konya", "Nevşehir", "Niğde"
+      ]
+    }
+  ]
+}

@@ -2,8 +2,10 @@ using System.Net.Http.Headers;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using SigortaPro.Application.Features.Auth.Commands.Login;
 using SigortaPro.Application.Features.Auth.Commands.Register;
 using SigortaPro.Application.Features.Auth.DTOs;
+using SigortaPro.Persistence.Seed;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
@@ -45,15 +47,18 @@ internal static class TestAccountFactory
     public static RegisterCommand CreateRegisterCommand(
         string? email = null,
         string? tckn = null,
-        string password = DefaultPassword) =>
+        string password = DefaultPassword,
+        string firstName = "Test",
+        string lastName = "Müşteri",
+        string phoneNumber = "+905321112233") =>
         new(
             email ?? UniqueEmail(),
             password,
-            "Test",
-            "Müşteri",
+            firstName,
+            lastName,
             tckn ?? GenerateValidTckn(),
             new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-            "+905321112233",
+            phoneNumber,
             "İstanbul",
             "Kadıköy",
             "Caferağa",
@@ -64,12 +69,16 @@ internal static class TestAccountFactory
         SigortaProWebApplicationFactory factory,
         string? email = null,
         string? tckn = null,
-        string password = DefaultPassword)
+        string password = DefaultPassword,
+        string firstName = "Test",
+        string lastName = "Müşteri",
+        string phoneNumber = "+905321112233")
     {
         using var scope = factory.Services.CreateScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
-        var result = await sender.Send(CreateRegisterCommand(email, tckn, password));
+        var result = await sender.Send(
+            CreateRegisterCommand(email, tckn, password, firstName, lastName, phoneNumber));
 
         result.IsSuccess.Should().BeTrue(
             "test kullanıcısı kaydı başarılı olmalıdır (hatalar: {0})",
@@ -86,4 +95,34 @@ internal static class TestAccountFactory
             new AuthenticationHeaderValue("Bearer", session.AccessToken);
         return client;
     }
+
+    /// <summary>Seed edilmiş bir hesapla giriş yapar (ISender — HTTP auth rate-limit bütçesine dokunmaz, ADR-034).</summary>
+    public static async Task<AuthResponse> LoginAsync(
+        SigortaProWebApplicationFactory factory, string email, string password)
+    {
+        using var scope = factory.Services.CreateScope();
+        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+
+        var result = await sender.Send(new LoginCommand(email, password));
+        result.IsSuccess.Should().BeTrue(
+            "giriş başarılı olmalıdır (hatalar: {0})", string.Join("; ", result.Errors));
+
+        return result.Value!;
+    }
+
+    /// <summary>Seed edilmiş Admin oturumu (ADR-060 Staff API testleri için).</summary>
+    public static Task<AuthResponse> AdminSessionAsync(SigortaProWebApplicationFactory factory) =>
+        LoginAsync(factory, IdentitySeeder.AdminEmail, IdentitySeeder.AdminPassword);
+
+    /// <summary>Seed edilmiş örnek Personel oturumu (ADR-060 — K13).</summary>
+    public static Task<AuthResponse> StaffSessionAsync(SigortaProWebApplicationFactory factory) =>
+        LoginAsync(factory, IdentitySeeder.SampleStaffEmail, IdentitySeeder.SampleStaffPassword);
+
+    /// <summary>Seed edilmiş Admin ile yetkilendirilmiş HttpClient.</summary>
+    public static async Task<HttpClient> AdminClientAsync(SigortaProWebApplicationFactory factory) =>
+        CreateAuthorizedClient(factory, await AdminSessionAsync(factory));
+
+    /// <summary>Seed edilmiş örnek Personel ile yetkilendirilmiş HttpClient.</summary>
+    public static async Task<HttpClient> StaffClientAsync(SigortaProWebApplicationFactory factory) =>
+        CreateAuthorizedClient(factory, await StaffSessionAsync(factory));
 }

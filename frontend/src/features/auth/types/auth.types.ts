@@ -4,6 +4,18 @@ export interface LoginRequest {
   password: string;
 }
 
+/** `POST /auth/forgot-password` istek gövdesi (backend `ForgotPasswordCommand`). */
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+/** `POST /auth/reset-password` istek gövdesi (backend `ResetPasswordCommand`). */
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+}
+
 /** `POST /auth/register` istek gövdesi (backend `RegisterCommand` ile birebir). */
 export interface RegisterRequest {
   email: string;

@@ -8,7 +8,7 @@ import {
   COVERAGE_PACKAGE_LABELS,
   INSURANCE_BRANCH_LABELS,
 } from "@/shared/types/insurance.types";
-import { formatCurrency, formatDate } from "@/shared/utils/format";
+import { formatCurrency, formatDate, formatPhoneNumber } from "@/shared/utils/format";
 
 /**
  * Admin poliçe detay çekmecesi içeriği: künye + risk objesi + teminat tablosu + PDF indirme.
@@ -35,6 +35,25 @@ export function AdminPolicyDetailPanel({ policyId }: { policyId: string }) {
         <p className="font-mono text-lg font-semibold text-primary">{data.policyNumber}</p>
         <PolicyStatusBadge status={data.status} />
       </div>
+
+      <section className="rounded-lg border bg-muted/40 px-4 py-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {data.insuredPerson ? "Sigorta Ettiren (Müşteri)" : "Müşteri"}
+        </p>
+        <p className="font-semibold">{data.customerFullName || "—"}</p>
+        {data.customerPhone !== null && data.customerPhone !== undefined && (
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {formatPhoneNumber(data.customerPhone)}
+          </p>
+        )}
+        {data.insuredPerson && (
+          <p className="mt-2 text-sm">
+            <span className="text-muted-foreground">Sigortalı: </span>
+            <span className="font-medium">{data.insuredPerson.fullName}</span>{" "}
+            <span className="text-muted-foreground">({data.insuredPerson.relationship})</span>
+          </p>
+        )}
+      </section>
 
       <section className="space-y-1 text-sm">
         <p>
