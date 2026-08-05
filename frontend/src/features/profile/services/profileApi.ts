@@ -20,9 +20,14 @@ export async function updateProfile(request: UpdateProfileRequest): Promise<Cust
   return response.data;
 }
 
-/** `POST /customers/me/vehicles` — yeni araç ekler. */
-export async function addVehicle(request: VehicleRequest): Promise<Vehicle> {
-  const response = await api.post<Vehicle>("/customers/me/vehicles", request);
+/**
+ * `POST /customers/me/vehicles` — yeni araç ekler.
+ * customerId verilirse acente destekli: `POST /customers/{customerId}/vehicles` — personel, müşteri adına
+ * teklif hazırlarken aracı müşterinin profiline ekler.
+ */
+export async function addVehicle(request: VehicleRequest, customerId?: string): Promise<Vehicle> {
+  const url = customerId ? `/customers/${customerId}/vehicles` : "/customers/me/vehicles";
+  const response = await api.post<Vehicle>(url, request);
   return response.data;
 }
 
@@ -32,9 +37,13 @@ export async function updateVehicle(id: string, request: VehicleRequest): Promis
   return response.data;
 }
 
-/** `POST /customers/me/properties` — yeni konut ekler. */
-export async function addProperty(request: PropertyRequest): Promise<Property> {
-  const response = await api.post<Property>("/customers/me/properties", request);
+/**
+ * `POST /customers/me/properties` — yeni konut ekler.
+ * customerId verilirse acente destekli: `POST /customers/{customerId}/properties`.
+ */
+export async function addProperty(request: PropertyRequest, customerId?: string): Promise<Property> {
+  const url = customerId ? `/customers/${customerId}/properties` : "/customers/me/properties";
+  const response = await api.post<Property>(url, request);
   return response.data;
 }
 

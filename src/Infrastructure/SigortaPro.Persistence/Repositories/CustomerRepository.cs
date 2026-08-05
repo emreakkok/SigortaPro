@@ -36,6 +36,12 @@ public sealed class CustomerRepository : GenericRepository<Customer>, ICustomerR
         _context.Customers
             .FirstOrDefaultAsync(customer => customer.AppUserId == appUserId, cancellationToken);
 
+    // Acente personelinin "müşteri adına" işlemlerinde hedef müşteriyi Customer Id üzerinden izlemeli çözümler
+    // (include yok; Address owned value object olarak zaten yüklenir — fiyatlama girdisi için yeterli).
+    public Task<Customer?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+        _context.Customers
+            .FirstOrDefaultAsync(customer => customer.Id == id, cancellationToken);
+
     // Kayıt akışı TCKN ön-kontrolü. UQ_Customers_TCKN filtresiz olduğundan soft-delete edilmiş kayıtlar da
     // TCKN'i işgal eder; DB unique ihlaliyle birebir örtüşmesi için query filter yok sayılır.
     public Task<bool> ExistsByTcknAsync(string tckn, CancellationToken cancellationToken = default) =>

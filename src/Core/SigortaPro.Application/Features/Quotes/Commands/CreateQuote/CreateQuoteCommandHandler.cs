@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Logging;
-using SigortaPro.Application.Common.Exceptions;
+using SigortaPro.Application.Common.Authorization;
 using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Features.Quotes.DTOs;
 using SigortaPro.Domain.Constants;
 using SigortaPro.Domain.Entities;
+using SigortaPro.Application.Common.Exceptions;
 
 namespace SigortaPro.Application.Features.Quotes.Commands.CreateQuote;
 
@@ -52,11 +53,10 @@ public sealed class CreateQuoteCommandHandler : ICommandHandler<CreateQuoteComma
 
     public async Task<QuoteDto> Handle(CreateQuoteCommand request, CancellationToken cancellationToken)
     {
-        var appUserId = _currentUserService.UserId
-            ?? throw new ForbiddenAccessException();
-
-        var customer = await _customerRepository.GetTrackedByAppUserIdAsync(appUserId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Customer), appUserId);
+        // Self-service (CustomerId null) → oturum sahibi müşteri; acente destekli (CustomerId dolu) → hedef
+        // müşteri, yalnızca personel çağrısıyla (TargetCustomerResolver staff-only guard uygular).
+        var customer = await TargetCustomerResolver.ResolveTrackedAsync(
+            request.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 
         var product = await _productRepository.GetActiveByBranchAsync(request.Branch, cancellationToken)
             ?? throw new NotFoundException(nameof(InsuranceProduct), request.Branch);
@@ -87,7 +87,10 @@ public sealed class CreateQuoteCommandHandler : ICommandHandler<CreateQuoteComma
             rates: effectivePricing.Rates,
             snapshot: snapshot);
 
-        var quote = new Quote(customer.Id, product.Id, request.Branch, vehicle?.Id, property?.Id);
+        // Acente destekli ise teklifin "üreten personel"i (agent of record) sabitlenir; sahibi yine müşteridir.
+        var producingStaffId = TargetCustomerResolver.ResolveProducingStaffId(request.CustomerId, _currentUserService);
+
+        var quote = new Quote(customer.Id, product.Id, request.Branch, vehicle?.Id, property?.Id, producingStaffId);
         quote.SelectCoveragePackage(request.CoveragePackage);
         quote.CapturePricingSnapshot(snapshot);
 
@@ -113,8 +116,8 @@ public sealed class CreateQuoteCommandHandler : ICommandHandler<CreateQuoteComma
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
-            "Teklif oluşturuldu. QuoteId: {QuoteId}, CustomerId: {CustomerId}, Branş: {Branch}, Prim: {Premium}",
-            quote.Id, customer.Id, request.Branch, quote.TotalPremium);
+            "Teklif oluşturuldu. QuoteId: {QuoteId}, CustomerId: {CustomerId}, Branş: {Branch}, Prim: {Premium}, ÜretenPersonel: {StaffId}",
+            quote.Id, customer.Id, request.Branch, quote.TotalPremium, producingStaffId);
 
         return QuoteMappings.ToDto(quote, product, vehicle, property, pricing);
     }

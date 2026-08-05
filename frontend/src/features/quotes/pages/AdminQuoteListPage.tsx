@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AdminQuoteDetailPanel } from "@/features/quotes/components/AdminQuoteDetailPanel";
+import { QuoteSourceBadge } from "@/features/quotes/components/QuoteSourceBadge";
 import { QuoteStatusBadge } from "@/features/quotes/components/QuoteStatusBadge";
 import { useQuoteList } from "@/features/quotes/hooks/useQuotes";
 import {
@@ -39,6 +40,7 @@ export default function AdminQuoteListPage() {
   const [pageSize, setPageSize] = useAdminPageSize();
   const [status, setStatus] = useState<QuoteStatus | undefined>(undefined);
   const [branch, setBranch] = useState<InsuranceBranch | undefined>(undefined);
+  const [createdByMe, setCreatedByMe] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   // ADR-047: bildirimden `?focus=<id>` ile gelindiğinde ilgili teklifin çekmecesi doğrudan açılır.
   const [selectedId, setSelectedId] = useFocusedRecord();
@@ -56,6 +58,7 @@ export default function AdminQuoteListPage() {
     status,
     branch,
     search: debouncedSearch === "" ? undefined : debouncedSearch,
+    createdByMe: createdByMe ? true : undefined,
   });
 
   return (
@@ -116,6 +119,19 @@ export default function AdminQuoteListPage() {
             ))}
           </Select>
         </div>
+        {/* Acente destekli: personelin yalnızca kendi müşteri adına oluşturduğu teklifleri süzmesi için. */}
+        <label className="flex h-10 cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="h-4 w-4 rounded border-border accent-primary"
+            checked={createdByMe}
+            onChange={(event) => {
+              setCreatedByMe(event.target.checked);
+              setPage(1);
+            }}
+          />
+          Yalnızca benim oluşturduklarım
+        </label>
       </div>
 
       {isLoading ? (
@@ -138,6 +154,7 @@ export default function AdminQuoteListPage() {
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
                     <th className="px-4 py-3 font-medium">Müşteri</th>
+                    <th className="px-4 py-3 font-medium">Kaynak</th>
                     <th className="px-4 py-3 font-medium">Tarih</th>
                     <th className="px-4 py-3 font-medium">Ürün</th>
                     <th className="px-4 py-3 font-medium">Paket</th>
@@ -160,6 +177,9 @@ export default function AdminQuoteListPage() {
                             {formatPhoneNumber(quote.customerPhone)}
                           </div>
                         )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <QuoteSourceBadge source={quote.source} audience="staff" />
                       </td>
                       <td className="px-4 py-3">{formatDate(quote.createdAt)}</td>
                       <td className="px-4 py-3 font-medium">{quote.productName}</td>

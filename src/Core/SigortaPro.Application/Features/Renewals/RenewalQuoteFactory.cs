@@ -30,12 +30,17 @@ internal static class RenewalQuoteFactory
         // kurulur ve buraya hazır verilir → yenileme, teklif oluşturma ve önizleme aynı yolu kullanır.
         // ADR-059: Hasar geçmişi artık bu snapshot'taki Bonus-Malus basamağıyla fiyatlanır; ayrı bir
         // ClaimHistoryFactor UYGULANMAZ (yeni tekliflerde 1.00 = nötr kalır).
+        // Yenileme indirimi AKTİF tarifeden okunur (gerçek sigortacılıkta yenileme yeni tarifeyle fiyatlanır).
+        // 1.00 = indirim yok. Değer teklifte dondurulacağından yeniden hesap deterministiktir.
+        var renewalDiscount = effectivePricing?.Rates?.RuleSet?.RenewalDiscountFactor ?? 1.00m;
+
         var pricing = QuotePricingFactory.Compute(
             pricingEngine, sourceQuote.Branch, customer, vehicle, property,
             product.Coverages, sourceQuote.CoveragePackage, now,
             insuredBirthDate: sourceQuote.InsuredPerson?.BirthDate,
             rates: effectivePricing?.Rates,
-            snapshot: snapshot);
+            snapshot: snapshot,
+            renewalDiscountFactor: renewalDiscount);
 
         var renewalQuote = new Quote(
             customer.Id, sourceQuote.InsuranceProductId, sourceQuote.Branch,
@@ -61,6 +66,12 @@ internal static class RenewalQuoteFactory
                 sourceQuote.InsuredPerson.PhoneNumber,
                 sourceQuote.InsuredPerson.Relationship));
         }
+        // Yenileme indirimini teklifte dondur (yalnızca etkiliyse) — yeniden hesap aynı değeri kullanır.
+        if (renewalDiscount != 1.00m)
+        {
+            renewalQuote.ApplyRenewalDiscount(renewalDiscount);
+        }
+
         // Yenileme teklifinin geçerliliği (kabul son tarihi) poliçe bitişine dayanır (bkz. RenewalOfferValidity):
         // müşteri mevcut poliçesi sona erene kadar kabul edebilmelidir. Böylece teklif, poliçe hâlâ AKTİFken
         // "geçerlilik süresi doldu" görünmez. Normal (yenileme dışı) tekliflerin 7 günlük vadesi değişmez.

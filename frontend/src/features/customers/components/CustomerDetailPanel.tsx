@@ -1,5 +1,6 @@
+import { Link } from "react-router-dom";
 import { useCustomer } from "@/features/customers/hooks/useCustomers";
-import { Alert, Spinner } from "@/shared/components";
+import { Alert, Button, Spinner } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
 import { formatDateOnly } from "@/shared/utils/format";
 
@@ -31,6 +32,12 @@ export function CustomerDetailPanel({ customerId }: { customerId: string }) {
 
   return (
     <div className="space-y-6">
+      {/* Acente destekli teklif: personel bu müşteri adına ortak teklif sihirbazını başlatır (gerçek akış:
+          telefonla arayan müşteri). Teklif sahibi müşteri olur; onay/ödeme müşteriye aittir. */}
+      <Link to={`/admin/customers/${data.id}/quotes/new`} className="block">
+        <Button className="w-full">Müşteri Adına Teklif Oluştur</Button>
+      </Link>
+
       <section>
         <h3 className="mb-1 text-sm font-semibold text-muted-foreground">Kimlik & İletişim</h3>
         <div className="divide-y divide-border">

@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Domain.Entities;
+using SigortaPro.Domain.Enums;
 using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
 // ADR-048: IPricingVersionRepository implementasyonu. Okuma sorguları AsNoTracking + Include(Rates);
-// versiyonlar değişmez olduğundan güncelleme yolu yoktur.
+// yalnızca TASLAK düzenlenir (izlemeli getirilir), aktif/arşiv değişmez.
 public sealed class PricingVersionRepository : GenericRepository<PricingVersion>, IPricingVersionRepository
 {
     private readonly AppDbContext _context;
@@ -16,14 +17,22 @@ public sealed class PricingVersionRepository : GenericRepository<PricingVersion>
         _context = context;
     }
 
-    public Task<PricingVersion?> GetEffectiveAsync(DateTime asOf, CancellationToken cancellationToken = default) =>
+    public Task<PricingVersion?> GetActiveAsync(CancellationToken cancellationToken = default) =>
         _context.PricingVersions
             .AsNoTracking()
             .Include(version => version.Rates)
-            .Where(version => version.EffectiveFrom <= asOf)
-            .OrderByDescending(version => version.EffectiveFrom)
-            .ThenByDescending(version => version.VersionNumber)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(version => version.Status == PricingVersionStatus.Active, cancellationToken);
+
+    public Task<PricingVersion?> GetDraftAsync(CancellationToken cancellationToken = default) =>
+        _context.PricingVersions
+            .AsNoTracking()
+            .Include(version => version.Rates)
+            .FirstOrDefaultAsync(version => version.Status == PricingVersionStatus.Draft, cancellationToken);
+
+    public Task<PricingVersion?> GetTrackedWithRatesByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+        _context.PricingVersions
+            .Include(version => version.Rates)
+            .FirstOrDefaultAsync(version => version.Id == id, cancellationToken);
 
     public Task<PricingVersion?> GetWithRatesByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         _context.PricingVersions
@@ -41,7 +50,11 @@ public sealed class PricingVersionRepository : GenericRepository<PricingVersion>
 
     public async Task<int> GetNextVersionNumberAsync(CancellationToken cancellationToken = default)
     {
+        // IgnoreQueryFilters: soft-delete edilmiş (iptal edilmiş taslak) satırlar da sayılır → versiyon
+        // numarası GLOBAL MONOTONIK kalır ve VersionNumber benzersiz indeksiyle asla çakışmaz (iptal edilen
+        // bir taslağın numarası yeniden kullanılmaz).
         var maxVersionNumber = await _context.PricingVersions
+            .IgnoreQueryFilters()
             .AsNoTracking()
             .Select(version => (int?)version.VersionNumber)
             .MaxAsync(cancellationToken);

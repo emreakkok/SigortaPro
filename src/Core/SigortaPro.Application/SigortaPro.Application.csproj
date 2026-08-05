@@ -4,6 +4,11 @@
     <ProjectReference Include="..\SigortaPro.Domain\SigortaPro.Domain.csproj" />
   </ItemGroup>
 
+  <!-- Fiyatlama köprüsü (QuotePricingFactory) gibi internal yardımcıların birim testi için (yalnızca test assembly'sine). -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="SigortaPro.Application.Tests" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.9.2" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.2" />

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using SigortaPro.Application.Common.Authorization;
 using SigortaPro.Application.Common.Exceptions;
 using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Common.Pricing;
@@ -104,5 +105,51 @@ public class CreateQuoteCommandHandlerTests
         var act = () => _handler.Handle(command, CancellationToken.None);
 
         await act.Should().ThrowAsync<NotFoundException>();
+    }
+
+    // ── Acente destekli teklif (agent-assisted): personel müşteri ADINA teklif oluşturur ────────────────
+    [Fact]
+    public async Task Handle_Should_SetCreatedByStaff_AndOwnByCustomer_When_StaffCreatesForCustomer()
+    {
+        var staffUserId = Guid.NewGuid();
+        var targetCustomer = CustomerTestData.CreateCustomer(Guid.NewGuid(), Guid.NewGuid());
+        var vehicle = CustomerTestData.CreateVehicle(targetCustomer.Id, Guid.NewGuid());
+        var product = QuoteTestData.CreateProduct(InsuranceBranch.Kasko);
+
+        // Oturum sahibi = personel; hedef müşteri route/komuttaki CustomerId ile çözülür.
+        _currentUserService.UserId.Returns(staffUserId);
+        _currentUserService.IsInRole(Roles.Admin).Returns(true);
+        _customerRepository.GetTrackedByIdAsync(targetCustomer.Id, Arg.Any<CancellationToken>()).Returns(targetCustomer);
+        _productRepository.GetActiveByBranchAsync(InsuranceBranch.Kasko, Arg.Any<CancellationToken>()).Returns(product);
+        _vehicleRepository.GetByIdAsync(vehicle.Id, Arg.Any<CancellationToken>()).Returns(vehicle);
+
+        var command = new CreateQuoteCommand(
+            InsuranceBranch.Kasko, vehicle.Id, null, CoveragePackage.Standart, CustomerId: targetCustomer.Id);
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Sahip müşteri, üreten personel ise oturum sahibidir.
+        result.CustomerId.Should().Be(targetCustomer.Id);
+        await _quoteRepository.Received(1).AddAsync(
+            Arg.Is<Quote>(quote =>
+                quote.CustomerId == targetCustomer.Id &&
+                quote.CreatedByStaffUserId == staffUserId &&
+                quote.Status == QuoteStatus.Priced),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ThrowForbidden_When_NonStaffProvidesCustomerId()
+    {
+        // Müşteri (staff değil) başka bir müşteri adına teklif oluşturmaya çalışır → reddedilir.
+        _currentUserService.IsInRole(Arg.Any<string>()).Returns(false);
+
+        var command = new CreateQuoteCommand(
+            InsuranceBranch.Kasko, Guid.NewGuid(), null, CoveragePackage.Standart, CustomerId: Guid.NewGuid());
+
+        var act = () => _handler.Handle(command, CancellationToken.None);
+
+        await act.Should().ThrowAsync<ForbiddenAccessException>();
+        await _quoteRepository.DidNotReceive().AddAsync(Arg.Any<Quote>(), Arg.Any<CancellationToken>());
     }
 }

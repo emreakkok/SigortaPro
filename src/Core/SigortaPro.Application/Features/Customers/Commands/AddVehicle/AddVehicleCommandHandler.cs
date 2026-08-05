@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using SigortaPro.Application.Common.Exceptions;
+using SigortaPro.Application.Common.Authorization;
 using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Features.Customers.DTOs;
 using SigortaPro.Domain.Entities;
@@ -30,11 +30,10 @@ public sealed class AddVehicleCommandHandler : ICommandHandler<AddVehicleCommand
 
     public async Task<VehicleDto> Handle(AddVehicleCommand request, CancellationToken cancellationToken)
     {
-        var appUserId = _currentUserService.UserId
-            ?? throw new ForbiddenAccessException();
-
-        var customer = await _customerRepository.GetTrackedByAppUserIdAsync(appUserId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Customer), appUserId);
+        // Self-service (CustomerId null) → oturum sahibi müşteri; acente destekli (dolu) → hedef müşteri
+        // (yalnızca personel — TargetCustomerResolver staff-only guard uygular).
+        var customer = await TargetCustomerResolver.ResolveTrackedAsync(
+            request.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 
         var vehicle = new Vehicle(
             customer.Id,

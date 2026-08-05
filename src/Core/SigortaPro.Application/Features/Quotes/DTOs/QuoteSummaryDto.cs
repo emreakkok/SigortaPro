@@ -17,4 +17,7 @@ public sealed record QuoteSummaryDto(
     // listesinde kendi bilgisini görür (sızıntı yok). Navigasyon yüklü değilse boş döner (null-safe).
     Guid CustomerId = default,
     string CustomerFullName = "",
-    string? CustomerPhone = null);
+    string? CustomerPhone = null,
+    // Teklif kaynağı (türetilmiş) — listede "Online / Acente" rozeti için. Müşteri kendi listesinde bunu
+    // "Kendiniz / Acente" olarak görür (personel kimliği sızmaz).
+    QuoteSource Source = QuoteSource.SelfService);

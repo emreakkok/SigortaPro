@@ -9,7 +9,13 @@ public class Quote : BaseEntity, IAggregateRoot
     {
     }
 
-    public Quote(Guid customerId, Guid insuranceProductId, InsuranceBranch branch, Guid? vehicleId, Guid? propertyId)
+    public Quote(
+        Guid customerId,
+        Guid insuranceProductId,
+        InsuranceBranch branch,
+        Guid? vehicleId,
+        Guid? propertyId,
+        Guid? createdByStaffUserId = null)
     {
         ValidateRiskObject(branch, vehicleId, propertyId);
 
@@ -19,6 +25,7 @@ public class Quote : BaseEntity, IAggregateRoot
         Branch = branch;
         VehicleId = vehicleId;
         PropertyId = propertyId;
+        CreatedByStaffUserId = createdByStaffUserId;
         Status = QuoteStatus.Draft;
     }
 
@@ -32,6 +39,13 @@ public class Quote : BaseEntity, IAggregateRoot
     public Property? Property { get; private set; }
     public InsuranceBranch Branch { get; private set; }
     public QuoteStatus Status { get; private set; }
+
+    // ACENTE DESTEKLİ TEKLİF (agent-assisted): Teklifi müşteri ADINA oluşturan acente personelinin (Admin/Personel)
+    // AppUser kimliği. null = müşteri teklifi kendi oluşturdu (self-service). Teklifin SAHİBİ her koşulda
+    // CustomerId'dir (değişmez) — bu alan yalnızca "üreten personel"i (gerçek sigortacılıktaki "agent of record")
+    // ayrı bir kavram olarak izler. Teklif kaynağı (SelfService/AgentAssisted) bu alandan TÜRETİLİR; ayrıca
+    // saklanmaz (veri minimizasyonu). Yalnızca oluşturma anında (constructor) set edilir; sonradan değişmez.
+    public Guid? CreatedByStaffUserId { get; private set; }
     public decimal TotalPremium { get; private set; }
     public DateTime? ValidUntil { get; private set; }
 
@@ -47,6 +61,12 @@ public class Quote : BaseEntity, IAggregateRoot
     // tekliflerinin primini ve prim dökümünü birebir korumak için saklanır ve yeniden hesapta uygulanmaya
     // devam eder. Yeni tekliflerde varsayılan 1.00 (etkisiz) kalır; değeri değiştiren bir metot YOKTUR.
     public decimal ClaimHistoryFactor { get; private set; } = 1.00m;
+
+    // YENİLEME İNDİRİMİ çarpanı (ADR-048 ailesi). Varsayılan 1.00 = indirim yok. Yalnızca YENİLEME teklifleri,
+    // oluşturuldukları anda AKTİF tarife versiyonunun yenileme indirimini burada dondurur. Snapshot mantığıyla
+    // aynı: değer teklifte saklandığından, tarife sonradan değişse bile bu teklifin primi/dökümü değişmez
+    // (deterministik yeniden hesap — ADR-021). Yeni (yenileme dışı) tekliflerde 1.00 kalır → döküm değişmez.
+    public decimal RenewalDiscountFactor { get; private set; } = 1.00m;
 
     // Sağlıkta "başkası adına" teklifte sigortalanan kişi (null = poliçe sahibi kendisi — ADR-041).
     // Owned/gömülü değer; fiyatlamanın deterministik yeniden hesabında yaş bu kişiden türetilir (ADR-021).
@@ -108,6 +128,25 @@ public class Quote : BaseEntity, IAggregateRoot
         }
 
         InsuredPerson = insuredPerson;
+    }
+
+    /// <summary>
+    /// Yenileme indirimini (aktif tarifeden) teklifte dondurur; yalnızca fiyatlamadan önce (taslak) çağrılabilir.
+    /// factor ∈ (0, 1]: 1.00 = indirim yok, 0.90 = %10 yenileme indirimi.
+    /// </summary>
+    public void ApplyRenewalDiscount(decimal factor)
+    {
+        if (Status != QuoteStatus.Draft)
+        {
+            throw new DomainException("Yenileme indirimi yalnızca taslak durumundaki teklifte uygulanabilir.");
+        }
+
+        if (factor <= 0m || factor > 1.00m)
+        {
+            throw new DomainException("Yenileme indirim çarpanı (0, 1] aralığında olmalıdır.");
+        }
+
+        RenewalDiscountFactor = factor;
     }
 
     /// <summary>Fiyatlamadan önce teminat paketini seçer; yalnızca taslak durumunda değiştirilebilir.</summary>

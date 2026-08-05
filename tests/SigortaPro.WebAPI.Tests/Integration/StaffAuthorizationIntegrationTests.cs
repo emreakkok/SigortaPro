@@ -95,14 +95,19 @@ public sealed class StaffAuthorizationIntegrationTests
     // ── Fiyatlandırma erişimi (S6–S7) ─────────────────────────────────────────────────────────
 
     [Fact] // S6 + S7
-    public async Task Personel_Should_BeForbidden_OnPricing()
+    public async Task Personel_Should_ViewPricing_ButNotModify()
     {
         var personel = await TestAccountFactory.StaffClientAsync(_factory);
 
+        // ADR-048 (güncellendi): Personel fiyatlandırmayı GÖRÜNTÜLER (salt-okunur).
         (await personel.GetAsync("/api/v1/pricing/versions"))
-            .StatusCode.Should().Be(HttpStatusCode.Forbidden, "Personel fiyat versiyonlarını göremez (S6)");
-        (await personel.PostAsJsonAsync("/api/v1/pricing/versions", new { }))
+            .StatusCode.Should().Be(HttpStatusCode.OK, "Personel fiyat versiyonlarını görüntüleyebilir (S6)");
+
+        // Ancak DEĞİŞTİREMEZ — taslak oluşturma/aktifleştirme yalnızca Admin'e açıktır (S7).
+        (await personel.PostAsync("/api/v1/pricing/versions", content: null))
             .StatusCode.Should().Be(HttpStatusCode.Forbidden, "Personel fiyat değiştiremez (S7)");
+        (await personel.PostAsync($"/api/v1/pricing/versions/{Guid.NewGuid()}/activate", content: null))
+            .StatusCode.Should().Be(HttpStatusCode.Forbidden, "Personel tarife aktifleştiremez (S7)");
     }
 
     // ── Mass-assignment / privilege escalation (S8) ───────────────────────────────────────────

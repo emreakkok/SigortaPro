@@ -6,10 +6,7 @@ using SigortaPro.Domain.Common;
 namespace SigortaPro.Persistence.Interceptors;
 
 // ARCHITECTURE_RULES.md §7.2: CreatedAt/UpdatedAt/CreatedBy/UpdatedBy SaveChanges interceptor'ı ile
-// otomatik doldurulur. ICurrentUserService (impl. WebAPI — Task 5/6) ve IDateTimeProvider (impl.
-// Infrastructure — Task 6) henüz implement edilmediğinden parametreler opsiyoneldir: .NET DI container'ı
-// kayıtlı olmayan bir servis için varsayılan (null) değere düşer. Bu sayede Task 4 kendi başına
-// çalışabilir; gerçek implementasyonlar eklendiğinde bu sınıfta hiçbir değişiklik gerekmez.
+// otomatik doldurulur.
 public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
 {
     private readonly IDateTimeProvider? _dateTimeProvider;

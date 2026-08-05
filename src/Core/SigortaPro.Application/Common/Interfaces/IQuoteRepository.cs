@@ -17,12 +17,15 @@ public interface IQuoteRepository : IReadRepository<Quote>, IWriteRepository<Quo
     // Sayfalanmış liste: müşteri Id verilirse yalnızca o müşterinin teklifleri, verilmezse tümü (admin).
     // Opsiyonel durum/branş filtreleriyle; ürün adı için InsuranceProduct, müşteri kimliği için Customer yüklenir.
     // search: müşteri adı/soyadı/tam adı veya telefon (format bağımsız — PhoneNumberSearch ile normalize).
+    // createdByStaffUserId: dolu ise yalnızca o personelin müşteri adına oluşturduğu teklifler ("acente destekli")
+    // döner — personelin "benim oluşturduklarım" görünümü için (null = filtre uygulanmaz).
     Task<PagedResult<Quote>> SearchAsync(
         Guid? customerId,
         QuoteStatus? status,
         InsuranceBranch? branch,
         string? search,
         PaginationParams paging,
+        Guid? createdByStaffUserId = null,
         CancellationToken cancellationToken = default);
 
     // İzlemeli: geçerlilik süresi dolmuş ancak henüz sonlanmamış (Draft/Priced/Approved) teklifler —

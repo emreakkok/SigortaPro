@@ -1,6 +1,7 @@
 import type {
   CoveragePackage,
   InsuranceBranch,
+  QuoteSource,
   QuoteStatus,
   RiskScore,
 } from "@/shared/types/insurance.types";
@@ -63,6 +64,10 @@ export interface Quote {
   /** Müşteri (Sigorta Ettiren) kimliği — admin detayında ad + telefon özeti (additive). */
   customerFullName?: string;
   customerPhone?: string | null;
+  /** Teklif kaynağı (türetilmiş): müşteri kendi mi oluşturdu yoksa acente mi. */
+  source: QuoteSource;
+  /** Acente destekli teklifte üreten personelin adı — yalnızca personel yüzeyine döner; müşteride null. */
+  createdByStaffName?: string | null;
 }
 
 /** "Başkası adına" sağlık teklifinde sigortalı özeti (backend `QuoteInsuredPersonDto` — TCKN maskeli). */
@@ -98,6 +103,8 @@ export interface QuoteSummary {
   customerId: string;
   customerFullName: string;
   customerPhone: string | null;
+  /** Teklif kaynağı (türetilmiş) — liste rozetinde "Online / Acente" (müşteride "Kendiniz / Acente"). */
+  source: QuoteSource;
 }
 
 /** `POST /quotes` istek gövdesi (backend `CreateQuoteCommand`). Enum'lar sayısal gönderilir. */
@@ -120,6 +127,8 @@ export interface QuoteListParams {
   branch?: InsuranceBranch;
   /** Müşteri adı/soyadı/tam adı veya telefon (format bağımsız) — admin araması. */
   search?: string;
+  /** Personel yüzeyinde "yalnızca benim oluşturduğum acente teklifleri" (müşteri çağrısında yok sayılır). */
+  createdByMe?: boolean;
 }
 
 /** `GET /quotes/compare` sorgu parametreleri. */

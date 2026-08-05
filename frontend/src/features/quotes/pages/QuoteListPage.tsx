@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { QuoteSourceBadge } from "@/features/quotes/components/QuoteSourceBadge";
 import { QuoteStatusBadge } from "@/features/quotes/components/QuoteStatusBadge";
 import { QuoteValidity } from "@/features/quotes/components/QuoteValidity";
 import { useQuoteList } from "@/features/quotes/hooks/useQuotes";
@@ -109,7 +110,11 @@ export default function QuoteListPage() {
                         <QuoteValidity validUntil={quote.validUntil} />
                       </p>
                     </div>
-                    <QuoteStatusBadge status={quote.status} />
+                    <div className="flex flex-col items-end gap-1">
+                      <QuoteStatusBadge status={quote.status} />
+                      {/* Acente tarafından oluşturulduysa görünür; kendi oluşturduğu tekliflerde gizli (hideSelf). */}
+                      <QuoteSourceBadge source={quote.source} audience="customer" hideSelf />
+                    </div>
                   </CardContent>
                 </Card>
               </Link>

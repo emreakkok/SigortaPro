@@ -30,4 +30,17 @@ public class PricingBranchRate : BaseEntity
 
     // Branşın yıllık baz primi (TRY). Risk çarpanları bu değerin üzerine uygulanır.
     public decimal BasePremium { get; private set; }
+
+    // Yalnızca TASLAK versiyon düzenlenirken PricingVersion.UpdateDraft üzerinden çağrılır (aktif/arşiv
+    // versiyonun oranları asla değişmez — üst aggregate Draft guard'ı uygular). Satır yerinde güncellenir
+    // (sil+ekle yerine) → aynı (versiyon, branş) benzersiz anahtarında çakışma oluşmaz.
+    internal void SetBasePremium(decimal basePremium)
+    {
+        if (basePremium <= 0m)
+        {
+            throw new DomainException("Baz prim sıfırdan büyük olmalıdır.");
+        }
+
+        BasePremium = basePremium;
+    }
 }

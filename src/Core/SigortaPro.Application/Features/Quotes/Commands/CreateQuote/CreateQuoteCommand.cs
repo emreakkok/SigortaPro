@@ -12,13 +12,17 @@ namespace SigortaPro.Application.Features.Quotes.Commands.CreateQuote;
 // Sağlıkta zorunludur (varsayılan atanmaz — önceden sessizce "false" varsayılıyor ve fiyat yanlış
 // hesaplanıyordu). Sağlık dışı branşlarda gönderilmez/yok sayılır. Yalnızca fiyatlama amacıyla kullanılır;
 // bildirimlere, aktivite akışına veya admin listelerine taşınmaz (KVKK — veri minimizasyonu).
+// CustomerId (acente destekli teklif, additive): dolu ise teklif bu müşteri ADINA oluşturulur ve çağıran
+// YALNIZCA acente personeli (Admin/Personel) olabilir (controller'da nested route ile set edilir; istemci
+// gövdesinden okunmaz). null = self-service (oturum sahibi müşteri kendi teklifini oluşturur — mevcut davranış).
 public sealed record CreateQuoteCommand(
     InsuranceBranch Branch,
     Guid? VehicleId,
     Guid? PropertyId,
     CoveragePackage CoveragePackage,
     InsuredPersonInput? InsuredPerson = null,
-    bool? IsSmoker = null) : ICommand<QuoteDto>;
+    bool? IsSmoker = null,
+    Guid? CustomerId = null) : ICommand<QuoteDto>;
 
 // Sigortalı beyanı (gerçek akış: sigorta ettiren ≠ sigortalı). Kimlik/iletişim bilgileri poliçe
 // sahibinin beyanıdır; sistemdeki diğer müşterilerle eşleştirilmez/aranmaz (kaynak sahipliği/KVKK —
