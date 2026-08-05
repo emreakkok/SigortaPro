@@ -21,7 +21,7 @@ public class GetQuoteListQueryHandlerTests
     {
         _quoteRepository.SearchAsync(
                 Arg.Any<Guid?>(), Arg.Any<QuoteStatus?>(), Arg.Any<InsuranceBranch?>(),
-                Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>())
+                Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResult<Quote>(Array.Empty<Quote>(), 1, 20, 0));
 
         _handler = new GetQuoteListQueryHandler(_quoteRepository, _customerRepository, _currentUserService);
@@ -36,8 +36,8 @@ public class GetQuoteListQueryHandlerTests
 
         // Personel tüm teklifleri görür → müşteri filtresi yok (null).
         await _quoteRepository.Received(1).SearchAsync(
-            null, Arg.Any<QuoteStatus?>(), Arg.Any<InsuranceBranch?>(),
-            Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>());
+            Arg.Is<Guid?>(id => id == null), Arg.Any<QuoteStatus?>(), Arg.Any<InsuranceBranch?>(),
+            Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -53,6 +53,21 @@ public class GetQuoteListQueryHandlerTests
 
         await _quoteRepository.Received(1).SearchAsync(
             customer.Id, Arg.Any<QuoteStatus?>(), Arg.Any<InsuranceBranch?>(),
-            Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<CancellationToken>());
+            Arg.Any<string?>(), Arg.Any<PaginationParams>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_FilterToOwnCreatedQuotes_When_StaffRequestsCreatedByMe()
+    {
+        var staffUserId = Guid.NewGuid();
+        _currentUserService.IsInRole(Roles.Personel).Returns(true);
+        _currentUserService.UserId.Returns(staffUserId);
+
+        await _handler.Handle(new GetQuoteListQuery(CreatedByMe: true), CancellationToken.None);
+
+        // "Benim oluşturduklarım" → müşteri filtresi yok (personel), üreten personel filtresi = oturum sahibi.
+        await _quoteRepository.Received(1).SearchAsync(
+            Arg.Is<Guid?>(id => id == null), Arg.Any<QuoteStatus?>(), Arg.Any<InsuranceBranch?>(),
+            Arg.Any<string?>(), Arg.Any<PaginationParams>(), staffUserId, Arg.Any<CancellationToken>());
     }
 }

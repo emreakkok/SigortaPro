@@ -50,6 +50,40 @@ public sealed class QuotesController : ControllerBase
         return Ok(result);
     }
 
+    // ── Acente destekli teklif (agent-assisted): personel müşteri ADINA teklif oluşturur ──────────────────
+    // Gerçek akış: müşteri acenteyi telefonla arar; personel teklifi hazırlar. Teklifin SAHİBİ yine müşteridir.
+    // Personel yalnızca oluşturur — onay/ödeme/poliçeleştirme uçları Customer'a kilitlidir (aşağıdaki
+    // approve/reject + PaymentsController) → personel müşteri adına satın alamaz/onaylayamaz (yapısal güvence).
+
+    /// <summary>Acente personeli, seçtiği müşteri adına teklif oluşturur (müşteri sonra kendi onaylar/satın alır).</summary>
+    [HttpPost("~/api/v1/customers/{customerId:guid}/quotes")]
+    [Authorize(Roles = Roles.Staff)]
+    [ProducesResponseType(typeof(QuoteDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CreateQuoteForCustomer(
+        Guid customerId, CreateQuoteCommand command, CancellationToken cancellationToken)
+    {
+        // Hedef müşteri ROUTE'tan alınır; gövdedeki CustomerId (varsa) yok sayılır (spoofing önlemi).
+        var result = await _sender.Send(command with { CustomerId = customerId }, cancellationToken);
+        return CreatedAtAction(nameof(GetQuoteById), new { id = result.Id }, result);
+    }
+
+    /// <summary>Acente personeli için seçili müşteri adına paket karşılaştırması (önizleme; teklif oluşturmaz).</summary>
+    [HttpGet("~/api/v1/customers/{customerId:guid}/quotes/compare")]
+    [Authorize(Roles = Roles.Staff)]
+    [ProducesResponseType(typeof(QuoteComparisonDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CompareForCustomer(
+        Guid customerId, [FromQuery] GetQuoteComparisonQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(query with { CustomerId = customerId }, cancellationToken);
+        return Ok(result);
+    }
+
     /// <summary>Teklif listesini getirir: müşteri kendi tekliflerini, acente personeli tümünü görür.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<QuoteSummaryDto>), StatusCodes.Status200OK)]

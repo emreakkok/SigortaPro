@@ -26,7 +26,8 @@ public sealed class GetQuoteListQueryHandler : IQueryHandler<GetQuoteListQuery, 
     {
         // Acente personeli tüm teklifleri görür; müşteri yalnızca kendi tekliflerini (customerId filtresi).
         Guid? customerFilter = null;
-        if (!QuoteAuthorization.IsStaff(_currentUserService))
+        var isStaff = QuoteAuthorization.IsStaff(_currentUserService);
+        if (!isStaff)
         {
             var appUserId = _currentUserService.UserId
                 ?? throw new ForbiddenAccessException();
@@ -37,10 +38,14 @@ public sealed class GetQuoteListQueryHandler : IQueryHandler<GetQuoteListQuery, 
             customerFilter = customer.Id;
         }
 
+        // "Benim oluşturduklarım" yalnızca personel için anlamlıdır (müşteri zaten kendi tekliflerini görür).
+        // Personel talep ederse, oturum sahibi personelin müşteri adına oluşturduğu tekliflere daraltılır.
+        Guid? createdByStaffFilter = isStaff && request.CreatedByMe ? _currentUserService.UserId : null;
+
         var paging = new PaginationParams { Page = request.Page, PageSize = request.PageSize };
 
         var page = await _quoteRepository.SearchAsync(
-            customerFilter, request.Status, request.Branch, request.Search, paging, cancellationToken);
+            customerFilter, request.Status, request.Branch, request.Search, paging, createdByStaffFilter, cancellationToken);
 
         var items = page.Items.Select(QuoteMappings.ToSummaryDto).ToList();
 

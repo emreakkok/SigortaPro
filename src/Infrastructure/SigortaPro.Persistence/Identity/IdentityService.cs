@@ -195,6 +195,10 @@ public sealed class IdentityService : IIdentityService
     private async Task<IdentityUserInfo> BuildUserInfoAsync(AppUser user)
     {
         var roles = await _userManager.GetRolesAsync(user);
-        return new IdentityUserInfo(user.Id, user.Email!, roles.ToList()) { IsActive = user.IsActive };
+        return new IdentityUserInfo(user.Id, user.Email!, roles.ToList())
+        {
+            IsActive = user.IsActive,
+            FullName = user.FullName,
+        };
     }
 }

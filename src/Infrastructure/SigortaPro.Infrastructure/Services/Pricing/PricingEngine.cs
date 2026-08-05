@@ -1,5 +1,6 @@
 using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Common.Pricing;
+using SigortaPro.Domain.Entities;
 using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Infrastructure.Services.Pricing;
@@ -28,12 +29,15 @@ public sealed class PricingEngine : IPricingEngine
     {
         EnsureBranch(request.Branch, InsuranceBranch.Kasko, InsuranceBranch.Trafik);
 
+        // Tüm bant çarpanları tarifenin kural setinden (versiyonlu) okunur; kural seti bu faktörü içermiyorsa
+        // yerleşik baseline kullanılır → geçmiş teklifler bit-aynı yeniden hesaplanır.
+        var ruleSet = rates?.RuleSet;
         var breakdown = new List<PricingBreakdownItem>
         {
-            DriverAgeFactor(request.DriverAge),
-            VehicleAgeFactor(request.VehicleAge),
-            EnginePowerFactor(request.EnginePowerHp),
-            CityRiskFactor(request.City),
+            DriverAgeFactor(request.DriverAge, ruleSet),
+            VehicleAgeFactor(request.VehicleAge, ruleSet),
+            EnginePowerFactor(request.EnginePowerHp, ruleSet),
+            CityRiskFactor(request.City, ruleSet),
         };
 
         // ADR-059: Bonus-Malus yalnızca basamak nötr DEĞİLSE prim dökümüne girer. Basamağı 0 olan
@@ -41,14 +45,14 @@ public sealed class PricingEngine : IPricingEngine
         // dökümü birebir korunur ve kullanıcıya etkisiz bir kalem gösterilmez.
         if (request.NoClaimTier != 0)
         {
-            breakdown.Add(BonusMalusFactor(request.NoClaimTier));
+            breakdown.Add(BonusMalusFactor(request.NoClaimTier, ruleSet));
         }
 
         // ADR-057: Kullanım amacı yalnızca BEYAN edildiyse fiyatlanır ve dökümde görünür; beyanı olmayan
         // (eski) kayıtlarda faktör hiç üretilmez → geçmiş fiyatlar/dökümler değişmez.
         if (request.UsagePurpose is not null)
         {
-            breakdown.Add(VehicleUsageFactor(request.UsagePurpose.Value));
+            breakdown.Add(VehicleUsageFactor(request.UsagePurpose.Value, ruleSet));
         }
 
         return BuildResult(request.Branch, breakdown, rates);
@@ -58,11 +62,12 @@ public sealed class PricingEngine : IPricingEngine
     {
         EnsureBranch(request.Branch, InsuranceBranch.Konut, InsuranceBranch.Dask);
 
+        var ruleSet = rates?.RuleSet;
         var breakdown = new List<PricingBreakdownItem>
         {
-            BuildingAgeFactor(request.BuildingAge),
-            SquareMetersFactor(request.SquareMeters),
-            EarthquakeZoneFactor(request.EarthquakeZone),
+            BuildingAgeFactor(request.BuildingAge, ruleSet),
+            SquareMetersFactor(request.SquareMeters, ruleSet),
+            EarthquakeZoneFactor(request.EarthquakeZone, ruleSet),
         };
 
         return BuildResult(request.Branch, breakdown, rates);
@@ -70,10 +75,11 @@ public sealed class PricingEngine : IPricingEngine
 
     private static PricingResult CalculateHealth(HealthPricingRequest request, PricingRateSet? rates)
     {
+        var ruleSet = rates?.RuleSet;
         var breakdown = new List<PricingBreakdownItem>
         {
-            HealthAgeFactor(request.Age),
-            SmokerFactor(request.IsSmoker),
+            HealthAgeFactor(request.Age, ruleSet),
+            SmokerFactor(request.IsSmoker, ruleSet),
         };
 
         return BuildResult(InsuranceBranch.Saglik, breakdown, rates);
@@ -99,48 +105,82 @@ public sealed class PricingEngine : IPricingEngine
         _ => RiskScore.High,
     };
 
-    // --- Kasko / Trafik faktörleri ---
+    // --- Kasko / Trafik faktörleri (band sınırları sabit; çarpan değerleri versiyonlu — ruleSet ?? baseline) ---
 
-    private static PricingBreakdownItem DriverAgeFactor(int driverAge) => driverAge switch
+    private static PricingBreakdownItem DriverAgeFactor(int driverAge, PricingRuleSet? ruleSet)
     {
-        < 25 => new("Sürücü Yaşı", 1.30m, "Genç sürücü ek primi (25 yaş altı)."),
-        > 65 => new("Sürücü Yaşı", 1.15m, "İleri yaş ek primi (65 yaş üstü)."),
-        _ => new("Sürücü Yaşı", 1.00m, "Standart yaş grubu (25-65)."),
-    };
-
-    private static PricingBreakdownItem VehicleAgeFactor(int vehicleAge) => vehicleAge switch
-    {
-        <= 3 => new("Araç Yaşı", 1.15m, "Yeni araç (0-3 yaş) — yüksek onarım/değer maliyeti."),
-        <= 10 => new("Araç Yaşı", 1.00m, "Orta yaş araç (4-10 yaş)."),
-        _ => new("Araç Yaşı", 0.85m, "Eski araç (10 yaş üstü) — düşük araç değeri."),
-    };
-
-    private static PricingBreakdownItem EnginePowerFactor(int enginePowerHp) => enginePowerHp switch
-    {
-        <= 100 => new("Motor Gücü", 1.00m, "Düşük motor gücü (≤100 HP)."),
-        <= 160 => new("Motor Gücü", 1.10m, "Orta motor gücü (101-160 HP)."),
-        <= 240 => new("Motor Gücü", 1.25m, "Yüksek motor gücü (161-240 HP)."),
-        _ => new("Motor Gücü", 1.45m, "Çok yüksek motor gücü (240 HP üstü)."),
-    };
-
-    private static PricingBreakdownItem CityRiskFactor(string? city)
-    {
-        var coefficient = PricingRuleTables.DefaultCityRiskCoefficient;
-        var description = "Standart il risk katsayısı.";
-
-        if (!string.IsNullOrWhiteSpace(city)
-            && PricingRuleTables.CityRiskCoefficients.TryGetValue(city.Trim(), out var cityCoefficient))
+        var (index, description) = driverAge switch
         {
-            coefficient = cityCoefficient;
-            description = $"{city.Trim()} ili risk katsayısı.";
-        }
-
-        return new PricingBreakdownItem("İl Risk Katsayısı", coefficient, description);
+            < 25 => (0, "Genç sürücü ek primi (25 yaş altı)."),
+            > 65 => (2, "İleri yaş ek primi (65 yaş üstü)."),
+            _ => (1, "Standart yaş grubu (25-65)."),
+        };
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.DriverAgeFactors, index)
+            ?? PricingRuleTables.DriverAgeBaseline[index];
+        return new PricingBreakdownItem("Sürücü Yaşı", multiplier, description);
     }
 
-    private static PricingBreakdownItem VehicleUsageFactor(VehicleUsage usage)
+    private static PricingBreakdownItem VehicleAgeFactor(int vehicleAge, PricingRuleSet? ruleSet)
     {
-        var coefficient = PricingRuleTables.VehicleUsageCoefficients[usage];
+        var (index, description) = vehicleAge switch
+        {
+            <= 3 => (0, "Yeni araç (0-3 yaş) — yüksek onarım/değer maliyeti."),
+            <= 10 => (1, "Orta yaş araç (4-10 yaş)."),
+            _ => (2, "Eski araç (10 yaş üstü) — düşük araç değeri."),
+        };
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.VehicleAgeFactors, index)
+            ?? PricingRuleTables.VehicleAgeBaseline[index];
+        return new PricingBreakdownItem("Araç Yaşı", multiplier, description);
+    }
+
+    private static PricingBreakdownItem EnginePowerFactor(int enginePowerHp, PricingRuleSet? ruleSet)
+    {
+        var (index, description) = enginePowerHp switch
+        {
+            <= 100 => (0, "Düşük motor gücü (≤100 HP)."),
+            <= 160 => (1, "Orta motor gücü (101-160 HP)."),
+            <= 240 => (2, "Yüksek motor gücü (161-240 HP)."),
+            _ => (3, "Çok yüksek motor gücü (240 HP üstü)."),
+        };
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.EnginePowerFactors, index)
+            ?? PricingRuleTables.EnginePowerBaseline[index];
+        return new PricingBreakdownItem("Motor Gücü", multiplier, description);
+    }
+
+    // Versiyonlanmış il risk katsayısı. ruleSet verilmişse (yeni tarife) katsayı ORADAN okunur; verilmemişse
+    // (kural seti eklenmeden önceki versiyonlar veya baz-prim-only tarife) yerleşik baseline tablosu kullanılır
+    // → eski teklifler bit-aynı yeniden hesaplanır.
+    private static PricingBreakdownItem CityRiskFactor(string? city, PricingRuleSet? ruleSet)
+    {
+        var trimmed = city?.Trim();
+
+        if (ruleSet is not null)
+        {
+            var known = !string.IsNullOrWhiteSpace(trimmed)
+                && ruleSet.CityRiskCoefficients.Keys.Any(key => string.Equals(key, trimmed, StringComparison.OrdinalIgnoreCase));
+            var coefficient = ruleSet.CityCoefficientFor(trimmed);
+            var description = known ? $"{trimmed} ili risk katsayısı." : "Standart il risk katsayısı.";
+            return new PricingBreakdownItem("İl Risk Katsayısı", coefficient, description);
+        }
+
+        var baselineCoefficient = PricingRuleTables.DefaultCityRiskCoefficient;
+        var baselineDescription = "Standart il risk katsayısı.";
+
+        if (!string.IsNullOrWhiteSpace(trimmed)
+            && PricingRuleTables.CityRiskCoefficients.TryGetValue(trimmed, out var cityCoefficient))
+        {
+            baselineCoefficient = cityCoefficient;
+            baselineDescription = $"{trimmed} ili risk katsayısı.";
+        }
+
+        return new PricingBreakdownItem("İl Risk Katsayısı", baselineCoefficient, baselineDescription);
+    }
+
+    private static PricingBreakdownItem VehicleUsageFactor(VehicleUsage usage, PricingRuleSet? ruleSet)
+    {
+        var index = (int)usage;
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.VehicleUsageFactors, index)
+            ?? PricingRuleTables.VehicleUsageBaseline[index];
         var description = usage switch
         {
             VehicleUsage.Hususi => "Hususi (kişisel) kullanım — referans seviye.",
@@ -149,64 +189,97 @@ public sealed class PricingEngine : IPricingEngine
             _ => "Kullanım amacı.",
         };
 
-        return new PricingBreakdownItem("Kullanım Amacı", coefficient, description);
+        return new PricingBreakdownItem("Kullanım Amacı", multiplier, description);
     }
 
     // ADR-059: Hasar geçmişinin tek çarpanı. Negatif basamak ek prim (malus), pozitif basamak indirim (bonus).
-    private static PricingBreakdownItem BonusMalusFactor(int step)
+    private static PricingBreakdownItem BonusMalusFactor(int step, PricingRuleSet? ruleSet)
     {
         var effectiveStep = Math.Clamp(step, BonusMalusScale.MinStep, BonusMalusScale.MaxStep);
-        var coefficient = PricingRuleTables.BonusMalusCoefficients[effectiveStep];
+        var index = effectiveStep - BonusMalusScale.MinStep;
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.BonusMalusFactors, index)
+            ?? PricingRuleTables.BonusMalusBaseline[index];
 
         var description = effectiveStep < 0
             ? $"Hasar geçmişi ek primi ({effectiveStep}. basamak)."
             : $"Hasarsızlık indirimi ({effectiveStep}. basamak).";
 
-        return new PricingBreakdownItem("Hasarsızlık Basamağı", coefficient, description);
+        return new PricingBreakdownItem("Hasarsızlık Basamağı", multiplier, description);
     }
 
     // --- Konut / DASK faktörleri ---
 
-    private static PricingBreakdownItem BuildingAgeFactor(int buildingAge) => buildingAge switch
+    private static PricingBreakdownItem BuildingAgeFactor(int buildingAge, PricingRuleSet? ruleSet)
     {
-        <= 5 => new("Bina Yaşı", 0.95m, "Yeni bina (0-5 yaş)."),
-        <= 20 => new("Bina Yaşı", 1.00m, "Orta yaş bina (6-20 yaş)."),
-        <= 40 => new("Bina Yaşı", 1.10m, "Eski bina (21-40 yaş)."),
-        _ => new("Bina Yaşı", 1.25m, "Çok eski bina (40 yaş üstü)."),
-    };
+        var (index, description) = buildingAge switch
+        {
+            <= 5 => (0, "Yeni bina (0-5 yaş)."),
+            <= 20 => (1, "Orta yaş bina (6-20 yaş)."),
+            <= 40 => (2, "Eski bina (21-40 yaş)."),
+            _ => (3, "Çok eski bina (40 yaş üstü)."),
+        };
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.BuildingAgeFactors, index)
+            ?? PricingRuleTables.BuildingAgeBaseline[index];
+        return new PricingBreakdownItem("Bina Yaşı", multiplier, description);
+    }
 
-    private static PricingBreakdownItem SquareMetersFactor(int squareMeters) => squareMeters switch
+    private static PricingBreakdownItem SquareMetersFactor(int squareMeters, PricingRuleSet? ruleSet)
     {
-        <= 75 => new("Metrekare", 0.90m, "Küçük konut (≤75 m²)."),
-        <= 120 => new("Metrekare", 1.00m, "Orta konut (76-120 m²)."),
-        <= 200 => new("Metrekare", 1.15m, "Büyük konut (121-200 m²)."),
-        _ => new("Metrekare", 1.30m, "Çok büyük konut (200 m² üstü)."),
-    };
+        var (index, description) = squareMeters switch
+        {
+            <= 75 => (0, "Küçük konut (≤75 m²)."),
+            <= 120 => (1, "Orta konut (76-120 m²)."),
+            <= 200 => (2, "Büyük konut (121-200 m²)."),
+            _ => (3, "Çok büyük konut (200 m² üstü)."),
+        };
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.SquareMetersFactors, index)
+            ?? PricingRuleTables.SquareMetersBaseline[index];
+        return new PricingBreakdownItem("Metrekare", multiplier, description);
+    }
 
-    private static PricingBreakdownItem EarthquakeZoneFactor(int earthquakeZone) => earthquakeZone switch
+    private static PricingBreakdownItem EarthquakeZoneFactor(int earthquakeZone, PricingRuleSet? ruleSet)
     {
-        1 => new("Deprem Bölgesi", 1.50m, "1. derece deprem bölgesi (en yüksek risk)."),
-        2 => new("Deprem Bölgesi", 1.30m, "2. derece deprem bölgesi."),
-        3 => new("Deprem Bölgesi", 1.15m, "3. derece deprem bölgesi."),
-        4 => new("Deprem Bölgesi", 1.05m, "4. derece deprem bölgesi."),
-        5 => new("Deprem Bölgesi", 1.00m, "5. derece deprem bölgesi (en düşük risk)."),
-        _ => new("Deprem Bölgesi", 1.15m, "Bilinmeyen deprem bölgesi — orta risk varsayıldı."),
-    };
+        var (index, description) = earthquakeZone switch
+        {
+            1 => (0, "1. derece deprem bölgesi (en yüksek risk)."),
+            2 => (1, "2. derece deprem bölgesi."),
+            3 => (2, "3. derece deprem bölgesi."),
+            4 => (3, "4. derece deprem bölgesi."),
+            5 => (4, "5. derece deprem bölgesi (en düşük risk)."),
+            _ => (5, "Bilinmeyen deprem bölgesi — orta risk varsayıldı."),
+        };
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.EarthquakeZoneFactors, index)
+            ?? PricingRuleTables.EarthquakeZoneBaseline[index];
+        return new PricingBreakdownItem("Deprem Bölgesi", multiplier, description);
+    }
 
     // --- Sağlık faktörleri ---
 
-    private static PricingBreakdownItem HealthAgeFactor(int age) => age switch
+    private static PricingBreakdownItem HealthAgeFactor(int age, PricingRuleSet? ruleSet)
     {
-        <= 17 => new("Yaş Bandı", 0.80m, "Çocuk/genç yaş bandı (0-17)."),
-        <= 30 => new("Yaş Bandı", 1.00m, "Genç yetişkin yaş bandı (18-30)."),
-        <= 45 => new("Yaş Bandı", 1.15m, "Orta yaş bandı (31-45)."),
-        <= 60 => new("Yaş Bandı", 1.40m, "İleri orta yaş bandı (46-60)."),
-        _ => new("Yaş Bandı", 1.80m, "İleri yaş bandı (60 üstü)."),
-    };
+        var (index, description) = age switch
+        {
+            <= 17 => (0, "Çocuk/genç yaş bandı (0-17)."),
+            <= 30 => (1, "Genç yetişkin yaş bandı (18-30)."),
+            <= 45 => (2, "Orta yaş bandı (31-45)."),
+            <= 60 => (3, "İleri orta yaş bandı (46-60)."),
+            _ => (4, "İleri yaş bandı (60 üstü)."),
+        };
+        var multiplier = PricingRuleSet.BandFactor(ruleSet?.HealthAgeFactors, index)
+            ?? PricingRuleTables.HealthAgeBaseline[index];
+        return new PricingBreakdownItem("Yaş Bandı", multiplier, description);
+    }
 
-    private static PricingBreakdownItem SmokerFactor(bool isSmoker) => isSmoker
-        ? new("Sigara Kullanımı", 1.25m, "Sigara kullanımı beyanı — ek prim.")
-        : new("Sigara Kullanımı", 1.00m, "Sigara kullanmıyor.");
+    private static PricingBreakdownItem SmokerFactor(bool isSmoker, PricingRuleSet? ruleSet)
+    {
+        if (!isSmoker)
+        {
+            return new PricingBreakdownItem("Sigara Kullanımı", 1.00m, "Sigara kullanmıyor.");
+        }
+
+        var multiplier = ruleSet?.SmokerSurcharge ?? PricingRuleTables.SmokerSurchargeBaseline;
+        return new PricingBreakdownItem("Sigara Kullanımı", multiplier, "Sigara kullanımı beyanı — ek prim.");
+    }
 
     private static void EnsureBranch(InsuranceBranch actual, params InsuranceBranch[] allowed)
     {

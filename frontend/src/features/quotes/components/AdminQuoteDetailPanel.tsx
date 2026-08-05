@@ -1,5 +1,6 @@
 import { CoverageList } from "@/features/quotes/components/CoverageList";
 import { PremiumBreakdownList } from "@/features/quotes/components/PremiumBreakdownList";
+import { QuoteSourceBadge } from "@/features/quotes/components/QuoteSourceBadge";
 import { QuoteStatusBadge } from "@/features/quotes/components/QuoteStatusBadge";
 import { QuoteValidity } from "@/features/quotes/components/QuoteValidity";
 import { RiskScoreBadge } from "@/features/quotes/components/RiskScoreBadge";
@@ -35,6 +36,7 @@ export function AdminQuoteDetailPanel({ quoteId }: { quoteId: string }) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         <QuoteStatusBadge status={data.status} />
+        <QuoteSourceBadge source={data.source} audience="staff" />
         <RiskScoreBadge score={data.riskScore} />
       </div>
 
@@ -75,6 +77,14 @@ export function AdminQuoteDetailPanel({ quoteId }: { quoteId: string }) {
         <p>
           <span className="text-muted-foreground">Oluşturulma: </span>
           <span className="font-medium">{formatDate(data.createdAt)}</span>
+        </p>
+        <p>
+          <span className="text-muted-foreground">Oluşturan: </span>
+          <span className="font-medium">
+            {data.createdByStaffName != null && data.createdByStaffName !== ""
+              ? `${data.createdByStaffName} (Acente)`
+              : "Müşteri (online)"}
+          </span>
         </p>
         <p className="text-muted-foreground">
           <QuoteValidity validUntil={data.validUntil} />

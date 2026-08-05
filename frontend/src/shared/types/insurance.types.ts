@@ -103,6 +103,33 @@ export const QUOTE_STATUS_BADGE_VARIANTS: Record<QuoteStatus, BadgeProps["varian
   [QuoteStatus.Rejected]: "destructive",
 };
 
+/**
+ * Teklifin oluşturulma kaynağı (backend `QuoteSource` — türetilmiş). SelfService: müşteri kendi oluşturdu;
+ * AgentAssisted: acente personeli müşteri adına oluşturdu. Müşteri yüzeyinde personel kimliği gösterilmez.
+ */
+export const QuoteSource = {
+  SelfService: 0,
+  AgentAssisted: 1,
+} as const;
+export type QuoteSource = (typeof QuoteSource)[keyof typeof QuoteSource];
+
+/** Müşteri yüzeyi etiketi ("Oluşturan: …"): kendi mi yaptı yoksa acente mi. */
+export const QUOTE_SOURCE_CUSTOMER_LABELS: Record<QuoteSource, string> = {
+  [QuoteSource.SelfService]: "Kendiniz",
+  [QuoteSource.AgentAssisted]: "Acente",
+};
+
+/** Personel/admin yüzeyi etiketi (kanal görünümü). */
+export const QUOTE_SOURCE_STAFF_LABELS: Record<QuoteSource, string> = {
+  [QuoteSource.SelfService]: "Online",
+  [QuoteSource.AgentAssisted]: "Acente",
+};
+
+export const QUOTE_SOURCE_BADGE_VARIANTS: Record<QuoteSource, BadgeProps["variant"]> = {
+  [QuoteSource.SelfService]: "secondary",
+  [QuoteSource.AgentAssisted]: "default",
+};
+
 export const PolicyStatus = {
   Active: 0,
   Expired: 1,

@@ -40,6 +40,7 @@ public sealed class QuoteRepository : GenericRepository<Quote>, IQuoteRepository
         InsuranceBranch? branch,
         string? search,
         PaginationParams paging,
+        Guid? createdByStaffUserId = null,
         CancellationToken cancellationToken = default)
     {
         // Customer, listede müşteri kimliği (ad + telefon) göstermek ve aramak için tek sorguda JOIN edilir (N+1 yok).
@@ -62,6 +63,11 @@ public sealed class QuoteRepository : GenericRepository<Quote>, IQuoteRepository
         if (branch.HasValue)
         {
             query = query.Where(quote => quote.Branch == branch.Value);
+        }
+
+        if (createdByStaffUserId.HasValue)
+        {
+            query = query.Where(quote => quote.CreatedByStaffUserId == createdByStaffUserId.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(search))

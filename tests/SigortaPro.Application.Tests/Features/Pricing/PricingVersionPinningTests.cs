@@ -27,7 +27,7 @@ public class PricingVersionPinningTests
 
     private static PricingVersion Version(int number, DateTime effectiveFrom, decimal kaskoBasePremium)
     {
-        var version = new PricingVersion(number, effectiveFrom, null, Guid.NewGuid(), "Admin");
+        var version = new PricingVersion(number, "Test Tarifesi", effectiveFrom, null, Guid.NewGuid(), "Admin");
         foreach (var branch in Enum.GetValues<InsuranceBranch>())
         {
             version.SetRate(branch, branch == InsuranceBranch.Kasko ? kaskoBasePremium : 1000m);
@@ -37,11 +37,12 @@ public class PricingVersionPinningTests
     }
 
     [Fact]
-    public async Task ResolveEffective_Should_ReturnNewestEffectiveVersion_When_TariffChanged()
+    public async Task ResolveEffective_Should_ReturnActiveVersion_When_TariffChanged()
     {
-        // Admin yeni tarife yayınladı → YENİ fiyatlamalar bunu kullanmalıdır.
+        // Admin yeni tarifeyi AKTİFLEŞTİRDİ → YENİ fiyatlamalar aktif versiyonu kullanmalıdır.
         var newVersion = Version(2, Now.AddDays(-1), 20000m);
-        _repository.GetEffectiveAsync(Now, Arg.Any<CancellationToken>()).Returns(newVersion);
+        newVersion.Activate(Now);
+        _repository.GetActiveAsync(Arg.Any<CancellationToken>()).Returns(newVersion);
 
         var effective = await _resolver.ResolveEffectiveAsync(Now);
 
@@ -74,9 +75,9 @@ public class PricingVersionPinningTests
     }
 
     [Fact]
-    public async Task ResolveEffective_Should_FallBackToBaseline_When_NoVersionExists()
+    public async Task ResolveEffective_Should_FallBackToBaseline_When_NoActiveVersionExists()
     {
-        _repository.GetEffectiveAsync(Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+        _repository.GetActiveAsync(Arg.Any<CancellationToken>())
             .Returns((PricingVersion?)null);
 
         var effective = await _resolver.ResolveEffectiveAsync(Now);

@@ -19,7 +19,9 @@ public sealed class PricingRateResolver : IPricingRateResolver
     public async Task<EffectivePricing> ResolveEffectiveAsync(
         DateTime asOf, CancellationToken cancellationToken = default)
     {
-        var version = await _pricingVersionRepository.GetEffectiveAsync(asOf, cancellationToken);
+        // Yürürlükteki tarife artık ZAMAN yerine YAŞAM DÖNGÜSÜ ile belirlenir: tek AKTİF versiyon. Böylece
+        // admin "Aktifleştir" dediği anda yeni teklifler yeni tarifeyi kullanır (asOf yalnızca imzada kalır).
+        var version = await _pricingVersionRepository.GetActiveAsync(cancellationToken);
         return version is null ? EffectivePricing.Baseline : new EffectivePricing(version.Id, ToRateSet(version));
     }
 
@@ -37,5 +39,7 @@ public sealed class PricingRateResolver : IPricingRateResolver
     }
 
     public static PricingRateSet ToRateSet(PricingVersion version) =>
-        new(version.Rates.ToDictionary(rate => rate.Branch, rate => rate.BasePremium));
+        new(
+            version.Rates.ToDictionary(rate => rate.Branch, rate => rate.BasePremium),
+            version.RuleSet);
 }

@@ -3,12 +3,18 @@ using SigortaPro.Domain.Entities;
 namespace SigortaPro.Application.Common.Interfaces;
 
 // ADR-048: Fiyatlandırma versiyonlarının okuma/yazma soyutlaması (ARCHITECTURE_RULES.md §4.2).
-// Versiyonlar değişmezdir; güncelleme metodu bilinçli olarak yoktur (yeni değer = yeni versiyon).
+// Aktif/arşiv versiyonlar değişmezdir; yalnızca TASLAK düzenlenir (yeni değer = yeni versiyon / taslak).
 public interface IPricingVersionRepository : IWriteRepository<PricingVersion>
 {
-    // Verilen ana yürürlükte olan tarife: EffectiveFrom <= asOf olanların en yenisi
-    // (eşitlikte VersionNumber büyük olan). Hiç versiyon yoksa null → yerleşik baseline kullanılır.
-    Task<PricingVersion?> GetEffectiveAsync(DateTime asOf, CancellationToken cancellationToken = default);
+    // Şu an YÜRÜRLÜKTEKİ (Active) tarife — yeni tekliflerde kullanılır. Hiç aktif versiyon yoksa null →
+    // yerleşik baseline kullanılır (temiz kurulum / ilk tarife aktifleştirilene kadar).
+    Task<PricingVersion?> GetActiveAsync(CancellationToken cancellationToken = default);
+
+    // Açık taslak (Draft) varsa getirir — aynı anda birden fazla taslağın oluşmasını engellemek için.
+    Task<PricingVersion?> GetDraftAsync(CancellationToken cancellationToken = default);
+
+    // İZLEMELİ taslak (oranlarıyla) — taslak düzenleme/aktifleştirme komutları için.
+    Task<PricingVersion?> GetTrackedWithRatesByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     // Teklifin sabitlediği versiyonu oranlarıyla getirir (deterministik yeniden hesap için).
     Task<PricingVersion?> GetWithRatesByIdAsync(Guid id, CancellationToken cancellationToken = default);

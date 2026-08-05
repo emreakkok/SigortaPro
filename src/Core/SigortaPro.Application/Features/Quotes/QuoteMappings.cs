@@ -8,12 +8,15 @@ namespace SigortaPro.Application.Features.Quotes;
 // Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz — CODING_STANDARDS.md §4.2).
 internal static class QuoteMappings
 {
+    // createdByStaffName: acente destekli teklifte üreten personelin adı (detay handler'ında IIdentityService
+    // ile çözülüp geçilir). Self-service tekliflerde ve liste sorgularında null bırakılır.
     public static QuoteDto ToDto(
         Quote quote,
         InsuranceProduct product,
         Vehicle? vehicle,
         Property? property,
-        QuotePricingOutcome pricing) => new(
+        QuotePricingOutcome pricing,
+        string? createdByStaffName = null) => new(
         quote.Id,
         quote.CustomerId,
         quote.Branch,
@@ -30,7 +33,9 @@ internal static class QuoteMappings
         pricing.Breakdown,
         ToInsuredPersonDto(quote.InsuredPerson),
         CustomerFullName: FullName(quote.Customer),
-        CustomerPhone: quote.Customer?.PhoneNumber);
+        CustomerPhone: quote.Customer?.PhoneNumber,
+        Source: ResolveSource(quote),
+        CreatedByStaffName: createdByStaffName);
 
     // ADR-041: sigortalı özeti — ham TCKN sızmaz, maskeli döner.
     public static QuoteInsuredPersonDto? ToInsuredPersonDto(InsuredPerson? insuredPerson) =>
@@ -55,7 +60,12 @@ internal static class QuoteMappings
         // aittir ve müşteri bilgisi gösterilmez). Telefon kanonik saklanır (+90…), gösterim frontend'de biçimlenir.
         CustomerId: quote.CustomerId,
         CustomerFullName: FullName(quote.Customer),
-        CustomerPhone: quote.Customer?.PhoneNumber);
+        CustomerPhone: quote.Customer?.PhoneNumber,
+        Source: ResolveSource(quote));
+
+    // Teklif kaynağı türetimi: üreten personel varsa acente destekli, yoksa self-service.
+    public static QuoteSource ResolveSource(Quote quote) =>
+        quote.CreatedByStaffUserId is null ? QuoteSource.SelfService : QuoteSource.AgentAssisted;
 
     // Müşteri (Sigorta Ettiren) tam adı; navigasyon yüklü değilse boş (null-safe).
     public static string FullName(Customer? customer) =>

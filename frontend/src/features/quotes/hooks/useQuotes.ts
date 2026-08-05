@@ -16,7 +16,9 @@ export const quotesQueryKeys = {
   all: ["quotes"] as const,
   list: (params: QuoteListParams) => ["quotes", "list", params] as const,
   detail: (id: string) => ["quotes", "detail", id] as const,
-  comparison: (params: QuoteComparisonParams) => ["quotes", "comparison", params] as const,
+  // customerId önbelleği ayırır: self-servis ile acente destekli önizleme çakışmaz.
+  comparison: (params: QuoteComparisonParams, customerId?: string) =>
+    ["quotes", "comparison", customerId ?? "self", params] as const,
 };
 
 /** Teklif listesi (sayfalı, filtreli). */
@@ -37,20 +39,26 @@ export function useQuote(id: string) {
 
 /**
  * Paket karşılaştırması (anlık prim + risk skoru). `enabled` ile sihirbazın risk
- * objesi adımı tamamlanmadan çağrılması engellenir.
+ * objesi adımı tamamlanmadan çağrılması engellenir. customerId verilirse acente destekli
+ * önizleme (personel, müşteri adına) — aynı sorgu/önbellek yolu kullanılır (kod tekrarı yok).
  */
-export function useQuoteComparison(params: QuoteComparisonParams, enabled: boolean) {
+export function useQuoteComparison(
+  params: QuoteComparisonParams,
+  enabled: boolean,
+  customerId?: string,
+) {
   return useQuery({
-    queryKey: quotesQueryKeys.comparison(params),
-    queryFn: () => getQuoteComparison(params),
+    queryKey: quotesQueryKeys.comparison(params, customerId),
+    queryFn: () => getQuoteComparison(params, customerId),
     enabled,
   });
 }
 
-export function useCreateQuote() {
+/** customerId verilirse acente destekli teklif oluşturma (personel, müşteri adına). */
+export function useCreateQuote(customerId?: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createQuote,
+    mutationFn: (request: Parameters<typeof createQuote>[0]) => createQuote(request, customerId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: quotesQueryKeys.all }),
   });
 }

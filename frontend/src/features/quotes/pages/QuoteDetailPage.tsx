@@ -20,6 +20,7 @@ import { getApiErrorMessages } from "@/shared/lib/apiError";
 import {
   COVERAGE_PACKAGE_LABELS,
   INSURANCE_BRANCH_LABELS,
+  QUOTE_SOURCE_CUSTOMER_LABELS,
   QuoteStatus,
 } from "@/shared/types/insurance.types";
 import { formatCurrency, formatDate } from "@/shared/utils/format";
@@ -119,6 +120,13 @@ export default function QuoteDetailPage() {
           </div>
           <p className="text-sm text-muted-foreground">
             <QuoteValidity validUntil={quote.validUntil} /> · Oluşturma {formatDate(quote.createdAt)}
+          </p>
+          {/* Gerçek akış: müşteri, teklifi acentenin mi yoksa kendisinin mi oluşturduğunu görebilir. */}
+          <p className="text-sm">
+            <span className="text-muted-foreground">Oluşturan: </span>
+            <span className="font-medium">
+              {QUOTE_SOURCE_CUSTOMER_LABELS[quote.source]}
+            </span>
           </p>
         </CardContent>
       </Card>

@@ -13,6 +13,8 @@ import {
 
 interface ComparisonStepProps {
   branch: InsuranceBranch;
+  /** Acente destekli akışta hedef müşteri; null = self-servis (oturum sahibi müşteri). */
+  customerId: string | null;
   /** Seçilen risk objesi (araç veya konut) kimliği; Sağlık için null. */
   riskObjectId: string | null;
   /** Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); kendim için null. */
@@ -27,7 +29,7 @@ interface ComparisonStepProps {
  * Sihirbaz 3. adım: anlık prim + risk skoru göstergesi ve paket karşılaştırma kartları.
  * Paket seçimi teklifi oluşturur (Priced) ve detay sayfasına yönlendirir.
  */
-export function ComparisonStep({ branch, riskObjectId, insuredPerson, isSmoker, onBack, onCreated }: ComparisonStepProps) {
+export function ComparisonStep({ branch, customerId, riskObjectId, insuredPerson, isSmoker, onBack, onCreated }: ComparisonStepProps) {
   const kind = branchRiskKind(branch);
   const params: QuoteComparisonParams = {
     branch,
@@ -39,8 +41,9 @@ export function ComparisonStep({ branch, riskObjectId, insuredPerson, isSmoker, 
     isSmoker: kind === "none" ? isSmoker : null,
   };
 
-  const comparison = useQuoteComparison(params, true);
-  const createQuote = useCreateQuote();
+  // customerId dolu → acente destekli (personel müşteri adına önizler/oluşturur); null → self-servis.
+  const comparison = useQuoteComparison(params, true, customerId ?? undefined);
+  const createQuote = useCreateQuote(customerId ?? undefined);
   const [selectingPackage, setSelectingPackage] = useState<CoveragePackage | null>(null);
 
   const handleSelect = (coveragePackage: CoveragePackage) => {

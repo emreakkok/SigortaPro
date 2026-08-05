@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using SigortaPro.Application.Common.Exceptions;
+using SigortaPro.Application.Common.Authorization;
 using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Common.Pricing;
 using SigortaPro.Application.Features.Customers.DTOs;
@@ -35,11 +35,10 @@ public sealed class AddPropertyCommandHandler : ICommandHandler<AddPropertyComma
 
     public async Task<PropertyDto> Handle(AddPropertyCommand request, CancellationToken cancellationToken)
     {
-        var appUserId = _currentUserService.UserId
-            ?? throw new ForbiddenAccessException();
-
-        var customer = await _customerRepository.GetTrackedByAppUserIdAsync(appUserId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Customer), appUserId);
+        // Self-service (CustomerId null) → oturum sahibi müşteri; acente destekli (dolu) → hedef müşteri
+        // (yalnızca personel — TargetCustomerResolver staff-only guard uygular).
+        var customer = await TargetCustomerResolver.ResolveTrackedAsync(
+            request.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 
         var address = new Address(request.City, request.District, request.Neighborhood, request.PostalCode);
 

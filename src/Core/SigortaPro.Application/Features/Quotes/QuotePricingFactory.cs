@@ -64,6 +64,8 @@ internal static class QuotePricingFactory
     // claimHistoryFactor: yenileme tekliflerinde hasar geçmişi ek prim çarpanı (varsayılan 1.00 = etkisiz).
     // rates (ADR-048): teklifin sabitlediği tarife versiyonunun baz primleri.
     // snapshot (ADR-053): teklifin dondurulmuş girdileri; null ise canlı veriden hesaplanır (eski kayıtlar).
+    // renewalDiscountFactor (ADR-048 ailesi): yenileme tekliflerinde aktif tarifenin yenileme indirimi
+    // (1.00 = indirim yok). Teklifte saklanır → deterministik yeniden hesapta aynı değer verilir.
     public static QuotePricingOutcome Compute(
         IPricingEngine pricingEngine,
         InsuranceBranch branch,
@@ -76,7 +78,8 @@ internal static class QuotePricingFactory
         decimal claimHistoryFactor = 1.00m,
         DateTime? insuredBirthDate = null,
         PricingRateSet? rates = null,
-        PricingSnapshot? snapshot = null)
+        PricingSnapshot? snapshot = null,
+        decimal renewalDiscountFactor = 1.00m)
     {
         var request = snapshot is null
             ? BuildRequest(branch, customer, vehicle, property, referenceDate, insuredBirthDate)
@@ -84,7 +87,9 @@ internal static class QuotePricingFactory
 
         var result = pricingEngine.CalculatePremium(request, rates);
 
-        var premiumFactor = CoveragePackageFactors.PremiumFactor(package);
+        // Paket (kapsam) prim çarpanı versiyonlanmıştır: tarifenin kural seti varsa ORADAN, yoksa yerleşik baseline.
+        var premiumFactor = rates?.RuleSet?.PackagePremiumFactorFor(package)
+            ?? CoveragePackageFactors.PremiumFactor(package);
 
         // Gerçek veriye dayanmayan kalemler dökümden çıkarılır. Tutar motorun kendi hesabından geldiği için
         // (aşağıdaki totalPremium) bu filtre HİÇBİR fiyatı değiştirmez — yalnızca sunumu dürüstleştirir.
@@ -103,7 +108,15 @@ internal static class QuotePricingFactory
                 "Önceki dönem hasar geçmişine göre yenileme ek primi."));
         }
 
-        var totalPremium = Round(result.TotalPremium * premiumFactor * claimHistoryFactor);
+        // Yenileme indirimi yalnızca etkiliyse (yenileme + aktif tarifede indirim tanımlı) dökümde görünür.
+        if (renewalDiscountFactor != 1.00m)
+        {
+            breakdown.Add(new PricingBreakdownItem(
+                "Yenileme İndirimi", renewalDiscountFactor,
+                "Yenileme dönemine özel indirim (aktif tarife)."));
+        }
+
+        var totalPremium = Round(result.TotalPremium * premiumFactor * claimHistoryFactor * renewalDiscountFactor);
 
         var limitFactor = CoveragePackageFactors.CoverageLimitFactor(package);
         var scaledCoverages = coverages

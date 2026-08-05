@@ -1,3 +1,4 @@
+using SigortaPro.Application.Common.Authorization;
 using SigortaPro.Application.Common.Exceptions;
 using SigortaPro.Application.Common.Interfaces;
 using SigortaPro.Application.Features.Quotes.DTOs;
@@ -41,11 +42,10 @@ public sealed class GetQuoteComparisonQueryHandler : IQueryHandler<GetQuoteCompa
 
     public async Task<QuoteComparisonDto> Handle(GetQuoteComparisonQuery request, CancellationToken cancellationToken)
     {
-        var appUserId = _currentUserService.UserId
-            ?? throw new ForbiddenAccessException();
-
-        var customer = await _customerRepository.GetTrackedByAppUserIdAsync(appUserId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Customer), appUserId);
+        // Self-service (CustomerId null) → oturum sahibi müşteri; acente destekli (CustomerId dolu) → hedef
+        // müşteri (yalnızca personel; TargetCustomerResolver staff-only guard uygular). Teklif oluşturmayla aynı yol.
+        var customer = await TargetCustomerResolver.ResolveTrackedAsync(
+            request.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 
         var product = await _productRepository.GetActiveByBranchAsync(request.Branch, cancellationToken)
             ?? throw new NotFoundException(nameof(InsuranceProduct), request.Branch);

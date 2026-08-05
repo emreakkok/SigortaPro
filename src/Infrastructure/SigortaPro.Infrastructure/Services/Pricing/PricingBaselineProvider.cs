@@ -1,4 +1,5 @@
 using SigortaPro.Application.Common.Interfaces;
+using SigortaPro.Application.Common.Pricing;
 using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Infrastructure.Services.Pricing;
@@ -9,4 +10,20 @@ namespace SigortaPro.Infrastructure.Services.Pricing;
 internal sealed class PricingBaselineProvider : IPricingBaselineProvider
 {
     public IReadOnlyDictionary<InsuranceBranch, decimal> BaselineBasePremiums => PricingRuleTables.BasePremiums;
+
+    public IReadOnlyDictionary<string, decimal> BaselineCityRiskCoefficients => PricingRuleTables.CityRiskCoefficients;
+
+    public decimal BaselineDefaultCityRiskCoefficient => PricingRuleTables.DefaultCityRiskCoefficient;
+
+    public PricingBandBaselines BandBaselines => new(
+        PricingRuleTables.DriverAgeBaseline,
+        PricingRuleTables.VehicleAgeBaseline,
+        PricingRuleTables.EnginePowerBaseline,
+        PricingRuleTables.VehicleUsageBaseline,
+        PricingRuleTables.BonusMalusBaseline,
+        PricingRuleTables.BuildingAgeBaseline,
+        PricingRuleTables.SquareMetersBaseline,
+        PricingRuleTables.EarthquakeZoneBaseline,
+        PricingRuleTables.HealthAgeBaseline,
+        PricingRuleTables.SmokerSurchargeBaseline);
 }

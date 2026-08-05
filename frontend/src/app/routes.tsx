@@ -30,6 +30,9 @@ const ClaimDetailPage = lazy(() => import("@/features/claims/pages/ClaimDetailPa
 const RenewalListPage = lazy(() => import("@/features/renewals/pages/RenewalListPage"));
 const AdminDashboardPage = lazy(() => import("@/features/dashboard/pages/AdminDashboardPage"));
 const AdminCustomerListPage = lazy(() => import("@/features/customers/pages/AdminCustomerListPage"));
+const AdminCustomerQuoteWizardPage = lazy(
+  () => import("@/features/quotes/pages/AdminCustomerQuoteWizardPage"),
+);
 const AdminQuoteListPage = lazy(() => import("@/features/quotes/pages/AdminQuoteListPage"));
 const AdminPolicyListPage = lazy(() => import("@/features/policies/pages/AdminPolicyListPage"));
 const AdminClaimListPage = lazy(() => import("@/features/claims/pages/AdminClaimListPage"));
@@ -148,6 +151,11 @@ export const router = createBrowserRouter([
         element: withSuspense(<AdminCustomerListPage />),
       },
       {
+        // Acente destekli teklif: personel/admin, seçili müşteri adına ortak teklif sihirbazını çalıştırır.
+        path: "customers/:customerId/quotes/new",
+        element: withSuspense(<AdminCustomerQuoteWizardPage />),
+      },
+      {
         path: "quotes",
         element: withSuspense(<AdminQuoteListPage />),
       },
@@ -173,13 +181,10 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        // ADR-048: Fiyatlandırma yönetimi yalnızca Admin'e açıktır (personel/müşteri erişemez).
+        // ADR-048: Fiyatlandırma yönetimini acente personeli GÖRÜNTÜLER; yalnızca Admin DEĞİŞTİRİR (taslak
+        // oluştur/düzenle/aktifleştir). Yazma yetkisi backend'de Admin'e kilitli; sayfa personel için salt-okunur.
         path: "pricing",
-        element: (
-          <ProtectedRoute allowedRoles={[UserRoles.Admin]}>
-            {withSuspense(<AdminPricingPage />)}
-          </ProtectedRoute>
-        ),
+        element: withSuspense(<AdminPricingPage />),
       },
     ],
   },

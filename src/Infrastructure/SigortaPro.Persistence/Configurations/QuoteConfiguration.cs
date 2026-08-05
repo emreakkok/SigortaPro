@@ -22,6 +22,13 @@ public sealed class QuoteConfiguration : BaseEntityConfiguration<Quote>
             .HasDefaultValue(1.00m)
             .IsRequired();
 
+        // Yenileme indirimi çarpanı; yalnızca yenileme tekliflerinde <1.00, aksi halde 1.00 (indirim yok).
+        // Teklifte dondurulur → tarife sonradan değişse bile bu teklifin primi/dökümü değişmez (ADR-048 ailesi).
+        builder.Property(q => q.RenewalDiscountFactor)
+            .HasColumnType("decimal(18,2)")
+            .HasDefaultValue(1.00m)
+            .IsRequired();
+
         builder.HasOne(q => q.Customer)
             .WithMany(c => c.Quotes)
             .HasForeignKey(q => q.CustomerId)
@@ -44,8 +51,14 @@ public sealed class QuoteConfiguration : BaseEntityConfiguration<Quote>
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
 
+        // Acente destekli teklif: teklifi müşteri adına oluşturan personelin AppUser kimliği (nullable).
+        // AppUser Identity katmanındadır ve Quote (Domain) ona navigation ile bağlanmaz (ADR-014) → yalnızca
+        // skaler kolon tutulur; personelin "kendi oluşturduğu teklifler" filtresi için indekslenir.
+        builder.Property(q => q.CreatedByStaffUserId);
+
         builder.HasIndex(q => q.CustomerId).HasDatabaseName("IX_Quotes_CustomerId");
         builder.HasIndex(q => q.Status).HasDatabaseName("IX_Quotes_Status");
+        builder.HasIndex(q => q.CreatedByStaffUserId).HasDatabaseName("IX_Quotes_CreatedByStaffUserId");
 
         // ADR-041: "Başkası adına" sağlık sigortalısı — Quotes tablosuna gömülü (OwnsOne) nullable kolonlar;
         // ayrı tablo/aggregate açılmaz (Address value object emsali). Ham TCKN yalnızca DB'de tutulur,

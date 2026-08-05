@@ -120,6 +120,38 @@ public sealed class CustomersController : ControllerBase
         var result = await _sender.Send(new GetCustomerByIdQuery(id), cancellationToken);
         return Ok(result);
     }
+
+    // ── Acente destekli teklif akışı: personel müşteri ADINA risk objesi (araç/konut) ekler ────────────────
+    // Telefonla teklif hazırlarken müşterinin aracı/konutu kayıtlı değilse personel bunu adına ekler. Hedef
+    // müşteri ROUTE'tan alınır; komuttaki CustomerId override edilir (spoofing önlemi). Yalnızca personel.
+
+    /// <summary>Acente personeli, seçili müşterinin profiline araç ekler (müşteri adına teklif hazırlarken).</summary>
+    [HttpPost("{customerId:guid}/vehicles")]
+    [Authorize(Roles = Roles.Staff)]
+    [ProducesResponseType(typeof(VehicleDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddVehicleForCustomer(
+        Guid customerId, AddVehicleCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(command with { CustomerId = customerId }, cancellationToken);
+        return CreatedAtAction(nameof(GetCustomerById), new { id = customerId }, result);
+    }
+
+    /// <summary>Acente personeli, seçili müşterinin profiline konut ekler (müşteri adına teklif hazırlarken).</summary>
+    [HttpPost("{customerId:guid}/properties")]
+    [Authorize(Roles = Roles.Staff)]
+    [ProducesResponseType(typeof(PropertyDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddPropertyForCustomer(
+        Guid customerId, AddPropertyCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(command with { CustomerId = customerId }, cancellationToken);
+        return CreatedAtAction(nameof(GetCustomerById), new { id = customerId }, result);
+    }
 }
 
 // Araç güncelleme istek gövdesi; araç kimliği route'tan alınır (gövdede tekrar edilmez).

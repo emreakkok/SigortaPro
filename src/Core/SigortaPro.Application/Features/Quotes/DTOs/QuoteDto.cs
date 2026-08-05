@@ -24,4 +24,9 @@ public sealed record QuoteDto(
     QuoteInsuredPersonDto? InsuredPerson = null,
     // Müşteri (Sigorta Ettiren) kimliği (additive) — admin detayında ad + telefon özeti. Navigasyon yoksa boş.
     string CustomerFullName = "",
-    string? CustomerPhone = null);
+    string? CustomerPhone = null,
+    // Teklif kaynağı (türetilmiş): müşteri kendi mi oluşturdu (SelfService) yoksa acente mi (AgentAssisted).
+    QuoteSource Source = QuoteSource.SelfService,
+    // Acente destekli teklifte üreten personelin görünen adı (yalnızca personel yüzeyine — admin detayı).
+    // Müşteri yüzeyine taşınmaz (KVKK/gizlilik — müşteri yalnızca "Acente" görür). Self-service ise null.
+    string? CreatedByStaffName = null);

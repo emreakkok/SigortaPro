@@ -17,6 +17,10 @@ public interface ICustomerRepository : IReadRepository<Customer>, IWriteReposito
     // İzlemeli (tracked) müşteri kaydı — güncelleme komutlarında AppUserId üzerinden çözümlenir.
     Task<Customer?> GetTrackedByAppUserIdAsync(Guid appUserId, CancellationToken cancellationToken = default);
 
+    // İzlemeli (tracked) müşteri kaydı — Customer Id üzerinden. Acente personelinin "müşteri adına" işlem
+    // yaptığı (teklif/araç/konut oluşturma) akışlarda hedef müşteriyi çözmek için kullanılır.
+    Task<Customer?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
     // TCKN benzersizliği ön-kontrolü (kayıt akışı) — DB unique ihlalini (500) önlemek için insert öncesi kullanılır.
     Task<bool> ExistsByTcknAsync(string tckn, CancellationToken cancellationToken = default);
 

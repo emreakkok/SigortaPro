@@ -19,6 +19,13 @@ import { cn } from "@/shared/lib/utils";
  * müşteri için Profil / Araçlarım / Konutlarım / Şifre Değiştir / Çıkış; personelde yalnızca Çıkış.
  * Ad-soyad müşteri profil sorgusundan gelir (ADR-039), yoksa e-postaya düşülür.
  */
+// Rol adlarının kullanıcı dostu Türkçe etiketleri (yalnızca gösterim — yetki mantığı session'dadır).
+const ROLE_LABELS: Record<string, string> = {
+  [UserRoles.Admin]: "Yönetici",
+  [UserRoles.Personel]: "Personel",
+  [UserRoles.Customer]: "Müşteri",
+};
+
 export function UserMenu() {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
@@ -60,6 +67,8 @@ export function UserMenu() {
 
   const displayName = fullName.length > 0 ? fullName : session.email;
   const initials = getInitials(fullName.length > 0 ? fullName : session.email);
+  // Oturumdaki rol(ler) — dropdown başlığında şık bir etiket olarak gösterilir (yalnızca sunum; mantık değişmez).
+  const roleLabel = session.roles.map((role) => ROLE_LABELS[role] ?? role).join(" · ");
 
   const handleSignOut = () => {
     setOpen(false);
@@ -78,7 +87,7 @@ export function UserMenu() {
       >
         <span
           aria-hidden="true"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary ring-1 ring-primary/20"
         >
           {initials}
         </span>
@@ -95,9 +104,22 @@ export function UserMenu() {
           role="menu"
           className="absolute right-0 z-30 mt-2 w-56 overflow-hidden rounded-lg border bg-card py-1 shadow-lg"
         >
-          <div className="border-b px-3 py-2">
-            <p className="truncate text-sm font-medium">{displayName}</p>
-            <p className="truncate text-xs text-muted-foreground">{session.email}</p>
+          <div className="flex items-center gap-3 border-b px-3 py-3">
+            <span
+              aria-hidden="true"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary ring-1 ring-primary/20"
+            >
+              {initials}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">{displayName}</p>
+              <p className="truncate text-xs text-muted-foreground">{session.email}</p>
+              {roleLabel.length > 0 && (
+                <span className="mt-1 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                  {roleLabel}
+                </span>
+              )}
+            </div>
           </div>
 
           {isCustomer && (

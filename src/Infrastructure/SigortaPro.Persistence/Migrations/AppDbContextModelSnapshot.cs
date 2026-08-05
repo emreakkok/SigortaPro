@@ -722,6 +722,9 @@ namespace SigortaPro.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("ActivatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -739,12 +742,26 @@ namespace SigortaPro.Persistence.Migrations
                     b.Property<DateTime>("EffectiveFrom")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<string>("Note")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("RuleSet")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("RuleSet");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -758,8 +775,8 @@ namespace SigortaPro.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EffectiveFrom")
-                        .HasDatabaseName("IX_PricingVersions_EffectiveFrom");
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_PricingVersions_Status");
 
                     b.HasIndex("VersionNumber")
                         .IsUnique()
@@ -835,6 +852,9 @@ namespace SigortaPro.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<Guid?>("CreatedByStaffUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
@@ -849,6 +869,11 @@ namespace SigortaPro.Persistence.Migrations
 
                     b.Property<Guid?>("PropertyId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("RenewalDiscountFactor")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(1.00m);
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -870,6 +895,9 @@ namespace SigortaPro.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByStaffUserId")
+                        .HasDatabaseName("IX_Quotes_CreatedByStaffUserId");
 
                     b.HasIndex("CustomerId")
                         .HasDatabaseName("IX_Quotes_CustomerId");

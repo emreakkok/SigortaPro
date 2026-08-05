@@ -34,12 +34,19 @@ export function useUpdateProfile() {
   });
 }
 
-export function useAddVehicle() {
+/**
+ * customerId verilirse acente destekli (personel, müşteri adına araç ekler) → o müşterinin detay sorgusu
+ * tazelenir; verilmezse self-servis → oturum sahibinin profili tazelenir.
+ */
+export function useAddVehicle(customerId?: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (request: VehicleRequest) => addVehicle(request),
-    // Araç DTO'su profilin bir alt kümesidir; profili yeniden çekmek en basit tutarlılık yolu.
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: profileQueryKey }),
+    mutationFn: (request: VehicleRequest) => addVehicle(request, customerId),
+    // Araç DTO'su profilin bir alt kümesidir; ilgili kaynağı yeniden çekmek en basit tutarlılık yolu.
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: customerId ? ["customers"] : profileQueryKey,
+      }),
   });
 }
 
@@ -59,10 +66,14 @@ export function useChangePassword() {
   });
 }
 
-export function useAddProperty() {
+/** customerId verilirse acente destekli (personel, müşteri adına konut ekler). */
+export function useAddProperty(customerId?: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (request: PropertyRequest) => addProperty(request),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: profileQueryKey }),
+    mutationFn: (request: PropertyRequest) => addProperty(request, customerId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: customerId ? ["customers"] : profileQueryKey,
+      }),
   });
 }

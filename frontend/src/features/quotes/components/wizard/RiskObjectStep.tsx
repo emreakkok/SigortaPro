@@ -14,6 +14,8 @@ interface RiskObjectStepProps {
   branch: InsuranceBranch;
   vehicles: Vehicle[];
   properties: Property[];
+  /** Acente destekli akışta hedef müşteri; null = self-servis (araç/konut oturum sahibine eklenir). */
+  customerId: string | null;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   /** Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); kendim için null. */
@@ -35,6 +37,7 @@ export function RiskObjectStep({
   branch,
   vehicles,
   properties,
+  customerId,
   selectedId,
   onSelect,
   insuredPerson,
@@ -50,8 +53,9 @@ export function RiskObjectStep({
   const [healthMode, setHealthMode] = useState<"self" | "other">(
     insuredPerson === null ? "self" : "other",
   );
-  const addVehicle = useAddVehicle();
-  const addProperty = useAddProperty();
+  // customerId dolu → araç/konut, seçili müşteri adına eklenir (acente destekli); null → oturum sahibine.
+  const addVehicle = useAddVehicle(customerId ?? undefined);
+  const addProperty = useAddProperty(customerId ?? undefined);
 
   // ADR-054: Sağlıkta sigara beyanı ZORUNLUDUR — beyan alınmadan ilerlenemez (varsayılan atanmaz).
   const canProceed =

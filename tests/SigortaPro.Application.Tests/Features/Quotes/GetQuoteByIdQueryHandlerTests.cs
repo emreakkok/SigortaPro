@@ -16,12 +16,14 @@ public class GetQuoteByIdQueryHandlerTests
     private readonly ICustomerRepository _customerRepository = Substitute.For<ICustomerRepository>();
     private readonly IPricingEngine _pricingEngine = Substitute.For<IPricingEngine>();
     private readonly ICurrentUserService _currentUserService = Substitute.For<ICurrentUserService>();
+    private readonly IIdentityService _identityService = Substitute.For<IIdentityService>();
     private readonly GetQuoteByIdQueryHandler _handler;
 
     public GetQuoteByIdQueryHandlerTests()
     {
         _handler = new GetQuoteByIdQueryHandler(
-            _quoteRepository, _customerRepository, _pricingEngine, PricingTestDoubles.BaselineResolver(), _currentUserService);
+            _quoteRepository, _customerRepository, _pricingEngine, PricingTestDoubles.BaselineResolver(),
+            _currentUserService, _identityService);
     }
 
     [Fact]
