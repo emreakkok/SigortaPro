@@ -36,7 +36,7 @@ public class Vehicle : BaseEntity, IAggregateRoot
     public int ManufactureYear { get; private set; }
     public int EnginePowerHp { get; private set; }
 
-    // ADR-057: Kullanım amacı BEYANI (Kasko/Trafik fiyatlamasını etkiler). Nullable'dır: bu alan
+    // Kullanım amacı BEYANI (Kasko/Trafik fiyatlamasını etkiler). Nullable'dır: bu alan
     // eklenmeden önce kaydedilmiş araçlarda null kalır ve o araçlardan üretilmiş ESKİ tekliflere yeni
     // faktör geriye dönük UYGULANMAZ. Yeni araç kaydında beyan zorunludur (varsayılan atanmaz).
     public VehicleUsage? UsagePurpose { get; private set; }

@@ -9,7 +9,7 @@ using SigortaPro.Application.Features.Staff.Commands.CreateStaffUser;
 
 namespace SigortaPro.Application.Tests.Features.Staff;
 
-// ADR-060: Personel oluşturma handler'ı. Rolün sunucuda Personel'e sabitlendiği ve şifrenin dışa sızmadığı doğrulanır.
+// Personel oluşturma handler'ı. Rolün sunucuda Personel'e sabitlendiği ve şifrenin dışa sızmadığı doğrulanır.
 public class CreateStaffUserCommandHandlerTests
 {
     private readonly IIdentityService _identityService = Substitute.For<IIdentityService>();

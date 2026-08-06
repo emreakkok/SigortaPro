@@ -8,7 +8,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Tests.Features.Pricing;
 
-// ADR-048'in ÇEKİRDEK GARANTİSİ: admin tarifeyi değiştirdiğinde
+// ÇEKİRDEK GARANTİSİ: admin tarifeyi değiştirdiğinde
 //   • yeni teklifler yeni tarifeyi kullanır,
 //   • mevcut teklif/poliçeler SABİTLEDİKLERİ tarifeyle hesaplanmaya devam eder (fiyatları değişmez).
 // Bu testler garantiyi çözümleyici (resolver) düzeyinde kanıtlar; fiyatın gerçekten değiştiğini/

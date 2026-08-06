@@ -10,11 +10,11 @@ using SigortaPro.Application.Features.Auth.Commands.ResetPassword;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// Task 23: Şifre sıfırlama akışının uçtan uca entegrasyon testleri (ADR-035). Gerçek pipeline'ı
+// Şifre sıfırlama akışının uçtan uca entegrasyon testleri. Gerçek pipeline'ı
 // (middleware → MediatR → Identity DataProtector token provider → EF) doğrular; böylece
 // AddDefaultTokenProviders kaydının fiilen çalıştığı kanıtlanır.
-// Rate limit bütçesi (10 istek/dk — ADR-020): bu sınıf yalnızca 2 HTTP auth çağrısı ekler
-// (arrange ISender ile). Koleksiyon toplamı 7 + 2 = 9 < 10 (ADR-034).
+// Rate limit bütçesi (10 istek/dk): bu sınıf yalnızca 2 HTTP auth çağrısı ekler
+// (arrange ISender ile). Koleksiyon toplamı 7 + 2 = 9 < 10.
 [Collection(IntegrationTestCollection.Name)]
 public sealed class PasswordResetFlowIntegrationTests
 {

@@ -48,8 +48,8 @@ public sealed class GetQuoteByIdQueryHandler : IQueryHandler<GetQuoteByIdQuery, 
         }
 
         // Prim dökümü, saklanan seçim + veri üzerinden oluşturma anındaki referansla (CreatedAt) yeniden
-        // hesaplanır; deterministik motor sayesinde oluşturma anındaki değerlerle birebir aynıdır (ADR-021).
-        // ADR-048: baz primler teklifin SABİTLEDİĞİ tarife versiyonundan okunur — admin tarifeyi
+        // hesaplanır; deterministik motor sayesinde oluşturma anındaki değerlerle birebir aynıdır.
+        // baz primler teklifin SABİTLEDİĞİ tarife versiyonundan okunur — admin tarifeyi
         // değiştirse bile bu teklifin primi/dökümü değişmez.
         var rates = await _pricingRateResolver.ResolveForQuoteAsync(quote.PricingVersionId, cancellationToken);
 
@@ -65,7 +65,7 @@ public sealed class GetQuoteByIdQueryHandler : IQueryHandler<GetQuoteByIdQuery, 
             quote.ClaimHistoryFactor,
             insuredBirthDate: quote.InsuredPerson?.BirthDate,
             rates: rates,
-            // ADR-053: yeniden hesap teklifin DONDURULMUŞ girdilerinden yapılır (canlı entity'den değil).
+            // yeniden hesap teklifin DONDURULMUŞ girdilerinden yapılır (canlı entity'den değil).
             snapshot: quote.PricingSnapshot,
             // Yenileme indirimi teklifte donduruldu → yeniden hesapta aynı değer (deterministik).
             renewalDiscountFactor: quote.RenewalDiscountFactor);

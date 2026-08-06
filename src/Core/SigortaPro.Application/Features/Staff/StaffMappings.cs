@@ -3,7 +3,7 @@ using SigortaPro.Application.Features.Staff.DTOs;
 
 namespace SigortaPro.Application.Features.Staff;
 
-// ADR-060: StaffUserInfo (kimlik özeti) → feature DTO eşlemeleri. Tek yerde toplanır (CODING_STANDARDS §5.2).
+// StaffUserInfo (kimlik özeti) → feature DTO eşlemeleri. Tek yerde toplanır.
 internal static class StaffMappings
 {
     public static StaffListItemDto ToListItemDto(this StaffUserInfo info) =>

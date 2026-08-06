@@ -3,7 +3,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// Bildirim modülüne özgü sorgular (ARCHITECTURE_RULES.md §4.2, ADR-005/ADR-042).
+// Bildirim modülüne özgü sorgular.
 // Tüm okuma yüzeyi alıcı (RecipientUserId) kapsamlıdır — kullanıcı yalnızca kendi bildirimlerini görür.
 public interface INotificationRepository : IReadRepository<Notification>, IWriteRepository<Notification>
 {

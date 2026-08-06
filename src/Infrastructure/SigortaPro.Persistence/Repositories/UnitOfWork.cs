@@ -16,7 +16,7 @@ public sealed class UnitOfWork : IUnitOfWork
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         _context.SaveChangesAsync(cancellationToken);
 
-    // ADR-017: Çoklu store'a yazan işlemler (örn. Identity kullanıcısı + Domain Customer) tek bir
+    // Çoklu store'a yazan işlemler (örn. Identity kullanıcısı + Domain Customer) tek bir
     // transaction içinde atomik yürütülür. EF ExecutionStrategy ile sarmalanır; hata durumunda rollback yapılır.
     public async Task ExecuteInTransactionAsync(Func<Task> operation, CancellationToken cancellationToken = default)
     {

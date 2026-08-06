@@ -3,7 +3,7 @@ namespace SigortaPro.Infrastructure.Email;
 // SMTP e-posta gönderimi ve şifre sıfırlama linki için ortak ayarlar (JwtSettings deseni).
 // appsettings.json "EmailSettings" bölümünden bağlanır. Gerçek kullanıcı adı/parola koda veya
 // appsettings dosyalarına YAZILMAZ; geliştirmede `dotnet user-secrets`, üretimde ortam değişkeni/secret store
-// ile sağlanır (ADR-035). Parola hiçbir log kaydına yazılmaz.
+// ile sağlanır. Parola hiçbir log kaydına yazılmaz.
 public sealed class EmailSettings
 {
     public const string SectionName = "EmailSettings";

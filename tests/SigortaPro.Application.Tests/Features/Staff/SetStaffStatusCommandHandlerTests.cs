@@ -7,7 +7,7 @@ using SigortaPro.Application.Features.Staff.Commands.SetStaffStatus;
 
 namespace SigortaPro.Application.Tests.Features.Staff;
 
-// ADR-060/061: Aktif/pasif handler'ı. Pasifleştirmede token iptali; hedef Personel değilse 404 (son-Admin invariant'ı).
+// Aktif/pasif handler'ı. Pasifleştirmede token iptali; hedef Personel değilse 404 (son-Admin invariant'ı).
 public class SetStaffStatusCommandHandlerTests
 {
     private readonly IIdentityService _identityService = Substitute.For<IIdentityService>();

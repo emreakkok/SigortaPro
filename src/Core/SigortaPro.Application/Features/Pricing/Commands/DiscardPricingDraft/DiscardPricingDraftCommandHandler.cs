@@ -7,7 +7,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Pricing.Commands.DiscardPricingDraft;
 
-// ADR-048: Taslağı soft-delete eder. Aktif/arşiv versiyon iptal edilemez — böylece hiçbir teklif/poliçenin
+// Taslağı soft-delete eder. Aktif/arşiv versiyon iptal edilemez — böylece hiçbir teklif/poliçenin
 // sabitlediği tarife kaybolmaz (geçmiş primler yeniden hesaplanabilir kalır).
 public sealed class DiscardPricingDraftCommandHandler : ICommandHandler<DiscardPricingDraftCommand>
 {

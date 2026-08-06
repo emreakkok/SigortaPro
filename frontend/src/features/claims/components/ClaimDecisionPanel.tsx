@@ -114,9 +114,9 @@ function RejectForm({ claim }: { claim: Claim }) {
 /**
  * Hasar karar aksiyonları (acente personeli): durum makinesine göre uygun aksiyonu sunar —
  * Submitted → incelemeye al; UnderReview → onayla/reddet; Approved → ödemeyi gerçekleştir.
- * Paid/Rejected uç durumlardır (aksiyon yok). Geçersiz geçişler backend'de 409 döner (ADR-013).
+ * Paid/Rejected uç durumlardır (aksiyon yok). Geçersiz geçişler backend'de 409 döner.
  *
- * ADR-060 (görevler ayrılığı): Ödeme (`pay`) aksiyonu YALNIZCA Admin'e gösterilir; Personel
+ * (görevler ayrılığı): Ödeme (`pay`) aksiyonu YALNIZCA Admin'e gösterilir; Personel
  * inceleme/onay/ret yapar ama ödeme yapamaz. Bu yalnızca UX gizlemesidir — gerçek kısıt backend'de
  * `[Authorize(Roles = Admin)]` ile sağlanır (Personel doğrudan çağırsa 403 alır).
  */
@@ -146,7 +146,7 @@ export function ClaimDecisionPanel({ claim }: { claim: Claim }) {
   }
 
   if (claim.status === ClaimStatus.Approved) {
-    // ADR-060: Ödeme yalnızca Admin'e görünür. Personel için bilgilendirme gösterilir (aksiyon yok).
+    // Ödeme yalnızca Admin'e görünür. Personel için bilgilendirme gösterilir (aksiyon yok).
     if (!isAdmin) {
       return (
         <p className="text-sm text-muted-foreground">

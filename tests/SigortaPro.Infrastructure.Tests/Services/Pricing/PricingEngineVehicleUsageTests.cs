@@ -5,7 +5,7 @@ using SigortaPro.Infrastructure.Services.Pricing;
 
 namespace SigortaPro.Infrastructure.Tests.Services.Pricing;
 
-// ADR-057: Kullanım amacı çarpanları (MVP simülasyonu). Hususi referans (1.00), ticari ve taksi ek prim.
+// Kullanım amacı çarpanları (MVP simülasyonu). Hususi referans (1.00), ticari ve taksi ek prim.
 // Beyanı olmayan (null) isteklerde faktör HİÇ üretilmez → eski kayıtların fiyatı/dökümü değişmez.
 public class PricingEngineVehicleUsageTests
 {
@@ -64,7 +64,7 @@ public class PricingEngineVehicleUsageTests
     [Fact]
     public void CalculatePremium_Should_ShowUsageFactor_EvenWhenNeutral()
     {
-        // Hususi çarpanı 1.00'dır ama BEYANA dayandığından dökümde gösterilir (ADR-054 ilkesi:
+        // Hususi çarpanı 1.00'dır ama BEYANA dayandığından dökümde gösterilir (ilkesi:
         // yalnızca gerçek veriye dayanmayan faktörler gizlenir).
         var result = _engine.CalculatePremium(Request(VehicleUsage.Hususi));
 

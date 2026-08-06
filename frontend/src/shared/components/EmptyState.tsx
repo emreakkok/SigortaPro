@@ -12,7 +12,7 @@ interface EmptyStateProps {
 }
 
 /*
- * Boş durum bileşeni (ADR-044). "Henüz kayıt yok" düz metni yerine kurumsal SaaS deseni:
+ * Boş durum bileşeni. "Henüz kayıt yok" düz metni yerine kurumsal SaaS deseni:
  * yumuşak token'lı ikon rozeti + başlık + açıklama + CTA. Renkler token tabanlı (accent/muted/primary)
  * → Dark Mode uyumlu. Bir Card içinde ya da tek başına kullanılabilir.
  */

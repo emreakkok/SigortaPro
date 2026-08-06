@@ -101,13 +101,13 @@ public sealed class PurchaseQuoteCommandHandler : ICommandHandler<PurchaseQuoteC
             throw new PaymentFailedException(payment.FailureReason!);
         }
 
-        // Başarılı ödeme + poliçe üretimi + teklif durumu tek transaction'da atomik yürütülür (ADR-017, ADR-022).
+        // Başarılı ödeme + poliçe üretimi + teklif durumu tek transaction'da atomik yürütülür.
         Policy policy = null!;
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             payment.MarkSuccessful(gatewayResult.ProviderReferenceCode);
 
-            // Approved değilse DomainException → UnhandledExceptionBehavior 409'a çevirir (ADR-013).
+            // Approved değilse DomainException → UnhandledExceptionBehavior 409'a çevirir.
             quote.Purchase();
 
             var sequence = await _policyRepository.CountByYearAsync(now.Year, cancellationToken) + 1;

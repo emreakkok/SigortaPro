@@ -2,8 +2,8 @@ using SigortaPro.Domain.Constants;
 
 namespace SigortaPro.Application.Common.Validation;
 
-// T.C. Kimlik Numarası algoritmik doğrulaması (CODING_STANDARDS.md §6.2). Kayıt (Task 5) sırasında
-// oluşturulan müşterinin TCKN'si burada doğrulanır; Task 7'nin müşteri modülü de bu ortak kuralı kullanır.
+// T.C. Kimlik Numarası algoritmik doğrulaması. Kayıt sırasında
+// oluşturulan müşterinin TCKN'si burada doğrulanır; 'nin müşteri modülü de bu ortak kuralı kullanır.
 public static class TcknValidation
 {
     public static bool IsValid(string? tckn)

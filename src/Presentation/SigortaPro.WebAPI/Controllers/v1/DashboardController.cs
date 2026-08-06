@@ -25,7 +25,7 @@ public sealed class DashboardController : ControllerBase
     }
 
     /// <summary>
-    /// Operasyon dashboard'ının tüm blokları tek çağrıda (ADR-052): seçilen aralığın KPI'ları + önceki eşit
+    /// Operasyon dashboard'ının tüm blokları tek çağrıda: seçilen aralığın KPI'ları + önceki eşit
     /// uzunluktaki dönemle karşılaştırma, aksiyon merkezi, prim üretimi zaman serisi, satış hunisi,
     /// branş performansı, hasar operasyonu ve portföy. Aralık verilmezse son 30 gün kullanılır.
     /// </summary>
@@ -50,7 +50,7 @@ public sealed class DashboardController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Tarih aralıklı ödeme/ciro raporu (işlem tarihine göre; sayfalı). Yalnızca Admin (ADR-060: ciro görünürlüğü yönetimseldir; sınıf düzeyi Staff yetkisini Admin'e daraltır).</summary>
+    /// <summary>Tarih aralıklı ödeme/ciro raporu (işlem tarihine göre; sayfalı). Yalnızca Admin.</summary>
     [HttpGet("reports/payments")]
     [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(PagedResult<PaymentReportItemDto>), StatusCodes.Status200OK)]

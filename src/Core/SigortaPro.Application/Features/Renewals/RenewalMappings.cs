@@ -4,7 +4,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Renewals;
 
-// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz — CODING_STANDARDS.md §4.2).
+// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz).
 internal static class RenewalMappings
 {
     public static RenewalDto ToDto(Renewal renewal) => new(

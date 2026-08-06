@@ -2,9 +2,9 @@ using SigortaPro.Domain.Common;
 
 namespace SigortaPro.Domain.Entities;
 
-// Kalıcı kullanıcı bildirimi (ADR-042). Alıcı bazlı satır modeli: bir olay, hedef kitledeki her
+// Kalıcı kullanıcı bildirimi. Alıcı bazlı satır modeli: bir olay, hedef kitledeki her
 // kullanıcı için ayrı kayıt üretir (okundu durumu kullanıcıya özeldir). RecipientUserId, Identity
-// kullanıcısına (AppUserId) işaret eden düz Guid'dir — Domain, Identity tiplerini bilmez (ADR-014).
+// kullanıcısına (AppUserId) işaret eden düz Guid'dir — Domain, Identity tiplerini bilmez.
 public class Notification : BaseEntity, IAggregateRoot
 {
     protected Notification()
@@ -55,7 +55,7 @@ public class Notification : BaseEntity, IAggregateRoot
     public Guid? RelatedEntityId { get; private set; }
     public string? RelatedEntityType { get; private set; }
 
-    // ADR-047 (additive): "işlemi kim yaptı" bağlamı. ActorUserId stabil kimlik referansıdır;
+    // (additive): "işlemi kim yaptı" bağlamı. ActorUserId stabil kimlik referansıdır;
     // ActorName bildirim oluşturulduğu andaki görünen ad **snapshot**'ıdır — kullanıcı adını sonradan
     // değiştirse bile geçmiş bildirim o anki gerçeği gösterir (activity feed girdisi geçmişe aittir).
     // Anonim akışlarda (şifre sıfırlama) her ikisi de null'dır.

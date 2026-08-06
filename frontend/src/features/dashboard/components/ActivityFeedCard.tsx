@@ -32,7 +32,7 @@ function relativeTime(iso: string): string {
 }
 
 /**
- * Son Aktiviteler (ADR-052) — MEVCUT bildirim altyapısından beslenir (ADR-047): actor snapshot'ı,
+ * Son Aktiviteler — MEVCUT bildirim altyapısından beslenir: actor snapshot'ı,
  * referans kodu ve `RelatedEntityId` zaten kayıtlıdır. **Yeni bir audit log sistemi kurulmaz**;
  * bildirim ≠ audit ayrımı korunur ve yeni endpoint eklenmez (mevcut `GET /notifications` küçük sayfa boyutuyla).
  * Satırlar, bildirim navigasyonunun aynısıyla (`?focus=<id>`) ilgili kayda götürür.

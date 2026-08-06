@@ -20,9 +20,9 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// ADR-060 / ADR-061 (STAFF_ROLE_AUTHORIZATION_PLAN.md §26.4, §26.5, §26.10): Admin/Personel yetki ayrımının
+// / (STAFF_ROLE_AUTHORIZATION_PLAN.md,,): Admin/Personel yetki ayrımının
 // uçtan uca güvenlik doğrulaması. Test numaraları plandaki S1–S19 senaryolarına karşılık gelir.
-// E-posta tetiklenmez (host NullEmailService); auth arrange ISender ile yapılır (HTTP rate-limit bütçesi korunur, ADR-034).
+// E-posta tetiklenmez (host NullEmailService); auth arrange ISender ile yapılır (HTTP rate-limit bütçesi korunur).
 [Collection(IntegrationTestCollection.Name)]
 public sealed class StaffAuthorizationIntegrationTests
 {
@@ -99,7 +99,7 @@ public sealed class StaffAuthorizationIntegrationTests
     {
         var personel = await TestAccountFactory.StaffClientAsync(_factory);
 
-        // ADR-048 (güncellendi): Personel fiyatlandırmayı GÖRÜNTÜLER (salt-okunur).
+        // (güncellendi): Personel fiyatlandırmayı GÖRÜNTÜLER (salt-okunur).
         (await personel.GetAsync("/api/v1/pricing/versions"))
             .StatusCode.Should().Be(HttpStatusCode.OK, "Personel fiyat versiyonlarını görüntüleyebilir (S6)");
 

@@ -2,7 +2,7 @@ namespace SigortaPro.Application.Common.Models;
 
 public sealed class PaginationParams
 {
-    // DEVELOPMENT_RULES.md §6: varsayılan pageSize=20, maksimum=100.
+    // : varsayılan pageSize=20, maksimum=100.
     private const int DefaultPageSize = 20;
     private const int MaxPageSize = 100;
 

@@ -26,7 +26,7 @@ public sealed class GetClaimListQueryHandler : IQueryHandler<GetClaimListQuery, 
     public async Task<PagedResult<ClaimSummaryDto>> Handle(GetClaimListQuery request, CancellationToken cancellationToken)
     {
         // Acente personeli tüm hasarları görür; müşteri yalnızca kendi hasarlarını (customerId filtresi).
-        // Sahiplik/personel muafiyeti mantığı QuoteAuthorization ile ortaktır (Task 9'dan yeniden kullanım).
+        // Sahiplik/personel muafiyeti mantığı QuoteAuthorization ile ortaktır ('dan yeniden kullanım).
         Guid? customerFilter = null;
         if (!QuoteAuthorization.IsStaff(_currentUserService))
         {

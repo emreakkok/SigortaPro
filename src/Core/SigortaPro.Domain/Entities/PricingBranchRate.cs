@@ -3,7 +3,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Domain.Entities;
 
-// ADR-048: Bir fiyatlandırma versiyonundaki tek branşın baz primi. Versiyonla birlikte değişmezdir;
+// Bir fiyatlandırma versiyonundaki tek branşın baz primi. Versiyonla birlikte değişmezdir;
 // güncelleme metodu bilinçli olarak yoktur (yeni değer = yeni versiyon).
 public class PricingBranchRate : BaseEntity
 {

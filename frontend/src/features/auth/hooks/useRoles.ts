@@ -2,7 +2,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { isAdmin, isCustomerRole, isStaff } from "@/shared/lib/session";
 
 /**
- * Aktif oturumun rol bayrakları (ADR-060). Tek merkezden türetilir; navigasyon görünürlüğü ve
+ * Aktif oturumun rol bayrakları. Tek merkezden türetilir; navigasyon görünürlüğü ve
  * koşullu aksiyon render'ı bunu kullanır. `useAuth().session`'a bağlı olduğundan oturum değişiminde
  * (login/logout/refresh) yeniden render tetikler — localStorage'ı doğrudan okuyan eski desenin aksine.
  *

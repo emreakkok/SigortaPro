@@ -3,7 +3,7 @@ using SigortaPro.Application.Common.Interfaces;
 
 namespace SigortaPro.Infrastructure.Services.Storage;
 
-// IFileStorageService yerel disk implementasyonu (ADR-023). Kök dizin `FileStorage:RootPath` ile
+// IFileStorageService yerel disk implementasyonu. Kök dizin `FileStorage:RootPath` ile
 // yapılandırılır; göreli anahtarlar kök altında saklanır. İleride blob depolamaya geçiş yalnızca
 // yeni bir implementasyon eklemektir (arayüz değişmez). Dizin dışına çıkış (path traversal) engellenir.
 public sealed class LocalFileStorageService : IFileStorageService

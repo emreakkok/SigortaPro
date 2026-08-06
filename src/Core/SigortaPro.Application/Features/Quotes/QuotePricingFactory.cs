@@ -9,21 +9,21 @@ namespace SigortaPro.Application.Features.Quotes;
 // Teklif modülünün fiyatlama köprüsü: fiyatlama motorunun (saf/deterministik) girdisini kurar, teminat
 // paketi ölçeğini uygular ve prim dökümü + ölçekli teminatları üretir.
 //
-// ADR-053: Girdiler artık teklifte SAKLANIR (PricingSnapshot). Yeniden hesap öncelikle snapshot'tan okur;
+// Girdiler artık teklifte SAKLANIR (PricingSnapshot). Yeniden hesap öncelikle snapshot'tan okur;
 // snapshot yoksa (bu alan eklenmeden önce oluşmuş kayıtlar) eski davranışa — canlı entity'den okumaya —
 // düşer. Böylece müşteri adresini/aracını sonradan değiştirse bile eski teklifin risk skoru ve prim
 // dökümü DEĞİŞMEZ, mevcut kayıtlar da bit-aynı kalır.
 internal static class QuotePricingFactory
 {
     // Beyanı alınmamış (eski) sağlık tekliflerinde motor girdisi: sigara faktörü etkisiz kalır ve
-    // dökümde gösterilmez — kullanıcıya sorulmamış bir sağlık beyanı gerçekmiş gibi sunulmaz (ADR-054).
+    // dökümde gösterilmez — kullanıcıya sorulmamış bir sağlık beyanı gerçekmiş gibi sunulmaz.
     private const bool NoSmokerDeclaration = false;
 
     // Gerçek veriye dayanmadığı sürece kullanıcıya gösterilmeyecek döküm kalemi (motor adıyla birebir).
     private const string SmokerFactorName = "Sigara Kullanımı";
 
     /// <summary>
-    /// Teklif oluşturulurken fiyatlama girdilerini dondurur (ADR-053). Yalnızca fiyatı DOĞRUDAN belirleyen
+    /// Teklif oluşturulurken fiyatlama girdilerini dondurur. Yalnızca fiyatı DOĞRUDAN belirleyen
     /// primitifler kopyalanır; kişisel veri (TCKN, telefon, tam adres) ve fiyata etkisiz alanlar (plaka,
     /// marka, model) taşınmaz.
     /// </summary>
@@ -43,10 +43,10 @@ internal static class QuotePricingFactory
             AgeInYears(customer.BirthDate, referenceDate),
             VehicleAgeInYears(vehicle!.ManufactureYear, referenceDate),
             vehicle.EnginePowerHp,
-            // MVP: müşterinin adres ili, aracın kullanım ili için vekildir (teknik borç — ADR-053).
+            // MVP: müşterinin adres ili, aracın kullanım ili için vekildir (teknik borç).
             customer.Address.City,
             bonusMalusStep,
-            // ADR-057: Kullanım amacı beyanı teklif anında dondurulur → araç sonradan güncellense bile
+            // Kullanım amacı beyanı teklif anında dondurulur → araç sonradan güncellense bile
             // bu teklifin fiyatı ve dökümü değişmez.
             vehicle.UsagePurpose),
         InsuranceBranch.Konut or InsuranceBranch.Dask => PricingSnapshot.ForProperty(
@@ -62,9 +62,9 @@ internal static class QuotePricingFactory
     };
 
     // claimHistoryFactor: yenileme tekliflerinde hasar geçmişi ek prim çarpanı (varsayılan 1.00 = etkisiz).
-    // rates (ADR-048): teklifin sabitlediği tarife versiyonunun baz primleri.
-    // snapshot (ADR-053): teklifin dondurulmuş girdileri; null ise canlı veriden hesaplanır (eski kayıtlar).
-    // renewalDiscountFactor (ADR-048 ailesi): yenileme tekliflerinde aktif tarifenin yenileme indirimi
+    // rates: teklifin sabitlediği tarife versiyonunun baz primleri.
+    // snapshot: teklifin dondurulmuş girdileri; null ise canlı veriden hesaplanır (eski kayıtlar).
+    // renewalDiscountFactor: yenileme tekliflerinde aktif tarifenin yenileme indirimi
     // (1.00 = indirim yok). Teklifte saklanır → deterministik yeniden hesapta aynı değer verilir.
     public static QuotePricingOutcome Compute(
         IPricingEngine pricingEngine,
@@ -129,8 +129,8 @@ internal static class QuotePricingFactory
         return new QuotePricingOutcome(result.BasePremium, totalPremium, result.RiskScore, breakdown, scaledCoverages);
     }
 
-    // Kullanıcıya yalnızca gerçek veriye dayanan faktörler gösterilir (ADR-054).
-    // Hasarsızlık basamağı ADR-059'dan itibaren gerçek veriden türetildiğinden artık burada filtrelenmez;
+    // Kullanıcıya yalnızca gerçek veriye dayanan faktörler gösterilir.
+    // Hasarsızlık basamağı itibaren gerçek veriden türetildiğinden artık burada filtrelenmez;
     // motor zaten yalnızca basamak nötr DEĞİLSE kalem üretir (nötr/eski kayıtlarda döküm değişmez).
     private static bool IsBackedByRealData(PricingBreakdownItem item, PricingSnapshot? snapshot)
     {
@@ -142,7 +142,7 @@ internal static class QuotePricingFactory
         return true;
     }
 
-    // Snapshot'tan motor girdisi (ADR-053) — canlı entity'ye HİÇ dokunulmaz.
+    // Snapshot'tan motor girdisi — canlı entity'ye HİÇ dokunulmaz.
     private static PricingRequest BuildRequestFromSnapshot(InsuranceBranch branch, PricingSnapshot snapshot) =>
         branch switch
         {
@@ -180,18 +180,18 @@ internal static class QuotePricingFactory
             VehicleAgeInYears(vehicle!.ManufactureYear, referenceDate),
             vehicle.EnginePowerHp,
             customer.Address.City,
-            // ADR-059: Snapshot'sız (eski) kayıtlarda Bonus-Malus basamağı BİLİNÇLİ olarak 0'dır —
+            // Snapshot'sız (eski) kayıtlarda Bonus-Malus basamağı BİLİNÇLİ olarak 0'dır —
             // müşterinin bugünkü hasar geçmişini geçmiş teklife yansıtmak, o teklifin primini ve dökümünü
             // geriye dönük değiştirirdi.
             BonusMalusScale.NeutralStep,
-            // ADR-057: Snapshot'sız kayıtlarda kullanım amacı da uygulanmaz (aynı gerekçe).
+            // Snapshot'sız kayıtlarda kullanım amacı da uygulanmaz (aynı gerekçe).
             UsagePurpose: null),
         InsuranceBranch.Konut or InsuranceBranch.Dask => new PropertyPricingRequest(
             branch,
             property!.BuildingAge,
             property.SquareMeters,
             property.EarthquakeZone),
-        // Sağlıkta yaş, "başkası adına" teklifte sigortalının doğum tarihinden hesaplanır (ADR-041).
+        // Sağlıkta yaş, "başkası adına" teklifte sigortalının doğum tarihinden hesaplanır.
         InsuranceBranch.Saglik => new HealthPricingRequest(
             AgeInYears(insuredBirthDate ?? customer.BirthDate, referenceDate),
             NoSmokerDeclaration),

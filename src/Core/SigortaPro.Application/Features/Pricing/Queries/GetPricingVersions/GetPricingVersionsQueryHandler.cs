@@ -35,7 +35,7 @@ public sealed class GetPricingVersionsQueryHandler
 
         var hasActive = chronological.Any(version => version.Status == PricingVersionStatus.Active);
 
-        // ADR-049: Yerleşik baz tarife her zaman zincirin başında (v0) yer alır → admin, hiç tarife
+        // Yerleşik baz tarife her zaman zincirin başında (v0) yer alır → admin, hiç tarife
         // aktifleştirilmemişken bile yürürlükteki gerçek baz primleri görür.
         var result = new List<PricingVersionDto>(chronological.Count + 1)
         {

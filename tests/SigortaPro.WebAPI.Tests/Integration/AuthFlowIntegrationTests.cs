@@ -9,8 +9,8 @@ using SigortaPro.Application.Features.Auth.DTOs;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// Task 21: Auth akışının uçtan uca entegrasyon testleri (gerçek pipeline: middleware → MediatR → Identity → EF).
-// Not: Auth uçları IP başına 10 istek/dk rate limit'lidir (ADR-020); koleksiyondaki HTTP auth çağrısı sayısı
+// Auth akışının uçtan uca entegrasyon testleri (gerçek pipeline: middleware → MediatR → Identity → EF).
+// Not: Auth uçları IP başına 10 istek/dk rate limit'lidir; koleksiyondaki HTTP auth çağrısı sayısı
 // bilinçli olarak bu bütçenin altında tutulur, arrange aşaması TestAccountFactory (ISender) ile yapılır.
 [Collection(IntegrationTestCollection.Name)]
 public sealed class AuthFlowIntegrationTests
@@ -40,7 +40,7 @@ public sealed class AuthFlowIntegrationTests
         session.AccessToken.Should().NotBeNullOrWhiteSpace();
         session.RefreshToken.Should().NotBeNullOrWhiteSpace();
 
-        // Üretilen access token korumalı bir uçta gerçekten çalışmalı; yanıt ham TCKN sızdırmamalı (§4.2).
+        // Üretilen access token korumalı bir uçta gerçekten çalışmalı; yanıt ham TCKN sızdırmamalı.
         var authorizedClient = TestAccountFactory.CreateAuthorizedClient(_factory, session);
         var profileResponse = await authorizedClient.GetAsync("/api/v1/customers/me");
         profileResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -75,7 +75,7 @@ public sealed class AuthFlowIntegrationTests
         // Act
         var response = await client.PostAsJsonAsync("/api/v1/auth/register", command);
 
-        // Assert: FluentValidation → ValidationBehavior → ExceptionHandlingMiddleware (RFC 7807 — ADR-018).
+        // Assert: FluentValidation → ValidationBehavior → ExceptionHandlingMiddleware (RFC 7807).
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
 
@@ -135,7 +135,7 @@ public sealed class AuthFlowIntegrationTests
             "/api/v1/auth/refresh-token",
             new RefreshTokenCommand(session.RefreshToken));
 
-        // Assert: yeni token çifti üretilir (rotasyon — ADR-003).
+        // Assert: yeni token çifti üretilir (rotasyon).
         refreshResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var rotated = await refreshResponse.Content.ReadFromJsonAsync<AuthResponse>();
         rotated!.RefreshToken.Should().NotBe(session.RefreshToken);

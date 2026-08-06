@@ -16,7 +16,7 @@ export interface Vehicle {
   model: string;
   manufactureYear: number;
   enginePowerHp: number;
-  /** Kullanım amacı beyanı (ADR-057); bu alan eklenmeden kaydedilmiş araçlarda null. */
+  /** Kullanım amacı beyanı; bu alan eklenmeden kaydedilmiş araçlarda null. */
   usagePurpose: VehicleUsage | null;
 }
 
@@ -27,9 +27,9 @@ export interface Property {
   buildingAge: number;
   squareMeters: number;
   /**
-   * Kayıt anında belirlenen deprem bölgesi. ADR-055'ten itibaren sistem tarafından adresin ilinden
+   * Kayıt anında belirlenen deprem bölgesi. itibaren sistem tarafından adresin ilinden
    * türetilir (kullanıcı seçemez). Daha eski kayıtlarda müşterinin o günkü beyanıdır ve tarihsel
-   * doğruluk için korunur (ADR-058). Salt okunurdur.
+   * doğruluk için korunur. Salt okunurdur.
    */
   earthquakeZone: number;
 }
@@ -66,7 +66,7 @@ export interface VehicleRequest {
   model: string;
   manufactureYear: number;
   enginePowerHp: number;
-  /** Kullanım amacı beyanı (ADR-057) — zorunlu; Kasko/Trafik primini etkiler. */
+  /** Kullanım amacı beyanı — zorunlu; Kasko/Trafik primini etkiler. */
   usagePurpose: VehicleUsage;
 }
 

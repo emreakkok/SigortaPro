@@ -45,7 +45,7 @@ export function resolveRange(key: DashboardRangeKey, now: Date = new Date()): { 
 }
 
 /**
- * Tarih aralığı seçimi — mevcut `PageSizeSelector` segmented control diliyle (ADR-045).
+ * Tarih aralığı seçimi — mevcut `PageSizeSelector` segmented control diliyle.
  * Tek bir seçim TÜM dashboard bloklarını tutarlı biçimde etkiler (tek sorgu yenilenir).
  */
 export function DashboardRangeFilter({

@@ -1,6 +1,6 @@
 namespace SigortaPro.Domain.Entities;
 
-// Sağlık teklifinde "başkası adına" sigortalanan kişi (sigortalı ≠ sigorta ettiren — ADR-041).
+// Sağlık teklifinde "başkası adına" sigortalanan kişi (sigortalı ≠ sigorta ettiren).
 // Quote'a gömülü (owned) değer nesnesidir; kendi kimliği/tablosu yoktur ve yalnızca poliçe sahibinin
 // beyanıyla oluşturulur. Fiyatlamada yaş, bu kişinin doğum tarihinden hesaplanır.
 public class InsuredPerson

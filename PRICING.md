@@ -1,7 +1,7 @@
 # SigortaPro — Fiyatlama Kuralları (Mock)
 
-> **Kapsam:** Task 8 — Risk Analizi & Dinamik Fiyatlama Motoru (Mock).
-> **Karar:** ADR-008 (`docs/ai/DECISIONS.md`, yerel geliştirme dokümanı).
+> **Kapsam:** — Risk Analizi & Dinamik Fiyatlama Motoru (Mock).
+> **Karar:** (``, yerel geliştirme dokümanı).
 > **Uyarı:** Bu kurallar **demo/MVP** amaçlıdır; gerçek aktüeryal doğruluğu yoktur.
 > **Senkronizasyon:** Buradaki tüm değerler `SigortaPro.Infrastructure/Services/Pricing/` (`PricingEngine`, `PricingRuleTables`) ile **birebir** eşleşir. Kural değiştiğinde iki taraf birlikte güncellenir.
 
@@ -68,7 +68,7 @@ ToplamPrim = BazPrim × (tüm risk faktörü çarpanlarının çarpımı)
 | Ticari | 1.30 |
 | Taksi | 1.60 |
 
-> **Durum (ADR-057):** Kullanım amacı, araç kaydında **zorunlu bir kullanıcı beyanıdır** (varsayılan yoktur).
+> **Durum:** Kullanım amacı, araç kaydında **zorunlu bir kullanıcı beyanıdır** (varsayılan yoktur).
 > Yalnızca **Kasko/Trafik** fiyatlamasını etkiler; Konut/DASK/Sağlık bu bilgiyi kullanmaz. Teklif anında
 > `PricingSnapshot.UsagePurpose` olarak dondurulur → araç sonradan güncellense bile eski teklifin primi ve
 > dökümü değişmez. Beyanı olmayan (bu alan eklenmeden kaydedilmiş) araçlarda faktör **uygulanmaz ve dökümde
@@ -89,7 +89,7 @@ ToplamPrim = BazPrim × (tüm risk faktörü çarpanlarının çarpımı)
 
 > Eşleşme büyük/küçük harf duyarsızdır; listede olmayan iller varsayılan katsayıyı alır (mock — il alanı serbest metindir).
 
-### Hasarsızlık Basamağı — Bonus-Malus (ADR-059)
+### Hasarsızlık Basamağı — Bonus-Malus 
 
 Hasar geçmişinin **tek** çarpanıdır. Negatif basamak ek prim (**malus**), pozitif basamak indirim (**bonus**),
 0 nötrdür. Yalnızca **Kasko ve Trafik** fiyatlamasında uygulanır; her branş **kendi** basamağını taşır.
@@ -107,18 +107,18 @@ Basamak = clamp( (hasarsız tamamlanmış dönem) − 2 × (onaylanmış/ödenmi
 | +1 | 0.95 | | +6 | 0.70 |
 
 - **Yeni müşteri 0. basamaktan başlar.** SigortaPro dışındaki geçmiş bilinmediğinden **varsayılmaz** —
-  ne indirim ne ceza verilir. Müşteri geçmişini beyan **edemez** (beyana açık indirim güvenlik açığıdır).
+ ne indirim ne ceza verilir. Müşteri geçmişini beyan **edemez** (beyana açık indirim güvenlik açığıdır).
 - **Yalnızca `Approved`/`Paid` hasarlar** sayılır; `Submitted`/`UnderReview`/`Rejected` basamağı etkilemez.
 - **Malus sönümlenir:** hasarlı müşteri sonraki hasarsız dönemlerde kademeli olarak toparlanır.
 - Basamak **durumsuz** hesaplanır (her fiyatlamada mevcut veriden yeniden türetilir) ve teklif anında
-  `PricingSnapshot.NoClaimTier`'a **dondurulur** → sonradan hasar oluşsa bile eski teklif değişmez.
+ `PricingSnapshot.NoClaimTier`'a **dondurulur** → sonradan hasar oluşsa bile eski teklif değişmez.
 - Basamak **0 iken prim dökümünde kalem gösterilmez** (etkisiz kalem sunulmaz; eski kayıtların dökümü de korunur).
 - ⚠️ **Katsayılar MVP SİMÜLASYONUDUR** — gerçek aktüeryal tarife verisi değildir.
 
 > **Emekliye ayrılan `ClaimHistoryFactor` (LEGACY):** Önceden yenilemede ayrı bir hasar çarpanı
 > (`1.00 + 0.20×hasar`, tavan 1.60) uygulanıyordu. İki bağımsız ölçek aralarında hiçbir değişmez olmadığından
-> **çelişkili sonuç üretebiliyordu** (ör. 3 hasarlı + yüksek basamaklı müşteri ≈ nötr fiyat). ADR-059 ile hasar
-> geçmişi tek basamağa indirildi. `Quote.ClaimHistoryFactor` alanı **silinmedi**: ADR-059 öncesi oluşmuş
+> **çelişkili sonuç üretebiliyordu** (ör. 3 hasarlı + yüksek basamaklı müşteri ≈ nötr fiyat). ile hasar
+> geçmişi tek basamağa indirildi. `Quote.ClaimHistoryFactor` alanı **silinmedi**: öncesi oluşmuş
 > yenileme tekliflerinin primi ve dökümü birebir korunsun diye saklanır ve yeniden hesapta uygulanmaya devam eder.
 > Yeni tekliflerde daima 1.00'dır (değeri değiştiren bir metot yoktur).
 
@@ -140,7 +140,7 @@ Basamak = clamp( (hasarsız tamamlanmış dönem) − 2 × (onaylanmış/ödenmi
 
 ### Deprem Bölgesi (1 = en yüksek risk … 5 = en düşük)
 
-> **Kaynak (ADR-055):** Bölge **kullanıcı beyanı değildir**; konutun **ilinden** türetilir
+> **Kaynak:** Bölge **kullanıcı beyanı değildir**; konutun **ilinden** türetilir
 > (gömülü il→bölge eşlemesi). Bu, il düzeyinde bir **MVP yaklaşıklamasıdır** — gerçek tehlike haritası
 > ilçe/koordinat düzeyindedir. İl tanınmazsa bölge atanmaz ve motor "bilinmeyen bölge" (1.15) davranışını
 > açık açıklamasıyla uygular; sessizce (ve müşteri lehine) bir bölge **atanmaz**.
@@ -171,7 +171,7 @@ Basamak = clamp( (hasarsız tamamlanmış dönem) − 2 × (onaylanmış/ödenmi
 | Kullanıyor | 1.25 |
 | Kullanmıyor | 1.00 |
 
-> **Durum (ADR-054):** Beyan **teklif sihirbazında zorunlu olarak alınır** (varsayılan yoktur; seçim
+> **Durum:** Beyan **teklif sihirbazında zorunlu olarak alınır** (varsayılan yoktur; seçim
 > yapılmadan devam edilemez) ve teklifte `PricingSnapshot.IsSmoker` olarak saklanır. Beyan alınmamış eski
 > kayıtlarda faktör **uygulanmaz ve dökümde gösterilmez**. Yalnızca fiyatlama amacıyla kullanılır;
 > bildirimlere, aktivite akışına ve admin listelerine taşınmaz (KVKK — veri minimizasyonu).
@@ -193,7 +193,7 @@ Bina 50 yaş (1.25) × 250 m² (1.30) × 1. bölge (1.50)
 
 ---
 
-## 6. Teminat Paketleri (Task 9)
+## 6. Teminat Paketleri 
 
 Aynı risk objesi için sunulan teminat seviyeleri; hem primi hem teminat limitlerini ölçekler. Paket **risk skorunu etkilemez** (kapsam seçimidir, risk faktörü değil). Katsayılar `SigortaPro.Application/Features/Quotes/CoveragePackageFactors` ile birebir eşleşir.
 
@@ -212,14 +212,14 @@ TeminatLimiti = ÜrünVarsayılanLimiti × PaketLimitÇarpanı
 
 ---
 
-## 6.1. Yenileme Hasar Çarpanı (Task 13) — ⚠️ EMEKLİ (ADR-059)
+## 6.1. Yenileme Hasar Çarpanı — ⚠️ EMEKLİ 
 
-> Yeni tekliflerde **uygulanmaz**; yerini Bonus-Malus basamağı aldı (bkz. §2). Yalnızca ADR-059 öncesi kayıtların determinizmi için korunur.
+> Yeni tekliflerde **uygulanmaz**; yerini Bonus-Malus basamağı aldı. Yalnızca öncesi kayıtların determinizmi için korunur.
 
-> **Kapsam (ADR-054):** Hasar sayımı **branşa göre kapsanır** — bir Kasko hasarı Sağlık yenilemesini
+> **Kapsam:** Hasar sayımı **branşa göre kapsanır** — bir Kasko hasarı Sağlık yenilemesini
 > pahalılaştıramaz. Hasarın branşı, bağlı olduğu poliçenin teklifinden (`Policy → Quote.Branch`) belirlenir.
 
-Poliçe yenileme tekliflerinde, müşterinin **fiyatlamaya etki eden hasar geçmişi** prime ek çarpan olarak yansır. Fiyatlamaya etki eden hasar = `Approved` **veya** `Paid` durumundaki hasarlar (bkz. `IClaimRepository.CountReportableClaimsByCustomerAsync`). Her hasar %20 ek prim getirir; en fazla 3 hasara kadar birikir (tavan +%60). Hasarsız müşteride çarpan 1.00'dır (etkisiz). Katsayılar `SigortaPro.Application/Features/Renewals/RenewalPricing` ile birebir eşleşir.
+Poliçe yenileme tekliflerinde, müşterinin **fiyatlamaya etki eden hasar geçmişi** prime ek çarpan olarak yansır. Fiyatlamaya etki eden hasar = `Approved` **veya** `Paid` durumundaki hasarlar. Her hasar %20 ek prim getirir; en fazla 3 hasara kadar birikir (tavan +%60). Hasarsız müşteride çarpan 1.00'dır (etkisiz). Katsayılar `SigortaPro.Application/Features/Renewals/RenewalPricing` ile birebir eşleşir.
 
 | Fiyatlamaya Etki Eden Hasar Sayısı | Hasar Çarpanı |
 |------------------------------------|---------------|
@@ -232,7 +232,7 @@ Poliçe yenileme tekliflerinde, müşterinin **fiyatlamaya etki eden hasar geçm
 YenilemePrimi = MotorPrimi (Bölüm 1-4) × PaketPrimÇarpanı × HasarÇarpanı
 ```
 
-> Hasar çarpanı yalnızca yenileme akışında (arkaplan servisi) uygulanır ve teklifte `Quote.ClaimHistoryFactor` olarak saklanır; bu sayede prim dökümü, teminat paketi gibi deterministik olarak yeniden hesaplanır (ADR-021/ADR-025). Normal (ilk) tekliflerde çarpan 1.00'dır.
+> Hasar çarpanı yalnızca yenileme akışında (arkaplan servisi) uygulanır ve teklifte `Quote.ClaimHistoryFactor` olarak saklanır; bu sayede prim dökümü, teminat paketi gibi deterministik olarak yeniden hesaplanır. Normal (ilk) tekliflerde çarpan 1.00'dır.
 >
 > **Örnek:** Yenileme motor+paket primi 20.625 TRY olan, 1 ödenmiş hasarı bulunan bir müşteride yenileme primi = `20.625 × 1.20 = 24.750 TRY`.
 
@@ -244,4 +244,4 @@ YenilemePrimi = MotorPrimi (Bölüm 1-4) × PaketPrimÇarpanı × HasarÇarpanı
 - **Girdi:** `VehiclePricingRequest` (Kasko/Trafik), `PropertyPricingRequest` (Konut/DASK), `HealthPricingRequest` (Sağlık) — `Common/Pricing`.
 - **Çıktı:** `PricingResult` (`BasePremium`, `TotalPremium`, `RiskScore`, `Breakdown[]`).
 - Girdi tipi ile branş uyuşmazsa (örn. araç isteğine Konut branşı) `ArgumentException` fırlatılır.
-- Girdilerin aralık doğrulaması (yaş, metrekare vb.) çağıran katmanın sorumluluğudur; teklif oluşturma komutu (Task 9) bu doğrulamayı FluentValidation ile yapacaktır.
+- Girdilerin aralık doğrulaması (yaş, metrekare vb.) çağıran katmanın sorumluluğudur; teklif oluşturma komutu bu doğrulamayı FluentValidation ile yapacaktır.

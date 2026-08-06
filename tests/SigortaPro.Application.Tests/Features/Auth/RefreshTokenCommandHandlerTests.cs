@@ -49,7 +49,7 @@ public class RefreshTokenCommandHandlerTests
         await _refreshTokenService.Received(1).RevokeAsync("aktif", Arg.Any<string?>(), Arg.Any<CancellationToken>());
     }
 
-    [Fact] // ADR-061: pasif hesap token yenileyemez ve eldeki tüm token'ları iptal edilir.
+    [Fact] // pasif hesap token yenileyemez ve eldeki tüm token'ları iptal edilir.
     public async Task Handle_Should_RevokeAllAndReturnFailure_When_UserIsInactive()
     {
         var userId = Guid.NewGuid();

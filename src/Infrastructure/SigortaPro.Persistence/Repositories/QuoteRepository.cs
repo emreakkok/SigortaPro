@@ -8,7 +8,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// IQuoteRepository implementasyonu (ADR-005, ARCHITECTURE_RULES.md §4.2).
+// IQuoteRepository implementasyonu.
 public sealed class QuoteRepository : GenericRepository<Quote>, IQuoteRepository
 {
     private readonly AppDbContext _context;
@@ -96,7 +96,7 @@ public sealed class QuoteRepository : GenericRepository<Quote>, IQuoteRepository
         return new PagedResult<Quote>(items, paging.Page, paging.PageSize, totalCount);
     }
 
-    // İzlemeli: geçerlilik süresi dolmuş ancak henüz sonlanmamış teklifler (arkaplan expiry — Task 13).
+    // İzlemeli: geçerlilik süresi dolmuş ancak henüz sonlanmamış teklifler (arkaplan expiry —).
     // Yalnızca Expire guard'ının kabul ettiği durumlar döner (Purchased/Rejected/Expired hariç).
     public async Task<IReadOnlyList<Quote>> GetExpirableAsync(DateTime asOf, CancellationToken cancellationToken = default) =>
         await _context.Quotes

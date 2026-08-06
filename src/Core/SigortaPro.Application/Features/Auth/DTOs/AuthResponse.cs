@@ -1,7 +1,7 @@
 namespace SigortaPro.Application.Features.Auth.DTOs;
 
 // Kayıt / giriş / token yenileme sonrası döndürülen oturum bilgisi.
-// Hassas veri (şifre hash'i, ham TCKN) içermez (CODING_STANDARDS.md §4.2).
+// Hassas veri (şifre hash'i, ham TCKN) içermez.
 public sealed record AuthResponse(
     Guid UserId,
     string Email,

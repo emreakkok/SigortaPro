@@ -6,7 +6,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// IRenewalRepository implementasyonu (ADR-005, ARCHITECTURE_RULES.md §4.2).
+// IRenewalRepository implementasyonu.
 public sealed class RenewalRepository : GenericRepository<Renewal>, IRenewalRepository
 {
     private readonly AppDbContext _context;

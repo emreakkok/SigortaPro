@@ -20,7 +20,7 @@ export function useMyProfile(enabled: boolean = true) {
   return useQuery({
     queryKey: profileQueryKey,
     queryFn: getMyProfile,
-    // ADR-039: UserMenu gibi rol-karışık yüzeyler, personel oturumunda sorguyu kapatabilir
+    // UserMenu gibi rol-karışık yüzeyler, personel oturumunda sorguyu kapatabilir
     // (personelin /customers/me ucu yoktur → 403'e hiç gidilmez). Varsayılan davranış değişmez.
     enabled,
   });
@@ -58,7 +58,7 @@ export function useUpdateVehicle(vehicleId: string) {
   });
 }
 
-/** Şifre değiştirme mutation'ı (ADR-040) — oturum/token akışını etkilemez (JWT mimarisi değişmez). */
+/** Şifre değiştirme mutation'ı — oturum/token akışını etkilemez (JWT mimarisi değişmez). */
 export function useChangePassword() {
   return useMutation({
     mutationFn: (request: { currentPassword: string; newPassword: string }) =>

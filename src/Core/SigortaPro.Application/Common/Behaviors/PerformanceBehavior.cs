@@ -7,7 +7,7 @@ namespace SigortaPro.Application.Common.Behaviors;
 public sealed class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull, IRequest<TResponse>
 {
-    // ARCHITECTURE_RULES.md §3.5: 500ms üzeri handler'lar warning olarak loglanır.
+    // : 500ms üzeri handler'lar warning olarak loglanır.
     private const long SlowRequestThresholdMilliseconds = 500;
 
     private readonly ILogger<PerformanceBehavior<TRequest, TResponse>> _logger;

@@ -17,7 +17,7 @@ public abstract class BaseEntityConfiguration<T> : IEntityTypeConfiguration<T>
         builder.Property(entity => entity.CreatedBy).HasMaxLength(256);
         builder.Property(entity => entity.UpdatedBy).HasMaxLength(256);
 
-        // ADR-010: Soft delete — fiziksel silme yok, global query filter ile varsayılan sorgulardan hariç tutulur.
+        // Soft delete — fiziksel silme yok, global query filter ile varsayılan sorgulardan hariç tutulur.
         builder.HasQueryFilter(entity => !entity.IsDeleted);
 
         ConfigureEntity(builder);

@@ -29,7 +29,7 @@ import { formatCurrency, formatDate } from "@/shared/utils/format";
 export default function QuoteDetailPage() {
   const { id = "" } = useParams();
   const { data: quote, isLoading, isError, error } = useQuote(id);
-  // "Başkası adına" teklifte Sigorta Ettiren satırı için poliçe sahibinin adı (ADR-042 — sunum).
+  // "Başkası adına" teklifte Sigorta Ettiren satırı için poliçe sahibinin adı.
   const { data: profile } = useMyProfile();
   const approve = useApproveQuote();
   const reject = useRejectQuote();
@@ -88,7 +88,7 @@ export default function QuoteDetailPage() {
         <CardContent className="space-y-2">
           {quote.insuredPerson != null && (
             <>
-              {/* Gerçek sigortacılık ayrımı: sigorta ettiren (poliçe sahibi) ≠ sigortalı (ADR-042). */}
+              {/* Gerçek sigortacılık ayrımı: sigorta ettiren (poliçe sahibi) ≠ sigortalı. */}
               <div className="flex items-baseline justify-between">
                 <span className="text-muted-foreground">Sigorta Ettiren</span>
                 <span className="font-medium">

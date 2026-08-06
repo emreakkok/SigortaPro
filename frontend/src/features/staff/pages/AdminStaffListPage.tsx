@@ -34,7 +34,7 @@ function toIsActive(filter: StatusFilter): boolean | undefined {
 /**
  * Personel Yönetimi (yalnızca Admin — route `/admin/staff` `ProtectedRoute[Admin]` ile korunur).
  * Arama (e-posta/ad) + aktiflik filtresi + tablo + oluşturma/detay çekmeceleri. Rol değiştirme,
- * Admin oluşturma, şifre sıfırlama ve silme UI'ı BİLİNÇLİ olarak yoktur (ADR-060).
+ * Admin oluşturma, şifre sıfırlama ve silme UI'ı BİLİNÇLİ olarak yoktur.
  */
 export default function AdminStaffListPage() {
   const [page, setPage] = useState(1);

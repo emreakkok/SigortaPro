@@ -29,7 +29,7 @@ public sealed class CreateStaffUserCommandHandler : ICommandHandler<CreateStaffU
             throw new BusinessRuleException("Bu e-posta adresi ile daha önce bir hesap oluşturulmuş.");
         }
 
-        // Rol SUNUCUDA sabittir: CreateStaffUserAsync her koşulda Roles.Personel atar (ADR-060, güvenlik).
+        // Rol SUNUCUDA sabittir: CreateStaffUserAsync her koşulda Roles.Personel atar.
         var staffId = await _identityService.CreateStaffUserAsync(
             request.Email, request.FullName, request.Password, cancellationToken);
 

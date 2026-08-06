@@ -10,7 +10,7 @@ import { AdminLayout } from "@/shared/layouts/AdminLayout";
 import { CustomerLayout } from "@/shared/layouts/CustomerLayout";
 import { STAFF_ROLES, UserRoles } from "@/shared/types/auth.types";
 
-// Route bazlı code splitting (DEVELOPMENT_RULES.md §6 — React.lazy + Suspense).
+// Route bazlı code splitting.
 const LandingPage = lazy(() => import("@/app/pages/LandingPage"));
 const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage"));
 const RegisterPage = lazy(() => import("@/features/auth/pages/RegisterPage"));
@@ -53,7 +53,7 @@ function withSuspense(node: ReactNode): ReactNode {
  * - /portal → müşteri portalı (Customer), /admin → acente paneli (Admin/Personel).
  * - /401 (oturum düştü — axios interceptor hedefi), /403 (rol yetkisiz), * → 404.
  * Kullanıcı menüsü, shared → features bağımlılığı oluşmaması için layout'lara
- * buradan slot olarak verilir (ADR-029).
+ * buradan slot olarak verilir.
  */
 export const router = createBrowserRouter([
   {
@@ -172,7 +172,7 @@ export const router = createBrowserRouter([
         element: withSuspense(<NotificationCenterPage />),
       },
       {
-        // ADR-060: Personel yönetimi yalnızca Admin'e açıktır (personel/müşteri erişemez).
+        // Personel yönetimi yalnızca Admin'e açıktır (personel/müşteri erişemez).
         path: "staff",
         element: (
           <ProtectedRoute allowedRoles={[UserRoles.Admin]}>
@@ -181,7 +181,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        // ADR-048: Fiyatlandırma yönetimini acente personeli GÖRÜNTÜLER; yalnızca Admin DEĞİŞTİRİR (taslak
+        // Fiyatlandırma yönetimini acente personeli GÖRÜNTÜLER; yalnızca Admin DEĞİŞTİRİR (taslak
         // oluştur/düzenle/aktifleştir). Yazma yetkisi backend'de Admin'e kilitli; sayfa personel için salt-okunur.
         path: "pricing",
         element: withSuspense(<AdminPricingPage />),

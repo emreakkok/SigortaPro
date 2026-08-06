@@ -9,8 +9,8 @@ using SigortaPro.Application.Features.Auth.Commands.Login;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// ADR-040: Şifre değiştirme (Identity katmanı) ve genişletilmiş müşteri araması (e-posta + normalize telefon)
-// entegrasyon doğrulaması. Rate limit bütçesi (10 istek/dk — ADR-020/ADR-034) korunur: şifre değiştirme,
+// Şifre değiştirme (Identity katmanı) ve genişletilmiş müşteri araması (e-posta + normalize telefon)
+// entegrasyon doğrulaması. Rate limit bütçesi (10 istek/dk) korunur: şifre değiştirme,
 // HTTP auth ucu yerine IIdentityService + ISender ile doğrulanır (controller köprüsü ince ve birim testlidir);
 // müşteri arama ucu (/customers) auth politikasına tabi değildir.
 [Collection(IntegrationTestCollection.Name)]

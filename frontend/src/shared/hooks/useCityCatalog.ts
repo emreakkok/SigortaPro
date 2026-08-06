@@ -5,7 +5,7 @@ export const cityCatalogQueryKey = ["city-catalog"] as const;
 
 /**
  * İl kataloğu sorgusu. 81 il statik referans veridir (oturum boyunca değişmez) → staleTime Infinity;
- * backend zaten In-Memory cache'ler (ADR-037), tek çağrı yeterlidir. Birden fazla adres formu aynı
+ * backend zaten In-Memory cache'ler, tek çağrı yeterlidir. Birden fazla adres formu aynı
  * cache'i paylaşır.
  */
 export function useCityCatalog() {

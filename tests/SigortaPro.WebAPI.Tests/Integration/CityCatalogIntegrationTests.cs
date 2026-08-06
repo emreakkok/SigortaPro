@@ -5,7 +5,7 @@ using SigortaPro.Application.Features.Cities.DTOs;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// Post-MVP (ADR-037): İl kataloğu ucunun uçtan uca doğrulaması. Gerçek pipeline'da (DI → Singleton provider →
+// Post-MVP: İl kataloğu ucunun uçtan uca doğrulaması. Gerçek pipeline'da (DI → Singleton provider →
 // gömülü JSON → JWT auth) 81 ilin yüklendiğini ve yetki kuralını kanıtlar.
 // Not: /city-catalog auth rate-limit politikasına tabi DEĞİLDİR; register arrange ISender ile yapılır.
 [Collection(IntegrationTestCollection.Name)]
@@ -21,7 +21,7 @@ public sealed class CityCatalogIntegrationTests
     [Fact]
     public async Task GetCatalog_Should_Return81Provinces_When_Anonymous()
     {
-        // ADR-039: Kayıt formu anonim olduğundan il kataloğu kimlik doğrulaması gerektirmez.
+        // Kayıt formu anonim olduğundan il kataloğu kimlik doğrulaması gerektirmez.
         var client = _factory.CreateClient();
 
         var response = await client.GetAsync("/api/v1/city-catalog");

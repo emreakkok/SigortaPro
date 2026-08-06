@@ -24,7 +24,7 @@ function formatDelta(delta: number): string {
 }
 
 /**
- * Dönemsel KPI kartı (ADR-052): büyük değer + önceki eş dönemle karşılaştırma.
+ * Dönemsel KPI kartı: büyük değer + önceki eş dönemle karşılaştırma.
  * Karşılaştırma güvenilir değilse (önceki dönem 0) oran gösterilmez — dashboard yanıltıcı sayı üretmez.
  */
 export function PeriodKpiCard({

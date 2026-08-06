@@ -5,7 +5,7 @@ using SigortaPro.Application.Features.Vehicles.DTOs;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// Task 24 (ADR-036): Araç kataloğu ucunun uçtan uca doğrulaması. Gerçek pipeline'da (DI → Singleton provider →
+// : Araç kataloğu ucunun uçtan uca doğrulaması. Gerçek pipeline'da (DI → Singleton provider →
 // gömülü JSON kaynağı → JWT auth) katalogun yüklendiğini ve yetki kuralını kanıtlar.
 // Not: /vehicle-catalog auth rate-limit politikasına tabi DEĞİLDİR (yalnızca AuthController); bu testler
 // koleksiyonun 10/dk auth HTTP bütçesini tüketmez (register arrange ISender ile yapılır).

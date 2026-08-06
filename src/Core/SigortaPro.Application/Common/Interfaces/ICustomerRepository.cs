@@ -3,7 +3,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// Müşteri modülüne özgü sorgular için özel repository (ARCHITECTURE_RULES.md §4.2, ADR-005).
+// Müşteri modülüne özgü sorgular için özel repository.
 // Application katmanı EF Core'a bağımlı olamadığından (async materialization, Include, projection
 // EF gerektirir), modüle özgü okuma/arama mantığı bu arayüzün arkasında Persistence'ta implement edilir.
 public interface ICustomerRepository : IReadRepository<Customer>, IWriteRepository<Customer>
@@ -25,7 +25,7 @@ public interface ICustomerRepository : IReadRepository<Customer>, IWriteReposito
     Task<bool> ExistsByTcknAsync(string tckn, CancellationToken cancellationToken = default);
 
     // Admin müşteri listesi: ad/soyad/TCKN/e-posta/telefon (normalize) araması ve il filtresiyle
-    // sayfalanmış sonuç (ADR-040 — searchTerm sözleşmesi değişmeden genişletildi).
+    // sayfalanmış sonuç.
     Task<PagedResult<Customer>> SearchAsync(
         string? searchTerm,
         string? city,

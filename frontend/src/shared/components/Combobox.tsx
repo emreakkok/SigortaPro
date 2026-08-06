@@ -12,7 +12,7 @@ interface ComboboxProps {
 }
 
 /**
- * El yazımı, aranabilir combobox (ADR-027 konvansiyonu — Radix/harici bağımlılık eklenmez).
+ * El yazımı, aranabilir combobox.
  * Değer yalnızca listeden seçim ile commit edilir; serbest metin girişi için VehicleForm'daki
  * "Diğer" düğmesi (native input) kullanılır. Klavye: ↑/↓ gezinme, Enter seçim, Esc kapatma.
  */

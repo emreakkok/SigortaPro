@@ -11,7 +11,7 @@ using SigortaPro.Application.Features.Pricing.Queries.GetPricingVersions;
 
 namespace SigortaPro.WebAPI.Controllers.v1;
 
-// ADR-048: Fiyatlandırma (tarife) yönetimi. Okuma acente personeline (Admin/Personel) açıktır; ancak DEĞİŞİKLİK
+// Fiyatlandırma (tarife) yönetimi. Okuma acente personeline (Admin/Personel) açıktır; ancak DEĞİŞİKLİK
 // (taslak oluştur/düzenle/aktifleştir) **YALNIZCA Admin**'e açıktır — personel yalnızca görüntüler, müşteri hiç erişemez.
 // Aktif/arşiv versiyonlar değişmezdir: yalnızca TASLAK düzenlenir; fiyat değişikliği = yeni versiyon + aktifleştirme.
 [ApiController]

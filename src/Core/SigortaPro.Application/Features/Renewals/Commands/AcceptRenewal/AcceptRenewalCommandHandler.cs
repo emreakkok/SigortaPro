@@ -46,7 +46,7 @@ public sealed class AcceptRenewalCommandHandler : ICommandHandler<AcceptRenewalC
         var newQuote = renewal.NewQuote
             ?? throw new NotFoundException(nameof(Quote), renewal.NewQuoteId);
 
-        // Kaynak sahipliği: müşteri yalnızca kendi yenileme teklifini onaylar (QuoteAuthorization — Task 9).
+        // Kaynak sahipliği: müşteri yalnızca kendi yenileme teklifini onaylar (QuoteAuthorization —).
         await QuoteAuthorization.EnsureCanAccessAsync(
             newQuote.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 

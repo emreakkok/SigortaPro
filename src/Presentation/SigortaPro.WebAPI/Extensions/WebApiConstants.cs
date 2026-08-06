@@ -1,6 +1,6 @@
 namespace SigortaPro.WebAPI.Extensions;
 
-// Çapraz kesit altyapısında kullanılan sabit adlar (magic string kullanımını önler — CLAUDE.md §10).
+// Çapraz kesit altyapısında kullanılan sabit adlar (magic string kullanımını önler).
 public static class WebApiConstants
 {
     // CORS politikası adı (React SPA origin'lerine izin verir).

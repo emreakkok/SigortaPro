@@ -5,9 +5,9 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Infrastructure.Services.Pricing;
 
-// ADR-008: Kural tabanlı mock fiyatlama motoru. Saf (deterministik, yan etkisiz) bir fonksiyondur;
+// Kural tabanlı mock fiyatlama motoru. Saf (deterministik, yan etkisiz) bir fonksiyondur;
 // baz prim × risk çarpanları hesabı yapar ve prim dökümü + risk skoru üretir. Kural değerleri
-// PRICING.md ile birebir eşleşir. Girdiler önceden hesaplanmış primitiflerdir (yaş vb.), böylece motor
+// ile birebir eşleşir. Girdiler önceden hesaplanmış primitiflerdir (yaş vb.), böylece motor
 // Quote akışından, domain entity'lerinden ve sistem saatinden bağımsızdır.
 public sealed class PricingEngine : IPricingEngine
 {
@@ -40,7 +40,7 @@ public sealed class PricingEngine : IPricingEngine
             CityRiskFactor(request.City, ruleSet),
         };
 
-        // ADR-059: Bonus-Malus yalnızca basamak nötr DEĞİLSE prim dökümüne girer. Basamağı 0 olan
+        // Bonus-Malus yalnızca basamak nötr DEĞİLSE prim dökümüne girer. Basamağı 0 olan
         // (yeni müşteri veya bu sistem öncesi oluşmuş) kayıtlarda kalem hiç üretilmez → eski tekliflerin
         // dökümü birebir korunur ve kullanıcıya etkisiz bir kalem gösterilmez.
         if (request.NoClaimTier != 0)
@@ -48,7 +48,7 @@ public sealed class PricingEngine : IPricingEngine
             breakdown.Add(BonusMalusFactor(request.NoClaimTier, ruleSet));
         }
 
-        // ADR-057: Kullanım amacı yalnızca BEYAN edildiyse fiyatlanır ve dökümde görünür; beyanı olmayan
+        // Kullanım amacı yalnızca BEYAN edildiyse fiyatlanır ve dökümde görünür; beyanı olmayan
         // (eski) kayıtlarda faktör hiç üretilmez → geçmiş fiyatlar/dökümler değişmez.
         if (request.UsagePurpose is not null)
         {
@@ -88,7 +88,7 @@ public sealed class PricingEngine : IPricingEngine
     private static PricingResult BuildResult(
         InsuranceBranch branch, IReadOnlyList<PricingBreakdownItem> breakdown, PricingRateSet? rates)
     {
-        // ADR-048: Baz prim verilen tarifeden okunur; tarife yoksa/branşı içermiyorsa yerleşik baseline
+        // Baz prim verilen tarifeden okunur; tarife yoksa/branşı içermiyorsa yerleşik baseline
         // kullanılır → tarife yönetimi eklenmeden önce oluşmuş kayıtlar birebir aynı sonucu üretir.
         var basePremium = rates?.BasePremiumFor(branch) ?? PricingRuleTables.BasePremiums[branch];
         var aggregateMultiplier = breakdown.Aggregate(1m, (accumulator, item) => accumulator * item.Multiplier);
@@ -192,7 +192,7 @@ public sealed class PricingEngine : IPricingEngine
         return new PricingBreakdownItem("Kullanım Amacı", multiplier, description);
     }
 
-    // ADR-059: Hasar geçmişinin tek çarpanı. Negatif basamak ek prim (malus), pozitif basamak indirim (bonus).
+    // Hasar geçmişinin tek çarpanı. Negatif basamak ek prim (malus), pozitif basamak indirim (bonus).
     private static PricingBreakdownItem BonusMalusFactor(int step, PricingRuleSet? ruleSet)
     {
         var effectiveStep = Math.Clamp(step, BonusMalusScale.MinStep, BonusMalusScale.MaxStep);

@@ -9,7 +9,7 @@ import { Alert, Button, FormField, Input, Spinner } from "@/shared/components";
 import { getApiErrorMessages } from "@/shared/lib/apiError";
 
 /**
- * Şifre değiştirme formu (profil "Şifre Değiştir" sekmesi — ADR-040). Kurallar backend
+ * Şifre değiştirme formu (profil "Şifre Değiştir" sekmesi). Kurallar backend
  * ChangePasswordCommandValidator'ı aynalar; mevcut şifre doğrulaması backend'dedir (400).
  */
 export function ChangePasswordForm() {

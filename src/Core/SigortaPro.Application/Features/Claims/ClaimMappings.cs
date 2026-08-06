@@ -3,7 +3,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Features.Claims;
 
-// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz — CODING_STANDARDS.md §4.2).
+// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz).
 internal static class ClaimMappings
 {
     // Poliçe numarası, detay sorgusunda navigation'dan; oluşturma akışında ise yüklenen poliçeden gelir.

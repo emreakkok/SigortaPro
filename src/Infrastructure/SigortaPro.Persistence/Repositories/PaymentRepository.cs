@@ -6,7 +6,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// IPaymentRepository implementasyonu (ADR-005, ARCHITECTURE_RULES.md §4.2).
+// IPaymentRepository implementasyonu.
 public sealed class PaymentRepository : GenericRepository<Payment>, IPaymentRepository
 {
     private readonly AppDbContext _context;

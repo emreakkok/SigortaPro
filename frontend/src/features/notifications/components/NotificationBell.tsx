@@ -20,9 +20,9 @@ const timeFormatter = new Intl.DateTimeFormat("tr-TR", {
 });
 
 /**
- * Navbar bildirim zili v2 (ADR-042): rozet + son bildirimler artık sunucudan (kalıcı) okunur;
+ * Navbar bildirim zili v2: rozet + son bildirimler artık sunucudan (kalıcı) okunur;
  * okundu işaretleme DB'ye yazılır. Bağlantı durumu zil üzerinde gösterilir; tam geçmiş için
- * "Tümünü gör" → Bildirim Merkezi. Layout'lara routes.tsx'ten slot olarak verilir (ADR-029).
+ * "Tümünü gör" → Bildirim Merkezi. Layout'lara routes.tsx'ten slot olarak verilir.
  */
 export function NotificationBell() {
   const { connectionState } = useNotifications();
@@ -123,7 +123,7 @@ export function NotificationBell() {
                     <button
                       type="button"
                       onClick={() => {
-                        // ADR-047: tıklama → okundu işaretle + ilgili kayda git (hedef varsa).
+                        // tıklama → okundu işaretle + ilgili kayda git (hedef varsa).
                         if (!notification.isRead) {
                           markAsRead.mutate(notification.id);
                         }

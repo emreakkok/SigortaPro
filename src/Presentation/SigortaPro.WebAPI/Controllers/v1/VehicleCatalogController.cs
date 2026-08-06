@@ -6,7 +6,7 @@ using SigortaPro.Application.Features.Vehicles.Queries.GetVehicleCatalog;
 
 namespace SigortaPro.WebAPI.Controllers.v1;
 
-// Task 24 (ADR-036): Araç marka/model kataloğu — frontend'in cascading select (aranabilir combobox) verisi.
+// : Araç marka/model kataloğu — frontend'in cascading select (aranabilir combobox) verisi.
 // Salt okunur referans veri; kimliği doğrulanmış her kullanıcı erişebilir.
 [ApiController]
 [Route("api/v1/vehicle-catalog")]

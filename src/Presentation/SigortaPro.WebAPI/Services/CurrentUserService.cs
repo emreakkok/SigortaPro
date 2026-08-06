@@ -3,7 +3,7 @@ using SigortaPro.Application.Common.Interfaces;
 
 namespace SigortaPro.WebAPI.Services;
 
-// ARCHITECTURE_RULES.md §6.1: ICurrentUserService implementasyonu WebAPI'de HttpContext tabanlı sağlanır.
+// : ICurrentUserService implementasyonu WebAPI'de HttpContext tabanlı sağlanır.
 // JWT'den gelen claim'leri okuyarak aktif kullanıcı bilgisini Application katmanına taşır (kaynak sahipliği kontrolü için).
 public sealed class CurrentUserService : ICurrentUserService
 {

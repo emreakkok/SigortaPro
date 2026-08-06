@@ -5,7 +5,7 @@ namespace SigortaPro.Application.Features.Auth.Commands.Register;
 
 public sealed class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
-    // Türk plaka değil; telefon formatı CODING_STANDARDS.md §6.2: +90 prefiksi + 10 hane.
+    // Türk plaka değil; telefon formatı: +90 prefiksi + 10 hane.
     private const string PhoneRegex = @"^\+90\d{10}$";
 
     public RegisterCommandValidator()

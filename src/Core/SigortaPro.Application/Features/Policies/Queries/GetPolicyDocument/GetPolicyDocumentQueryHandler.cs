@@ -7,7 +7,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Features.Policies.Queries.GetPolicyDocument;
 
-// Poliçe belgesini indirir; ilk erişimde yoksa üretip saklar (lazy, idempotent — ADR-023).
+// Poliçe belgesini indirir; ilk erişimde yoksa üretip saklar (lazy, idempotent).
 public sealed class GetPolicyDocumentQueryHandler : IQueryHandler<GetPolicyDocumentQuery, PolicyDocumentFileDto>
 {
     private readonly IPolicyRepository _policyRepository;
@@ -89,7 +89,7 @@ public sealed class GetPolicyDocumentQueryHandler : IQueryHandler<GetPolicyDocum
 
     private async Task<byte[]> GenerateAndStore(Policy policy, string key, CancellationToken cancellationToken)
     {
-        // ADR-048: PDF, teklifin sabitlediği tarifeyle üretilir → sertifikadaki geçmiş prim/döküm değişmez.
+        // PDF, teklifin sabitlediği tarifeyle üretilir → sertifikadaki geçmiş prim/döküm değişmez.
         var rates = await _pricingRateResolver.ResolveForQuoteAsync(
             policy.Quote?.PricingVersionId, cancellationToken);
 

@@ -2,7 +2,7 @@ import { forwardRef, type HTMLAttributes } from "react";
 import { cn } from "@/shared/lib/utils";
 
 /*
- * Kart primitifi (ADR-044). Modern SaaS elevation sistemi: yumuşak gölge + ince border + hafif
+ * Kart primitifi. Modern SaaS elevation sistemi: yumuşak gölge + ince border + hafif
  * geçiş. Geçiş (`transition-*`) tabanda tanımlıdır → tüketicinin eklediği `hover:*` (border/gölge/
  * transform) sınıfları her yerde otomatik olarak pürüzsüz animasyonlanır. Renk yalnızca token'lardan
  * gelir (`bg-card`, `border`) → Dark Mode otomatik uyumlu.

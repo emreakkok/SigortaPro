@@ -9,7 +9,7 @@ import {
 } from "react";
 
 /**
- * Merkezi tema yönetimi (ADR-043). Renk kimliği tamamen token tabanlıdır (globals.css `.dark`);
+ * Merkezi tema yönetimi. Renk kimliği tamamen token tabanlıdır (globals.css `.dark`);
  * bu katman yalnızca hangi temanın etkin olduğunu belirler ve `.dark` sınıfını <html> üzerine uygular.
  * Üç mod desteklenir: açık (light), koyu (dark) ve sistem (system → işletim sistemini izler).
  * Tercih localStorage'da saklanır; ilk boyama öncesi index.html içindeki inline script ile uygulanır (FOUC yok).

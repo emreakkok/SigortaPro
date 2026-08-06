@@ -3,7 +3,7 @@ using SigortaPro.Application.Common.Interfaces;
 
 namespace SigortaPro.Application.Common.Notifications;
 
-// ADR-047: INotificationContextResolver implementasyonu. Mevcut soyutlamaları yeniden kullanır
+// INotificationContextResolver implementasyonu. Mevcut soyutlamaları yeniden kullanır
 // (ICurrentUserService + ICustomerRepository) — yeni tablo/audit altyapısı kurulmaz.
 // Sorgu maliyeti bilinçli olarak düşük tutulur: personel için hiç sorgu yapılmaz (e-posta zaten
 // oturum bağlamındadır), müşteri için tek profil okuması yapılır.

@@ -4,7 +4,7 @@ using SigortaPro.Application.Common.Security;
 
 namespace SigortaPro.Infrastructure.Services.Payment;
 
-// ADR-007: Mock sanal POS. Kartı Luhn ile doğrular, belirli test kartları için senaryo bazlı ret üretir,
+// Mock sanal POS. Kartı Luhn ile doğrular, belirli test kartları için senaryo bazlı ret üretir,
 // diğer geçerli kartlarda başarı döner. Saf/deterministik (dış çağrı/rastgele sonuç yok); ham kart log'lanmaz.
 // Test kartları README.md'de belgelenir.
 public sealed class MockVirtualPosService : IPaymentService

@@ -10,7 +10,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Tests.Features.Renewals;
 
-// ADR-048: Yenileme teklifi AKTİF PricingVersion ile fiyatlanır (yeni dönem yeni tarifeden) ve aktif tarifenin
+// Yenileme teklifi AKTİF PricingVersion ile fiyatlanır (yeni dönem yeni tarifeden) ve aktif tarifenin
 // yenileme indirimini teklifte DONDURUR. Kaynak (süresi dolan) teklif/poliçe DEĞİŞMEZ — geçmiş prim korunur.
 public class RenewalPricingVersionTests
 {

@@ -33,29 +33,29 @@ public static class InfrastructureServiceRegistration
         services.AddSingleton(jwtSettings);
         services.AddScoped<ITokenService, TokenService>();
 
-        // IDateTimeProvider implementasyonu (ARCHITECTURE_RULES.md §6.2: Singleton, stateless).
+        // IDateTimeProvider implementasyonu.
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
-        // ADR-008: Kural tabanlı mock fiyatlama motoru (ARCHITECTURE_RULES.md §6.2: Scoped).
+        // Kural tabanlı mock fiyatlama motoru.
         services.AddScoped<IPricingEngine, PricingEngine>();
 
-        // ADR-049: Yerleşik baz tarife sağlayıcısı — motorla aynı sabit değerleri açar (stateless → Singleton).
+        // Yerleşik baz tarife sağlayıcısı — motorla aynı sabit değerleri açar (stateless → Singleton).
         services.AddSingleton<IPricingBaselineProvider, PricingBaselineProvider>();
 
-        // ADR-007: Mock sanal POS ödeme servisi (ARCHITECTURE_RULES.md §6.2: Scoped).
+        // Mock sanal POS ödeme servisi.
         services.AddScoped<IPaymentService, MockVirtualPosService>();
 
-        // ADR-006/ADR-023: QuestPDF Community lisansı (ücretsiz) süreç genelinde bir kez ayarlanır.
+        // QuestPDF Community lisansı (ücretsiz) süreç genelinde bir kez ayarlanır.
         QuestPDF.Settings.License = LicenseType.Community;
 
-        // PDF render (saf) ve dosya saklama (yerel disk) — stateless olduklarından Singleton (ARCHITECTURE_RULES.md §6.2).
+        // PDF render (saf) ve dosya saklama (yerel disk) — stateless olduklarından Singleton.
         services.AddSingleton<IPolicyDocumentService, PolicyPdfDocumentService>();
         services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
-        // Task 13: mock bildirim servisi (log/e-posta simülasyonu — ARCHITECTURE_RULES.md §6.1).
+        // mock bildirim servisi (log/e-posta simülasyonu).
         services.AddScoped<INotificationService, MockNotificationService>();
 
-        // ADR-035: E-posta altyapısı. EmailSettings appsettings + user-secrets/ortam değişkeninden bağlanır
+        // E-posta altyapısı. EmailSettings appsettings + user-secrets/ortam değişkeninden bağlanır
         // (bölüm yoksa boş varsayılan — fail-fast YOK: SMTP yapılandırılmamışsa gönderim EmailDeliveryException
         // fırlatır ve şifre sıfırlama akışı bunu sızdırmadan ele alır). IEmailService genel transport (SMTP);
         // PasswordResetNotifier link/şablon kurup transport'u kullanır (sağlayıcı geçişinde yalnızca transport değişir).
@@ -64,19 +64,19 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IPasswordResetNotifier, PasswordResetNotifier>();
 
-        // Task 13: poliçe yaşam döngüsü arkaplan servisi (teklif/poliçe expiry + yenileme teklifi üretimi).
+        // poliçe yaşam döngüsü arkaplan servisi (teklif/poliçe expiry + yenileme teklifi üretimi).
         services.AddHostedService<PolicyLifecycleBackgroundService>();
 
-        // ADR-036: Araç kataloğu gömülü JSON'dan bir defa okunup In-Memory cache'lenir → Singleton.
+        // Araç kataloğu gömülü JSON'dan bir defa okunup In-Memory cache'lenir → Singleton.
         services.AddSingleton<IVehicleCatalogProvider, VehicleCatalogProvider>();
 
-        // ADR-037: İl kataloğu (81 il) gömülü JSON'dan bir defa okunup In-Memory cache'lenir → Singleton.
+        // İl kataloğu (81 il) gömülü JSON'dan bir defa okunup In-Memory cache'lenir → Singleton.
         services.AddSingleton<ICityCatalogProvider, CityCatalogProvider>();
 
-        // ADR-055: Deprem bölgesi il'den türetilir (kullanıcı beyanı değil) — aynı gömülü JSON deseni.
+        // Deprem bölgesi il'den türetilir (kullanıcı beyanı değil) — aynı gömülü JSON deseni.
         services.AddSingleton<IEarthquakeZoneProvider, EarthquakeZoneProvider>();
 
-        // ADR-041: Gerçek zamanlı bildirim altyapısı (SignalR). Hub uç noktası WebAPI'de map edilir
+        // Gerçek zamanlı bildirim altyapısı (SignalR). Hub uç noktası WebAPI'de map edilir
         // (composition root); yayın soyutlaması taşıyıcıdan bağımsızdır (IRealTimeNotifier).
         services.AddSignalR();
         services.AddScoped<IRealTimeNotifier, SignalRRealTimeNotifier>();

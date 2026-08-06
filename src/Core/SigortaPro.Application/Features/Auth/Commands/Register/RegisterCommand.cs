@@ -4,7 +4,7 @@ using SigortaPro.Application.Features.Auth.DTOs;
 
 namespace SigortaPro.Application.Features.Auth.Commands.Register;
 
-// Müşteri kaydı: Identity kullanıcısı + Customer profili birlikte oluşturulur (ADR-014).
+// Müşteri kaydı: Identity kullanıcısı + Customer profili birlikte oluşturulur.
 public sealed record RegisterCommand(
     string Email,
     string Password,

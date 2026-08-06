@@ -5,7 +5,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Quotes;
 
-// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz — CODING_STANDARDS.md §4.2).
+// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz).
 internal static class QuoteMappings
 {
     // createdByStaffName: acente destekli teklifte üreten personelin adı (detay handler'ında IIdentityService
@@ -37,7 +37,7 @@ internal static class QuoteMappings
         Source: ResolveSource(quote),
         CreatedByStaffName: createdByStaffName);
 
-    // ADR-041: sigortalı özeti — ham TCKN sızmaz, maskeli döner.
+    // sigortalı özeti — ham TCKN sızmaz, maskeli döner.
     public static QuoteInsuredPersonDto? ToInsuredPersonDto(InsuredPerson? insuredPerson) =>
         insuredPerson is null
             ? null
@@ -90,7 +90,7 @@ internal static class QuoteMappings
                 $"{property.Address.City}/{property.Address.District} · {property.SquareMeters} m²");
         }
 
-        // ADR-041: "başkası adına" teklifte risk objesi sigortalının kendisidir.
+        // "başkası adına" teklifte risk objesi sigortalının kendisidir.
         return insuredPerson is null
             ? new QuoteRiskObjectDto("Kişi", "Sağlık sigortası (sigortalı: poliçe sahibi)")
             : new QuoteRiskObjectDto("Kişi", $"Sigortalı: {insuredPerson.FullName} ({insuredPerson.Relationship})");

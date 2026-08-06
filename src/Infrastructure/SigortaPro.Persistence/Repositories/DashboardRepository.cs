@@ -10,7 +10,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// IDashboardRepository implementasyonu (ADR-005 §4.2, ADR-026). Tüm sorgular salt okunur (AsNoTracking);
+// IDashboardRepository implementasyonu. Tüm sorgular salt okunur (AsNoTracking);
 // metrikler SQL tarafında agregasyon (COUNT/SUM/GROUP BY) ile hesaplanır — entity materialize edilmez,
 // N+1 üretilmez. Hiçbir metot durum değiştirmez.
 public sealed class DashboardRepository : IDashboardRepository

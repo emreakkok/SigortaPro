@@ -4,7 +4,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Features.Dashboard;
 
-// Entity/ReadModel → DTO manuel eşlemeleri (AutoMapper kullanılmaz — CODING_STANDARDS.md §4.2).
+// Entity/ReadModel → DTO manuel eşlemeleri (AutoMapper kullanılmaz).
 internal static class DashboardMappings
 {
     public static PremiumSeriesPointDto ToPointDto(PremiumSeriesAggregate aggregate) => new(

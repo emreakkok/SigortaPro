@@ -1,8 +1,8 @@
 namespace SigortaPro.Persistence.Identity;
 
-// Refresh token kaydı Identity'nin yanında Persistence katmanında tutulur (ADR-014). Domain BaseEntity'sinden
+// Refresh token kaydı Identity'nin yanında Persistence katmanında tutulur. Domain BaseEntity'sinden
 // türemez; bir Domain entity'si değil, kimlik doğrulama altyapısının parçasıdır. Rotasyon için revoke/replace
-// alanları taşır (DEVELOPMENT_RULES.md §7).
+// alanları taşır.
 public sealed class RefreshToken
 {
     public Guid Id { get; set; }

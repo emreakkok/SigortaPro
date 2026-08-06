@@ -26,7 +26,7 @@ public sealed class UnhandledExceptionBehavior<TRequest, TResponse> : IPipelineB
         }
         catch (DomainException ex)
         {
-            // ADR-013: Domain'in DomainException'ı, Application sınırında BusinessRuleException'a (409) çevrilir.
+            // Domain'in DomainException'ı, Application sınırında BusinessRuleException'a (409) çevrilir.
             _logger.LogWarning(ex, "Domain kuralı ihlali: {RequestName}", typeof(TRequest).Name);
             throw new BusinessRuleException(ex.Message);
         }

@@ -4,7 +4,7 @@ using SigortaPro.Domain.Enums;
 namespace SigortaPro.Application.Common.Documents;
 
 // Poliçe sertifikası PDF'ini üretmek için gereken tüm veriyi taşıyan, sunum katmanından bağımsız model.
-// TCKN maskeli taşınır (CLAUDE.md §4.5); render servisi yalnızca bu modeli tüketir.
+// TCKN maskeli taşınır; render servisi yalnızca bu modeli tüketir.
 public sealed record PolicyDocumentModel(
     string AgencyName,
     string AgencyAddress,
@@ -28,7 +28,7 @@ public sealed record PolicyDocumentModel(
     decimal TotalPremium,
     IReadOnlyList<PolicyCoverageLine> Coverages,
     IReadOnlyList<PricingBreakdownItem> PremiumBreakdown,
-    // ADR-042 (additive): Sağlıkta "başkası adına" poliçede sigortalı özeti ("Ad Soyad (Yakınlık) · TCKN maskeli").
+    // (additive): Sağlıkta "başkası adına" poliçede sigortalı özeti ("Ad Soyad (Yakınlık) · TCKN maskeli").
     // Doluysa PDF, sigorta ettiren (poliçe sahibi) ile sigortalıyı ayrı gösterir; null = sigortalı poliçe sahibidir.
     string? InsuredPersonSummary = null);
 

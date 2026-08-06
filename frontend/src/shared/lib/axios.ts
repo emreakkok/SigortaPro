@@ -5,7 +5,7 @@ import type { ApiProblemDetails } from "@/shared/types/api.types";
 import type { AuthResponse } from "@/shared/types/auth.types";
 
 /**
- * Uygulama genelinde kullanılan tek Axios instance'ı (ADR-028):
+ * Uygulama genelinde kullanılan tek Axios instance'ı:
  * - İstek interceptor'ı oturumdaki access token'ı `Authorization: Bearer` olarak ekler.
  * - Yanıt interceptor'ı 401'de refresh token ile oturumu yeniler (tek uçuş / single-flight),
  *   bekleyen isteği yeni token'la bir kez tekrarlar; yenileme de başarısızsa oturumu
@@ -95,7 +95,7 @@ api.interceptors.response.use(
     if (newAccessToken === null) {
       clearSession();
       // Router dışından tam sayfa yönlendirme (interceptor React ağacında yaşamaz);
-      // yeniden yükleme AuthProvider state'ini de sıfırlar (ADR-029). 401 sayfası
+      // yeniden yükleme AuthProvider state'ini de sıfırlar. 401 sayfası
       // kullanıcıya oturumun neden düştüğünü açıklar.
       window.location.assign("/401");
       return Promise.reject(error);

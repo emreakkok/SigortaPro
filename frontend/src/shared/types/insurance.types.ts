@@ -41,7 +41,7 @@ export function branchRiskKind(branch: InsuranceBranch): "vehicle" | "property" 
   return "none";
 }
 
-/** Aracın kullanım amacı (backend `VehicleUsage` — ADR-057). Kasko/Trafik primini etkiler. */
+/** Aracın kullanım amacı (backend `VehicleUsage`). Kasko/Trafik primini etkiler. */
 export const VehicleUsage = {
   Hususi: 0,
   Ticari: 1,

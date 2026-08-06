@@ -5,7 +5,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Features.Pricing.Commands.CreatePricingVersion;
 
-// ADR-048: TASLAK versiyon oluşturur. Mevcut aktif versiyonun değerlerini kopyalayarak seed eder → admin
+// TASLAK versiyon oluşturur. Mevcut aktif versiyonun değerlerini kopyalayarak seed eder → admin
 // güncel tarifeden başlar. Hiçbir mevcut versiyona/teklife DOKUNMAZ (canlı fiyatlar değişmez).
 public sealed class CreatePricingVersionCommandHandler
     : ICommandHandler<CreatePricingVersionCommand, PricingVersionDto>

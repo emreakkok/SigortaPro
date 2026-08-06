@@ -8,7 +8,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// IPolicyRepository implementasyonu (ADR-005, ARCHITECTURE_RULES.md §4.2).
+// IPolicyRepository implementasyonu.
 public sealed class PolicyRepository : GenericRepository<Policy>, IPolicyRepository
 {
     private readonly AppDbContext _context;
@@ -18,7 +18,7 @@ public sealed class PolicyRepository : GenericRepository<Policy>, IPolicyReposit
         _context = context;
     }
 
-    // Yıla ait poliçe sayısı (sıralı numara üretimi — ADR-022). Soft-delete edilmiş poliçeler de benzersiz
+    // Yıla ait poliçe sayısı (sıralı numara üretimi). Soft-delete edilmiş poliçeler de benzersiz
     // numarayı işgal ettiğinden numara tekrarını önlemek için query filter yok sayılır (IgnoreQueryFilters).
     public Task<int> CountByYearAsync(int year, CancellationToken cancellationToken = default)
     {
@@ -29,7 +29,7 @@ public sealed class PolicyRepository : GenericRepository<Policy>, IPolicyReposit
             .CountAsync(policy => policy.PolicyNumber.StartsWith(prefix), cancellationToken);
     }
 
-    // Salt okunur, sayfalanmış "Poliçelerim" listesi (Task 18): müşteri filtresi + opsiyonel durum; branş/ürün
+    // Salt okunur, sayfalanmış "Poliçelerim" listesi: müşteri filtresi + opsiyonel durum; branş/ürün
     // adı için teklif+ürün yüklenir. En yeni başlangıç önce (kararlı sıralama için Id ikincil).
     public async Task<PagedResult<Policy>> GetByCustomerPagedAsync(
         Guid customerId,
@@ -60,7 +60,7 @@ public sealed class PolicyRepository : GenericRepository<Policy>, IPolicyReposit
     }
 
     // Salt okunur (AsNoTracking) detay: müşteri, teklif (ürün+teminatlar, araç/konut) ile — teminat tablosunun
-    // deterministik yeniden hesabı için (Task 18 GetPolicyById). Belge yazımı gerekmediğinden tracked değildir.
+    // deterministik yeniden hesabı için (GetPolicyById). Belge yazımı gerekmediğinden tracked değildir.
     public Task<Policy?> GetReadDetailByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         _context.Policies
             .AsNoTracking()
@@ -70,7 +70,7 @@ public sealed class PolicyRepository : GenericRepository<Policy>, IPolicyReposit
             .Include(policy => policy.Quote!).ThenInclude(quote => quote.Property)
             .FirstOrDefaultAsync(policy => policy.Id == id, cancellationToken);
 
-    // İzlemeli detay (PDF üretiminde belge eklenip kaydedilebilir — ADR-023): müşteri, teklif (ürün+teminatlar,
+    // İzlemeli detay (PDF üretiminde belge eklenip kaydedilebilir): müşteri, teklif (ürün+teminatlar,
     // araç/konut) ve varsa mevcut belge yüklenir.
     public Task<Policy?> GetDetailByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         _context.Policies
@@ -81,14 +81,14 @@ public sealed class PolicyRepository : GenericRepository<Policy>, IPolicyReposit
             .Include(policy => policy.PolicyDocument)
             .FirstOrDefaultAsync(policy => policy.Id == id, cancellationToken);
 
-    // İzlemeli: bitiş tarihi geçmiş aktif poliçeler (arkaplan expiry — Task 13).
+    // İzlemeli: bitiş tarihi geçmiş aktif poliçeler (arkaplan expiry —).
     public async Task<IReadOnlyList<Policy>> GetOverdueActiveAsync(DateTime asOf, CancellationToken cancellationToken = default) =>
         await _context.Policies
             .Where(policy => policy.Status == PolicyStatus.Active && policy.EndDate < asOf)
             .ToListAsync(cancellationToken);
 
     // Salt okunur: bitişine ≤ pencere kadar kalan, henüz yenileme teklifi olmayan aktif poliçeler; özgün teklif
-    // (ürün+teminatlar, risk objesi) ve müşteri ile birlikte (yenileme fiyatlaması için, Task 13).
+    // (ürün+teminatlar, risk objesi) ve müşteri ile birlikte (yenileme fiyatlaması için,).
     public async Task<IReadOnlyList<Policy>> GetDueForRenewalAsync(
         DateTime asOf,
         DateTime renewalWindowEnd,
@@ -105,7 +105,7 @@ public sealed class PolicyRepository : GenericRepository<Policy>, IPolicyReposit
                 && !policy.Renewals.Any())
             .ToListAsync(cancellationToken);
 
-    // ADR-059: Bonus-Malus girdisi. Tek sorgu; SQL tarafında COUNT + NOT EXISTS ile hesaplanır (N+1 yok).
+    // Bonus-Malus girdisi. Tek sorgu; SQL tarafında COUNT + NOT EXISTS ile hesaplanır (N+1 yok).
     // Branş, poliçenin kaynaklandığı teklifden okunur → Kasko ve Trafik AYRI basamak taşır.
     public Task<int> CountClaimFreeCompletedPeriodsAsync(
         Guid customerId, InsuranceBranch branch, DateTime asOf, CancellationToken cancellationToken = default) =>

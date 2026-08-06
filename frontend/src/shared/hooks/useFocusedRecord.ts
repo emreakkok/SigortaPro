@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 /*
- * Liste ekranlarındaki detay çekmecesinin seçili kaydı (ADR-047). `?focus=<id>` query parametresiyle
+ * Liste ekranlarındaki detay çekmecesinin seçili kaydı. `?focus=<id>` query parametresiyle
  * derin bağlantı kurulabilir → bildirimden tıklanınca ilgili kayıt doğrudan açılır. API'si
  * `useState<string | null>` ile aynıdır; mevcut sayfalar tek satır değişiklikle bunu kullanabilir.
  * Çekmece kapatıldığında parametre URL'den temizlenir (geri tuşu geçmişi kirlenmesin diye `replace`).

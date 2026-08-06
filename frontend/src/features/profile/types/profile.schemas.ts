@@ -5,7 +5,7 @@ import { TURKISH_PHONE_REGEX, TURKISH_PLATE_REGEX } from "@/shared/utils/validat
 /**
  * Client-side ön doğrulama şemaları — backend FluentValidation kurallarını
  * (UpdateProfile/AddVehicle/AddProperty validator'ları) Türkçe mesajlarıyla aynalar.
- * Son söz backend'dedir (CLAUDE.md §10).
+ * Son söz backend'dedir.
  */
 const CURRENT_YEAR = new Date().getFullYear();
 const MIN_MANUFACTURE_YEAR = 1950;
@@ -60,7 +60,7 @@ export const vehicleSchema = z.object({
     .int("Motor gücü tam sayı olmalıdır.")
     .min(1, `Motor gücü 1 ile ${MAX_ENGINE_POWER_HP} beygir arasında olmalıdır.`)
     .max(MAX_ENGINE_POWER_HP, `Motor gücü 1 ile ${MAX_ENGINE_POWER_HP} beygir arasında olmalıdır.`),
-  // ADR-057: Kullanım amacı zorunludur ve varsayılan yoktur — kullanıcı bilinçli seçmelidir.
+  // Kullanım amacı zorunludur ve varsayılan yoktur — kullanıcı bilinçli seçmelidir.
   // Boş seçim "" olarak gelir; sayıya çevrilemediğinde net bir mesaj gösterilir.
   usagePurpose: z.coerce
     .number({ invalid_type_error: "Kullanım amacı seçilmelidir." })
@@ -87,7 +87,7 @@ export const propertySchema = z.object({
 });
 export type PropertyFormValues = z.infer<typeof propertySchema>;
 
-// Şifre kuralları backend ChangePasswordCommandValidator (= Register/ResetPassword) ile birebir aynı (ADR-040).
+// Şifre kuralları backend ChangePasswordCommandValidator (= Register/ResetPassword) ile birebir aynı.
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Mevcut şifre zorunludur."),

@@ -8,7 +8,7 @@ namespace SigortaPro.Application.Features.Pricing;
 
 // Tarife versiyonu → DTO eşlemeleri (AutoMapper kullanılmaz). Bir versiyonun kural setinde bir faktör grubu
 // yoksa (o grup eklenmeden önce oluşmuş versiyonlar) yerleşik baseline değerleri gösterilir → admin her zaman
-// GERÇEK sayıları görür, motorla asla sapmaz (baseline tek kaynaktan okunur — ADR-049).
+// GERÇEK sayıları görür, motorla asla sapmaz (baseline tek kaynaktan okunur).
 internal static class PricingMappings
 {
     // TÜM çarpanlarıyla yerleşik baseline kural seti (ticari kaldıraçlar + tüm faktör grupları). Yeni taslak

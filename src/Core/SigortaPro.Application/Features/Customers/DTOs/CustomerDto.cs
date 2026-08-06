@@ -1,6 +1,6 @@
 namespace SigortaPro.Application.Features.Customers.DTOs;
 
-// Müşteri profil detayı. Hassas alan (ham TCKN) taşımaz; TCKN maskeli döner (CODING_STANDARDS.md §4.2).
+// Müşteri profil detayı. Hassas alan (ham TCKN) taşımaz; TCKN maskeli döner.
 public sealed record CustomerDto(
     Guid Id,
     string FirstName,

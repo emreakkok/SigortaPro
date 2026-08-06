@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/utils";
 import { useTheme, type ThemeMode } from "@/shared/theme/useTheme";
 
 /**
- * Navbar'daki tema değiştirme butonu (ADR-043). Tek tıkta açık → koyu → sistem sırayla döner;
+ * Navbar'daki tema değiştirme butonu. Tek tıkta açık → koyu → sistem sırayla döner;
  * ikon Framer Motion ile hafifçe (opacity + rotate + scale) çapraz geçiş yapar (`useReducedMotion`'a saygılı).
  * Renk yükü yok — token tabanlı `text-muted-foreground/accent` kullanır, koyu temada otomatik uyumlu.
  */

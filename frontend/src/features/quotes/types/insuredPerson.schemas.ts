@@ -2,7 +2,7 @@ import { z } from "zod";
 import { isValidTckn, TURKISH_PHONE_REGEX } from "@/shared/utils/validation";
 
 /**
- * "Başkası adına" sağlık sigortalısı beyan şeması (ADR-041) — backend
+ * "Başkası adına" sağlık sigortalısı beyan şeması — backend
  * CreateQuoteCommandValidator'ın sigortalı kurallarını Türkçe mesajlarıyla aynalar.
  */
 export const insuredPersonSchema = z.object({
@@ -31,7 +31,7 @@ export const insuredPersonSchema = z.object({
     .string()
     .min(1, "Yakınlık derecesi zorunludur.")
     .max(50, "Yakınlık derecesi en fazla 50 karakter olabilir."),
-  // "Diğer" seçildiğinde zorunlu serbest açıklama (ADR-042); backend'e relationship olarak bu değer gider.
+  // "Diğer" seçildiğinde zorunlu serbest açıklama; backend'e relationship olarak bu değer gider.
   relationshipDetail: z
     .string()
     .max(50, "Yakınlık açıklaması en fazla 50 karakter olabilir.")

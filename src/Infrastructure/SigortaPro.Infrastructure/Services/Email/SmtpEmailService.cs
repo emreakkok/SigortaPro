@@ -9,10 +9,10 @@ using SigortaPro.Infrastructure.Email;
 
 namespace SigortaPro.Infrastructure.Services.Email;
 
-// IEmailService'in MVP SMTP implementasyonu (ADR-035). MailKit kullanılır (System.Net.Mail.SmtpClient
+// IEmailService'in MVP SMTP implementasyonu. MailKit kullanılır (System.Net.Mail.SmtpClient
 // obsolete olduğu için tercih edilmez). Sağlayıcıya özgü hatalar EmailDeliveryException'a sarılır; böylece
 // Application katmanı MailKit'e bağımlı olmadan hatayı tiplenmiş yakalayabilir. E-posta gövdesi, alıcı token'ı
-// veya SMTP parolası ASLA loglanmaz (CLAUDE.md §4.5, §8.3).
+// veya SMTP parolası ASLA loglanmaz.
 public sealed class SmtpEmailService : IEmailService
 {
     private readonly EmailSettings _settings;

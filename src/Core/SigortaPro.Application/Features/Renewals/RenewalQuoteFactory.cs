@@ -6,14 +6,14 @@ using SigortaPro.Domain.Entities;
 namespace SigortaPro.Application.Features.Renewals;
 
 // Süresi dolmakta olan poliçenin özgün teklifinden yeni bir dönem teklifi (Priced) kurar: aynı branş/ürün/risk
-// objesi/teminat paketi, güncel referans tarihiyle yeniden fiyatlanır ve hasar geçmişi çarpanı uygulanır (Task 13).
+// objesi/teminat paketi, güncel referans tarihiyle yeniden fiyatlanır ve hasar geçmişi çarpanı uygulanır.
 internal static class RenewalQuoteFactory
 {
     // sourceQuote: yenilenen poliçenin teklifi (yalnızca skaler alanları — branş/ürün/risk objesi/paket — okunur).
     // product/vehicle/property/customer fiyatlama için ayrıca verilir (navigation'a bağımlı değildir → izole test edilebilir).
-    // effectivePricing (ADR-048): yenileme YENİ bir dönem teklifi ürettiğinden, güncel referans tarihiyle
+    // effectivePricing: yenileme YENİ bir dönem teklifi ürettiğinden, güncel referans tarihiyle
     // birlikte O AN yürürlükteki tarife kullanılır ve yeni teklifte sabitlenir. Kaynak teklifin/poliçenin
-    // fiyatı değişmez — yalnızca yeni dönem teklifi güncel tarifeyle fiyatlanır (ADR-021 determinizmi korunur).
+    // fiyatı değişmez — yalnızca yeni dönem teklifi güncel tarifeyle fiyatlanır.
     public static Quote Build(
         Quote sourceQuote,
         Customer customer,
@@ -26,9 +26,9 @@ internal static class RenewalQuoteFactory
         PricingSnapshot snapshot,
         EffectivePricing? effectivePricing = null)
     {
-        // ADR-056/058/059: Girdi (snapshot) çağıran handler tarafından ORTAK IQuotePricingInputBuilder ile
+        // Girdi (snapshot) çağıran handler tarafından ORTAK IQuotePricingInputBuilder ile
         // kurulur ve buraya hazır verilir → yenileme, teklif oluşturma ve önizleme aynı yolu kullanır.
-        // ADR-059: Hasar geçmişi artık bu snapshot'taki Bonus-Malus basamağıyla fiyatlanır; ayrı bir
+        // Hasar geçmişi artık bu snapshot'taki Bonus-Malus basamağıyla fiyatlanır; ayrı bir
         // ClaimHistoryFactor UYGULANMAZ (yeni tekliflerde 1.00 = nötr kalır).
         // Yenileme indirimi AKTİF tarifeden okunur (gerçek sigortacılıkta yenileme yeni tarifeyle fiyatlanır).
         // 1.00 = indirim yok. Değer teklifte dondurulacağından yeniden hesap deterministiktir.
@@ -54,7 +54,7 @@ internal static class RenewalQuoteFactory
             renewalQuote.PinPricingVersion(effectivePricing.VersionId.Value);
         }
 
-        // ADR-041: "başkası adına" sağlık poliçesinin yenilemesi aynı sigortalı için düzenlenir
+        // "başkası adına" sağlık poliçesinin yenilemesi aynı sigortalı için düzenlenir
         // (owned instance entity'ler arasında paylaşılmaz; kaynak beyandan kopyalanır).
         if (sourceQuote.InsuredPerson is not null)
         {
@@ -72,7 +72,7 @@ internal static class RenewalQuoteFactory
             renewalQuote.ApplyRenewalDiscount(renewalDiscount);
         }
 
-        // Yenileme teklifinin geçerliliği (kabul son tarihi) poliçe bitişine dayanır (bkz. RenewalOfferValidity):
+        // Yenileme teklifinin geçerliliği (kabul son tarihi) poliçe bitişine dayanır:
         // müşteri mevcut poliçesi sona erene kadar kabul edebilmelidir. Böylece teklif, poliçe hâlâ AKTİFken
         // "geçerlilik süresi doldu" görünmez. Normal (yenileme dışı) tekliflerin 7 günlük vadesi değişmez.
         renewalQuote.MarkAsPriced(pricing.TotalPremium, RenewalOfferValidity.Compute(now, policyEndDate));

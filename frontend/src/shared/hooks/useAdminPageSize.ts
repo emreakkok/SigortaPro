@@ -6,7 +6,7 @@ import {
 } from "@/shared/lib/pagination";
 
 /*
- * Admin tablolarının sayfa boyutu tercihi (ADR-045). localStorage'da kalıcıdır ve tüm admin
+ * Admin tablolarının sayfa boyutu tercihi. localStorage'da kalıcıdır ve tüm admin
  * tabloları arasında paylaşılır ("50 satır isterim" her yerde geçerli). Backend'e yük getirmez.
  */
 export function useAdminPageSize(): [AdminPageSize, (size: AdminPageSize) => void] {

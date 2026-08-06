@@ -36,9 +36,9 @@ export function QuoteWizard({ profile, customerId, onCreated }: QuoteWizardProps
   const [step, setStep] = useState<WizardStep>("branch");
   const [branch, setBranch] = useState<InsuranceBranch | null>(null);
   const [riskObjectId, setRiskObjectId] = useState<string | null>(null);
-  // Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); null = kendim/müşterinin kendisi için.
+  // Sağlıkta "başkası adına" sigortalı beyanı; null = kendim/müşterinin kendisi için.
   const [insuredPerson, setInsuredPerson] = useState<InsuredPersonRequest | null>(null);
-  // ADR-054: Sağlıkta sigara beyanı; null = henüz beyan edilmedi (varsayılan atanmaz).
+  // Sağlıkta sigara beyanı; null = henüz beyan edilmedi (varsayılan atanmaz).
   const [isSmoker, setIsSmoker] = useState<boolean | null>(null);
 
   const handleBranchSelect = (selected: InsuranceBranch) => {

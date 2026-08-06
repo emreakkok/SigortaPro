@@ -31,7 +31,7 @@ public sealed class MarkNotificationAsReadCommandHandler : ICommandHandler<MarkN
         var notification = await _notificationRepository.GetTrackedByIdAsync(request.NotificationId, cancellationToken)
             ?? throw new NotFoundException(nameof(Notification), request.NotificationId);
 
-        // Kaynak sahipliği: bildirim yalnızca alıcısı tarafından okundu işaretlenebilir (DEVELOPMENT_RULES §7).
+        // Kaynak sahipliği: bildirim yalnızca alıcısı tarafından okundu işaretlenebilir.
         if (notification.RecipientUserId != userId)
         {
             throw new ForbiddenAccessException("Bu bildirim size ait değil.");

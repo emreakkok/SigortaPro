@@ -57,7 +57,7 @@ public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<Gener
             return 0;
         }
 
-        // ADR-048: yenileme teklifleri yeni dönem için üretildiğinden güncel tarifeyle fiyatlanır
+        // yenileme teklifleri yeni dönem için üretildiğinden güncel tarifeyle fiyatlanır
         // (tüm parti için bir kez çözülür); kaynak poliçe/teklif fiyatlarına dokunulmaz.
         var effectivePricing = await _pricingRateResolver.ResolveEffectiveAsync(now, cancellationToken);
 
@@ -75,9 +75,9 @@ public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<Gener
                 continue;
             }
 
-            // ADR-056/058/059: Girdi (Bonus-Malus basamağı dahil) ORTAK builder'dan kurulur → yenileme,
+            // Girdi (Bonus-Malus basamağı dahil) ORTAK builder'dan kurulur → yenileme,
             // teklif oluşturma ve önizleme aynı fiyatlama girdisini üretir. Hasar geçmişi artık ayrı bir
-            // ClaimHistoryFactor ile değil, bu basamakla fiyatlanır (ADR-059).
+            // ClaimHistoryFactor ile değil, bu basamakla fiyatlanır.
             // Sigara beyanı kaynak teklifin beyanından taşınır (arkaplan işinde müşteriye soru sorulamaz).
             var snapshot = await _pricingInputBuilder.BuildAsync(
                 originalQuote.Branch, customer, originalQuote.Vehicle, originalQuote.Property, now,
@@ -86,7 +86,7 @@ public sealed class GeneratePolicyRenewalsCommandHandler : ICommandHandler<Gener
                 cancellationToken: cancellationToken);
 
             // policy.EndDate: yenileme teklifi mevcut poliçe bitene kadar geçerli olmalı (aksi halde poliçe
-            // aktifken teklif "süresi doldu" görünürdü — bkz. RenewalQuoteFactory geçerlilik hesabı).
+            // aktifken teklif "süresi doldu" görünürdü geçerlilik hesabı).
             var renewalQuote = RenewalQuoteFactory.Build(
                 originalQuote, customer, product, originalQuote.Vehicle, originalQuote.Property,
                 _pricingEngine, now, policy.EndDate, snapshot, effectivePricing);

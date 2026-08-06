@@ -10,7 +10,7 @@ using SigortaPro.Persistence.Context;
 namespace SigortaPro.WebAPI.Tests.Integration;
 
 /// <summary>
-/// ADR-054 — REGRESYON KORUMASI: Yenileme fiyatlamasını besleyen hasar geçmişi sayımı **branşa göre**
+/// — REGRESYON KORUMASI: Yenileme fiyatlamasını besleyen hasar geçmişi sayımı **branşa göre**
 /// kapsanmalıdır. Önceden müşterinin TÜM branşlardaki hasarları sayılıyordu; bu, bir <b>Kasko hasarının
 /// Sağlık yenileme primini artırmasına</b> yol açıyordu (branşlar arası risk kirlenmesi).
 /// <para>

@@ -12,8 +12,8 @@ interface AppProvidersProps {
 
 /**
  * Uygulama genel provider kompozisyonu. main.tsx ve App.tsx değişmez.
- * ThemeProvider (ADR-043) en dışta durur → açık/koyu/sistem tema tüm ağaca uygulanır.
- * NotificationProvider (ADR-041): staff oturumunda SignalR bağlantısını yönetir; sonner Toaster'ı
+ * ThemeProvider en dışta durur → açık/koyu/sistem tema tüm ağaca uygulanır.
+ * NotificationProvider: staff oturumunda SignalR bağlantısını yönetir; sonner Toaster'ı
  * gerçek zamanlı bildirim toast'larını gösterir (richColors → success/info/warning/error varyantları)
  * ve etkin temayı izler → toast'lar koyu modda da uyumlu.
  */

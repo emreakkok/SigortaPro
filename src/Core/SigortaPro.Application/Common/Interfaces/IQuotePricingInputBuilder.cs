@@ -3,7 +3,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// ADR-056: Fiyatlama girdisini (PricingSnapshot) kuran tek nokta. Teklif oluşturma ve karşılaştırma
+// Fiyatlama girdisini (PricingSnapshot) kuran tek nokta. Teklif oluşturma ve karşılaştırma
 // önizlemesi AYNI yolu kullanır → gösterilen fiyat ile oluşturulan teklifin fiyatı yapısal olarak eşittir.
 //
 // TASKS.md'de tanımlı domain terimi ("konut risk objesi" = property) korunuyor; CA1716 (VB.NET 'Property'

@@ -6,7 +6,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// ADR-048: IPricingVersionRepository implementasyonu. Okuma sorguları AsNoTracking + Include(Rates);
+// IPricingVersionRepository implementasyonu. Okuma sorguları AsNoTracking + Include(Rates);
 // yalnızca TASLAK düzenlenir (izlemeli getirilir), aktif/arşiv değişmez.
 public sealed class PricingVersionRepository : GenericRepository<PricingVersion>, IPricingVersionRepository
 {

@@ -106,7 +106,7 @@ export function CardPreview({
 
 /**
  * Kartın bir yüzü: gradient + cam (glassmorphism) katmanları ve derinlik gölgesi.
- * Renkler tema token'larından (`primary`) türer → koyu tema otomatik uyumludur (ADR-027).
+ * Renkler tema token'larından (`primary`) türer → koyu tema otomatik uyumludur.
  */
 function CardFace({ children, className }: { children: ReactNode; className?: string }) {
   return (

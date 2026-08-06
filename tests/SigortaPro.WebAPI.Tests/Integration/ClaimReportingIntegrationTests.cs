@@ -15,7 +15,7 @@ namespace SigortaPro.WebAPI.Tests.Integration;
 // Hasar bildiriminin teminat penceresi kontrolünün uçtan uca doğrulaması (saat hassasiyetli).
 // EN KRİTİK KABUL: poliçe bugün satın alma anında (saat dahil) aktifleşir; aynı gün başlangıçtan SONRAKİ
 // bir olay "poliçe başlangıcından önce" gerekçesiyle REDDEDİLMEMELİDİR. Başlangıçtan önceki an ise reddedilir.
-// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi TestAccountFactory (ISender) ile korunur (ADR-034).
+// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi TestAccountFactory (ISender) ile korunur.
 [Collection(IntegrationTestCollection.Name)]
 public sealed class ClaimReportingIntegrationTests
 {

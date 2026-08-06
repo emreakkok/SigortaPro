@@ -6,11 +6,11 @@ using SigortaPro.Domain.Enums;
 namespace SigortaPro.Application.Features.Quotes;
 
 /// <summary>
-/// ADR-056: Fiyatlama girdisinin **tek kurulum noktası**. Hem teklif OLUŞTURMA hem de paket
+/// Fiyatlama girdisinin **tek kurulum noktası**. Hem teklif OLUŞTURMA hem de paket
 /// KARŞILAŞTIRMA (önizleme) akışı bu sınıfı kullanır.
 /// <para>
 /// Neden var: Önizleme ve oluşturma daha önce girdiyi <b>ayrı ayrı</b> kuruyordu. Parite sözleşmeyle değil
-/// tesadüfle sağlanıyordu ve sigara beyanı (ADR-054) ile adresten türetilen deprem bölgesi (ADR-055)
+/// tesadüfle sağlanıyordu ve sigara beyanı ile adresten türetilen deprem bölgesi
 /// eklenince bozuldu: kullanıcıya karşılaştırmada bir fiyat gösterilip oluşan teklifte başka fiyat
 /// uygulanıyordu. Girdi kurulumu tek noktaya alınarak parite <b>yapısal olarak</b> garanti edilir —
 /// ileride yeni bir risk faktörü eklendiğinde iki akış tekrar ayrışamaz.
@@ -42,13 +42,13 @@ public sealed class QuotePricingInputBuilder : IQuotePricingInputBuilder
         bool? isSmoker,
         CancellationToken cancellationToken = default)
     {
-        // ADR-055: Deprem bölgesi kullanıcı beyanı değil, konutun ilinden türetilir. İl çözülemezse bölge
+        // Deprem bölgesi kullanıcı beyanı değil, konutun ilinden türetilir. İl çözülemezse bölge
         // atanmaz → motor "bilinmeyen bölge" davranışını açık açıklamasıyla uygular.
         var earthquakeZone = property is null
             ? null
             : _earthquakeZoneProvider.ResolveZone(property.Address.City);
 
-        // ADR-059: Bonus-Malus basamağı YALNIZCA araç branşlarında (Kasko/Trafik) hesaplanır ve her branş
+        // Bonus-Malus basamağı YALNIZCA araç branşlarında (Kasko/Trafik) hesaplanır ve her branş
         // kendi geçmişini taşır. Sağlık/Konut/DASK için hesaplanmaz — snapshot'ları bu alanı zaten taşımaz.
         var bonusMalusStep = branch is InsuranceBranch.Kasko or InsuranceBranch.Trafik
             ? await ResolveBonusMalusStepAsync(customer.Id, branch, referenceDate, cancellationToken)

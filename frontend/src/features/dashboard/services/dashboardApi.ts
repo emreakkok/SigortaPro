@@ -9,7 +9,7 @@ import type {
 } from "@/features/dashboard/types/dashboard.types";
 
 /**
- * `GET /dashboard/summary` — operasyon dashboard'ının TÜM blokları tek çağrıda (ADR-052):
+ * `GET /dashboard/summary` — operasyon dashboard'ının TÜM blokları tek çağrıda:
  * dönem KPI'ları + karşılaştırma, aksiyon merkezi, prim serisi, satış hunisi, branş performansı,
  * hasar operasyonu, portföy. Filtre değiştiğinde yalnızca bu istek yenilenir.
  */

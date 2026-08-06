@@ -1,7 +1,7 @@
 namespace SigortaPro.Domain.Enums;
 
 /// <summary>
-/// Aracın kullanım amacı (ADR-057). Kasko/Trafik fiyatlamasında maruziyeti belirleyen kullanıcı beyanıdır:
+/// Aracın kullanım amacı. Kasko/Trafik fiyatlamasında maruziyeti belirleyen kullanıcı beyanıdır:
 /// ticari ve özellikle taksi kullanımı, hususi kullanıma göre belirgin biçimde daha yüksek yıllık kilometre
 /// ve kaza sıklığı taşır. Diğer branşlar (Konut/DASK/Sağlık) bu bilgiyi kullanmaz.
 /// </summary>

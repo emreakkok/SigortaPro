@@ -4,7 +4,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Common.Notifications;
 
-// ADR-042: INotificationDispatcher implementasyonu (Application orkestrasyonu — iş kuralı içermez,
+// INotificationDispatcher implementasyonu (Application orkestrasyonu — iş kuralı içermez,
 // yalnızca kalıcılık + canlı yayın koordinasyonu). Fan-out: staff (Admin ∪ Personel) kullanıcılarının
 // her biri için ayrı Notification satırı yazılır (okundu durumu kullanıcıya özel), ardından "staff"
 // grubuna tek canlı yayın yapılır. Çağıran (RealTimeNotificationBehavior) hataları yan-kanal olarak ele alır.
@@ -29,7 +29,7 @@ public sealed class NotificationDispatcher : INotificationDispatcher
 
     public async Task PublishToStaffAsync(RealTimeNotification notification, CancellationToken cancellationToken = default)
     {
-        // ADR-060: staff kümesi (Admin ∪ Personel) tek kaynaktan (Roles.StaffRoles) türetilir.
+        // staff kümesi (Admin ∪ Personel) tek kaynaktan (Roles.StaffRoles) türetilir.
         var recipientIds = new List<Guid>();
         foreach (var role in Roles.StaffRoles)
         {
@@ -49,7 +49,7 @@ public sealed class NotificationDispatcher : INotificationDispatcher
                     notification.Message,
                     notification.RelatedEntityId,
                     notification.RelatedEntityType,
-                    // ADR-047: actor snapshot'ı + operasyonel referans kalıcı kayda taşınır.
+                    // actor snapshot'ı + operasyonel referans kalıcı kayda taşınır.
                     notification.ActorUserId,
                     notification.ActorName,
                     notification.ReferenceCode),

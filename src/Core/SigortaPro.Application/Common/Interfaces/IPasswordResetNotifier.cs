@@ -1,7 +1,7 @@
 namespace SigortaPro.Application.Common.Interfaces;
 
 // Şifre sıfırlama e-postasını oluşturup gönderir (link kurulumu + şablon Infrastructure'da;
-// taban URL EmailSettings'ten okunur — ADR-035). INotificationService/MockNotificationService deseninin
+// taban URL EmailSettings'ten okunur). INotificationService/MockNotificationService deseninin
 // izidir: Application yalnızca "bu kullanıcıya sıfırlama linkini gönder" niyetini bilir, taşıma/şablon
 // detayları Infrastructure'da kalır. Böylece IEmailService genel/soyut transport olarak sağlayıcıdan bağımsız kalır.
 public interface IPasswordResetNotifier

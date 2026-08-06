@@ -7,7 +7,7 @@ import {
 } from "@/features/notifications/services/notificationsApi";
 import type { NotificationListParams } from "@/features/notifications/types/notification.types";
 
-/** Bildirim sorgu anahtarları (ADR-042) — SignalR invalidation'ı da bu kökü kullanır. */
+/** Bildirim sorgu anahtarları — SignalR invalidation'ı da bu kökü kullanır. */
 export const notificationQueryKeys = {
   all: ["notifications"] as const,
   list: (params: NotificationListParams) => ["notifications", "list", params] as const,

@@ -17,7 +17,7 @@ using SigortaPro.Persistence.Context;
 namespace SigortaPro.WebAPI.Tests.Integration;
 
 /// <summary>
-/// ADR-059: Hasar geçmişinin TEK ölçeği (Bonus-Malus basamağı) — uçtan uca.
+/// Hasar geçmişinin TEK ölçeği (Bonus-Malus basamağı) — uçtan uca.
 /// <para>
 /// Doğrulanan garantiler: yeni müşteri nötr, hasarsız dönemler indirim getirir, hasar ek prim getirir ve
 /// sonraki hasarsız dönemlerde sönümlenir, Kasko ↔ Trafik basamakları birbirinden bağımsızdır,
@@ -146,7 +146,7 @@ public sealed class BonusMalusPricingIntegrationTests
     [Fact]
     public async Task Preview_And_CreatedQuote_Should_HaveIdenticalPremium_WithBonusMalus()
     {
-        // ADR-056 paritesi yeni faktörle de korunur (ortak QuotePricingInputBuilder).
+        // paritesi yeni faktörle de korunur (ortak QuotePricingInputBuilder).
         var client = await CustomerClientAsync();
         var vehicle = await AddVehicleAsync(client);
         var customerId = await CustomerIdAsync(client);
@@ -169,7 +169,7 @@ public sealed class BonusMalusPricingIntegrationTests
     [Fact]
     public async Task ExistingQuote_Should_NotChange_WhenClaimHistoryChangesAfterwards()
     {
-        // ADR-053 determinizmi: basamak teklif anında snapshot'lanır.
+        // determinizmi: basamak teklif anında snapshot'lanır.
         var client = await CustomerClientAsync();
         var vehicle = await AddVehicleAsync(client);
         var customerId = await CustomerIdAsync(client);

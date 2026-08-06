@@ -18,8 +18,8 @@ import { cn } from "@/shared/lib/utils";
 import { formatDateOnly } from "@/shared/utils/format";
 
 /*
- * Profil sekmeleri; kimlikler URL `?tab=` değeriyle birebirdir (dropdown menü derin bağlantıları — ADR-040).
- * "Bildirimler" sekmesi kaldırıldı (ADR-046): bildirim sistemi yalnızca staff'a çalışır (SignalR yalnız
+ * Profil sekmeleri; kimlikler URL `?tab=` değeriyle birebirdir (dropdown menü derin bağlantıları).
+ * "Bildirimler" sekmesi kaldırıldı: bildirim sistemi yalnızca staff'a çalışır (SignalR yalnız
  * Admin/Personel oturumunda bağlanır); müşteri hiç bildirim almadığından tercih ekranı yanıltıcıydı.
  */
 const TABS = [
@@ -35,7 +35,7 @@ function isTabId(value: string | null): value is TabId {
   return TABS.some((tab) => tab.id === value);
 }
 
-/** Profil sayfası: tek sayfada sekmeli hesap yönetimi (genel bilgiler, araçlar, konutlar, şifre — ADR-040). */
+/** Profil sayfası: tek sayfada sekmeli hesap yönetimi (genel bilgiler, araçlar, konutlar, şifre). */
 export default function ProfilePage() {
   const { data: profile, isLoading, isError, error } = useMyProfile();
   const [searchParams, setSearchParams] = useSearchParams();

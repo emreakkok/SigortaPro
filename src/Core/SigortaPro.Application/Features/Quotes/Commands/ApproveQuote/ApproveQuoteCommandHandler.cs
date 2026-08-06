@@ -39,13 +39,13 @@ public sealed class ApproveQuoteCommandHandler : ICommandHandler<ApproveQuoteCom
         await QuoteAuthorization.EnsureCanAccessAsync(
             quote.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 
-        // Geçerlilik süresi dolmuş bir teklif onaylanamaz (Expired'a çekme işi Task 13 arkaplan servisidir).
+        // Geçerlilik süresi dolmuş bir teklif onaylanamaz (Expired'a çekme işi arkaplan servisidir).
         if (quote.ValidUntil is not null && _dateTimeProvider.UtcNow > quote.ValidUntil)
         {
             throw new BusinessRuleException("Teklifin geçerlilik süresi dolmuş, onaylanamaz.");
         }
 
-        // Priced değilse DomainException → UnhandledExceptionBehavior 409'a çevirir (ADR-013).
+        // Priced değilse DomainException → UnhandledExceptionBehavior 409'a çevirir.
         quote.Approve();
 
         _quoteRepository.Update(quote);

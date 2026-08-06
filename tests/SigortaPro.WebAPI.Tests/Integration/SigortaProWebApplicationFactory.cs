@@ -17,19 +17,19 @@ using SigortaPro.Persistence.Seed;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// Task 21 / ADR-034: Entegrasyon testleri için gerçek HTTP pipeline'ı (middleware, auth, MediatR, EF Core)
+// / Entegrasyon testleri için gerçek HTTP pipeline'ı (middleware, auth, MediatR, EF Core)
 // SQLite in-memory veritabanıyla ayağa kaldıran WebApplicationFactory.
 //
 // - Ortam "Testing"tir: Program.cs'in Development'a özel migrate/seed bloğu ve Swagger devre dışı kalır;
 //   şema EnsureCreated ile EF modelinden üretilir (SQL Server'a özgü migration'lar çalıştırılmaz).
 // - Tek bir açık SqliteConnection factory ömrü boyunca tutulur (":memory:" veritabanı bağlantı kapanınca
 //   silinir). Serilog bootstrap logger'ı süreçte tek kez dondurulabildiğinden TÜM entegrasyon sınıfları bu
-//   factory'yi IntegrationTestCollection üzerinden paylaşır (bkz. oradaki açıklama); test izolasyonu her
+// factory'yi IntegrationTestCollection üzerinden paylaşır; test izolasyonu her
 //   testin kendi kullanıcı/verisini üretmesiyle sağlanır.
-// - PolicyLifecycleBackgroundService kaldırılır: arkaplan komutları Task 13 birim testlerinde kapsanır ve
+// - PolicyLifecycleBackgroundService kaldırılır: arkaplan komutları birim testlerinde kapsanır ve
 //   paylaşılan SQLite bağlantısına eşzamanlı erişim testleri kırılgan yapar.
 // - Referans verisi (5 sigorta ürünü + roller) prodüksiyondaki seeder'larla yüklenir; testler kendi
-//   kullanıcı/araç/teklif verisini kendileri oluşturur (DEVELOPMENT_RULES.md §5.4).
+// kullanıcı/araç/teklif verisini kendileri oluşturur.
 public sealed class SigortaProWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     // HS256 en az 256 bit anahtar ister; yalnızca test ortamında kullanılır.

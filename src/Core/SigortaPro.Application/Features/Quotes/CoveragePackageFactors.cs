@@ -2,7 +2,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Quotes;
 
-// Teminat paketi ölçek katsayıları (PRICING.md "Teminat Paketleri" ile birebir). Prim ve teminat
+// Teminat paketi ölçek katsayıları. Prim ve teminat
 // limitlerini paket seviyesine göre ölçekler. Risk skorunu etkilemez (paket, risk değil kapsam seçimidir).
 internal static class CoveragePackageFactors
 {

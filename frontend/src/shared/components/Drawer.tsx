@@ -12,7 +12,7 @@ interface DrawerProps {
 
 /**
  * Sağdan açılan detay çekmecesi (admin yönetim ekranları — tablo satırı → detay).
- * Tasarım sistemi konvansiyonuyla el yazımıdır (ADR-027; Radix eklenmez):
+ * Tasarım sistemi konvansiyonuyla el yazımıdır:
  * overlay tıklaması ve Escape kapatır, açıkken body scroll kilitlenir.
  */
 export function Drawer({ open, onClose, title, description, children, className }: DrawerProps) {

@@ -3,7 +3,7 @@ using SigortaPro.Infrastructure.Services.EarthquakeZone;
 
 namespace SigortaPro.Infrastructure.Tests.Services;
 
-// ADR-055: Deprem bölgesi kullanıcı beyanından değil, konutun İLİNDEN türetilir.
+// Deprem bölgesi kullanıcı beyanından değil, konutun İLİNDEN türetilir.
 public class EarthquakeZoneProviderTests
 {
     private readonly EarthquakeZoneProvider _provider = new();

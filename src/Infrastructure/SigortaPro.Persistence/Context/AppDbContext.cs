@@ -7,7 +7,7 @@ using SigortaPro.Persistence.Identity;
 
 namespace SigortaPro.Persistence.Context;
 
-// ADR-014: AppDbContext, IdentityDbContext'ten türer; ASP.NET Core Identity tabloları (AspNetUsers,
+// AppDbContext, IdentityDbContext'ten türer; ASP.NET Core Identity tabloları (AspNetUsers,
 // AspNetRoles vb.) Domain aggregate'leriyle aynı veritabanında yönetilir.
 public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
 {
@@ -15,7 +15,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     {
     }
 
-    // Yalnızca aggregate root'lar DbSet olarak dışa açılır (ARCHITECTURE_RULES.md §4.2);
+    // Yalnızca aggregate root'lar DbSet olarak dışa açılır;
     // Coverage ve PolicyDocument kendi konfigürasyonlarıyla modele dahil edilir ancak
     // ilgili aggregate root'un (InsuranceProduct, Policy) navigation'ı üzerinden erişilir.
     public DbSet<Customer> Customers => Set<Customer>();
@@ -29,11 +29,11 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<Renewal> Renewals => Set<Renewal>();
     public DbSet<Notification> Notifications => Set<Notification>();
 
-    // ADR-048: Versiyonlanmış tarife (baz primler). Versiyonlar değişmezdir; fiyat değişikliği yeni satır ekler.
+    // Versiyonlanmış tarife (baz primler). Versiyonlar değişmezdir; fiyat değişikliği yeni satır ekler.
     public DbSet<PricingVersion> PricingVersions => Set<PricingVersion>();
     public DbSet<PricingBranchRate> PricingBranchRates => Set<PricingBranchRate>();
 
-    // Refresh token'lar Identity'nin yanında Persistence'ta tutulur (ADR-014).
+    // Refresh token'lar Identity'nin yanında Persistence'ta tutulur.
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     // TIMEZONE: Date-only semantiği taşıyan alanlar (takvim günü — saat/timezone anlamsız). Bu alanlar UTC

@@ -35,7 +35,7 @@ import { formatCurrency, formatDate } from "@/shared/utils/format";
 const RECENT_LIMIT = 4;
 
 /**
- * Müşteri portalı ana sayfası (ADR-045): yaşayan bir dashboard. Karşılama bandı (ad + özet + birincil
+ * Müşteri portalı ana sayfası: yaşayan bir dashboard. Karşılama bandı (ad + özet + birincil
  * aksiyon), hızlı işlemler, durum kartları (gerçek `totalCount`'lardan) ve son teklif/poliçe akışları.
  * Tümü mevcut müşteri uçlarından kompoze edilir — yeni API yoktur; backend değişmedi.
  */

@@ -12,8 +12,8 @@ using SigortaPro.Application.Features.Staff.Queries.GetStaffList;
 
 namespace SigortaPro.WebAPI.Controllers.v1;
 
-// ADR-060: Personel (staff) yönetimi. TÜM yüzey yalnızca Admin'e açıktır (Personel ve Customer 403 alır).
-// Rol atama, şifre sıfırlama ve silme uçları bilinçli olarak YOKTUR (§26.4). Route deseni mevcut
+// Personel (staff) yönetimi. TÜM yüzey yalnızca Admin'e açıktır (Personel ve Customer 403 alır).
+// Rol atama, şifre sıfırlama ve silme uçları bilinçli olarak YOKTUR. Route deseni mevcut
 // controller konvansiyonuyla aynıdır (api/v1/{kaynak}); yetki attribute ile ifade edilir, yol adıyla değil.
 [ApiController]
 [Route("api/v1/staff")]

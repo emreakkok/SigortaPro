@@ -4,7 +4,7 @@ using SigortaPro.Application.Common.Interfaces;
 
 namespace SigortaPro.Application.Features.Quotes;
 
-// Teklif kaynak sahipliği kontrolü (DEVELOPMENT_RULES.md §7): müşteri yalnızca kendi teklifine erişir;
+// Teklif kaynak sahipliği kontrolü: müşteri yalnızca kendi teklifine erişir;
 // Admin/Personel tüm tekliflere erişebilir. Sahiplik, teklifin CustomerId'si ile çağıranın müşteri
 // kaydı karşılaştırılarak değerlendirilir (EF navigasyonuna bağlı değildir).
 internal static class QuoteAuthorization

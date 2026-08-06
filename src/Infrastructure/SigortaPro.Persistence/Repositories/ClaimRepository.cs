@@ -7,7 +7,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// IClaimRepository implementasyonu (ADR-005, ARCHITECTURE_RULES.md §4.2).
+// IClaimRepository implementasyonu.
 public sealed class ClaimRepository : GenericRepository<Claim>, IClaimRepository
 {
     private readonly AppDbContext _context;
@@ -70,8 +70,8 @@ public sealed class ClaimRepository : GenericRepository<Claim>, IClaimRepository
         return new PagedResult<Claim>(items, paging.Page, paging.PageSize, totalCount);
     }
 
-    // Fiyatlamaya etki eden hasar geçmişi: onaylanmış + ödenmiş hasar sayısı (Task 13 yenileme fiyatlaması besler).
-    // ADR-054: Hasar geçmişi BRANŞ KAPSAMLI sayılır (Policy → Quote.Branch join'i ile). Önceden müşterinin
+    // Fiyatlamaya etki eden hasar geçmişi: onaylanmış + ödenmiş hasar sayısı (yenileme fiyatlaması besler).
+    // Hasar geçmişi BRANŞ KAPSAMLI sayılır (Policy → Quote.Branch join'i ile). Önceden müşterinin
     // tüm branşlardaki hasarları sayılıyordu; bu, bir Kasko hasarının Sağlık yenileme primini artırmasına
     // yol açıyordu (branşlar arası risk kirlenmesi).
     public Task<int> CountReportableClaimsByCustomerAsync(

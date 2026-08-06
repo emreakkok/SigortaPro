@@ -67,11 +67,11 @@ public sealed class CreateQuoteCommandHandler : ICommandHandler<CreateQuoteComma
 
         var now = _dateTimeProvider.UtcNow;
 
-        // ADR-048: Yeni teklif her zaman O AN yürürlükte olan tarifeyle fiyatlanır ve bu versiyon teklifte
+        // Yeni teklif her zaman O AN yürürlükte olan tarifeyle fiyatlanır ve bu versiyon teklifte
         // sabitlenir; sonraki tarife değişiklikleri bu teklifin primini/dökümünü etkileyemez.
         var effectivePricing = await _pricingRateResolver.ResolveEffectiveAsync(now, cancellationToken);
 
-        // ADR-053/056: Fiyatlama girdileri teklif oluşturulurken DONDURULUR. Girdi, karşılaştırma
+        // Fiyatlama girdileri teklif oluşturulurken DONDURULUR. Girdi, karşılaştırma
         // önizlemesiyle AYNI builder'dan kurulur → önizlemede gösterilen fiyat ile oluşan teklifin fiyatı
         // yapısal olarak eşittir. Sonraki tüm yeniden hesaplar da bu snapshot'tan okur.
         var snapshot = await _pricingInputBuilder.BuildAsync(

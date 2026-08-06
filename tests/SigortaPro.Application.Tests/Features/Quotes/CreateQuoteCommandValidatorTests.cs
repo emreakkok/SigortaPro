@@ -27,7 +27,7 @@ public class CreateQuoteCommandValidatorTests
     [Fact]
     public void Validate_Should_Pass_When_HealthBranchWithoutRiskObject()
     {
-        // ADR-054: Sağlıkta sigara beyanı zorunludur; risk objesi ise gerekmez.
+        // Sağlıkta sigara beyanı zorunludur; risk objesi ise gerekmez.
         var command = new CreateQuoteCommand(
             InsuranceBranch.Saglik, null, null, CoveragePackage.Standart, IsSmoker: false);
 
@@ -37,7 +37,7 @@ public class CreateQuoteCommandValidatorTests
     [Fact]
     public void Validate_Should_HaveError_When_HealthQuoteHasNoSmokerDeclaration()
     {
-        // ADR-054: Beyan alınmadan sağlık teklifi oluşturulamaz — sessizce "sigara içmiyor" varsayılmaz.
+        // Beyan alınmadan sağlık teklifi oluşturulamaz — sessizce "sigara içmiyor" varsayılmaz.
         var command = new CreateQuoteCommand(InsuranceBranch.Saglik, null, null, CoveragePackage.Standart);
 
         _validator.TestValidate(command).ShouldHaveValidationErrorFor(c => c.IsSmoker);

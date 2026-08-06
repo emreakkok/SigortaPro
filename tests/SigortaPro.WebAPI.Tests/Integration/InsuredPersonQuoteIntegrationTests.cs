@@ -7,9 +7,9 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// ADR-041: Sağlıkta "başkası adına" teklif akışının uçtan uca doğrulaması (gerçek pipeline: JWT →
+// Sağlıkta "başkası adına" teklif akışının uçtan uca doğrulaması (gerçek pipeline: JWT →
 // validation → domain guard → fiyatlama → EF owned entity). /quotes auth rate-limit politikasına tabi
-// değildir; arrange ISender ile yapılır (HTTP auth bütçesi harcanmaz — ADR-034).
+// değildir; arrange ISender ile yapılır (HTTP auth bütçesi harcanmaz).
 [Collection(IntegrationTestCollection.Name)]
 public sealed class InsuredPersonQuoteIntegrationTests
 {
@@ -56,7 +56,7 @@ public sealed class InsuredPersonQuoteIntegrationTests
         insuredPremium.Should().NotBe(selfPremium,
             "prim, poliçe sahibinin değil sigortalının yaşından hesaplanmalıdır (1990 vs 1955)");
 
-        // Deterministik yeniden hesap (ADR-021): detay, saklanan sigortalı beyanıyla aynı primi üretir.
+        // Deterministik yeniden hesap: detay, saklanan sigortalı beyanıyla aynı primi üretir.
         var quoteId = root.GetProperty("id").GetString();
         var detailResponse = await client.GetAsync($"/api/v1/quotes/{quoteId}");
         detailResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -84,7 +84,7 @@ public sealed class InsuredPersonQuoteIntegrationTests
     [Fact]
     public async Task NotificationHub_Should_Return401_When_Unauthenticated()
     {
-        // ADR-041: hub uç noktası map edilmiş ve kimlik doğrulaması zorunlu olmalıdır.
+        // hub uç noktası map edilmiş ve kimlik doğrulaması zorunlu olmalıdır.
         var client = _factory.CreateClient();
 
         var response = await client.PostAsync("/hubs/notifications/negotiate?negotiateVersion=1", null);

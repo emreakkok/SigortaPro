@@ -4,7 +4,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// Hasar modülüne özgü sorgular (ARCHITECTURE_RULES.md §4.2, ADR-005). Detay/liste sorguları poliçe
+// Hasar modülüne özgü sorgular. Detay/liste sorguları poliçe
 // navigasyonunu (poliçe numarası için) EF Core Include ile yükler; Application EF'e bağımlı olamaz.
 public interface IClaimRepository : IReadRepository<Claim>, IWriteRepository<Claim>
 {
@@ -24,7 +24,7 @@ public interface IClaimRepository : IReadRepository<Claim>, IWriteRepository<Cla
         CancellationToken cancellationToken = default);
 
     // Müşterinin fiyatlamaya etki eden hasar geçmişi: onaylanmış/ödenmiş hasar sayısı.
-    // ADR-054: Sayım **branşa göre kapsanır** — bir Kasko hasarı Sağlık yenilemesini pahalılaştıramaz.
+    // Sayım **branşa göre kapsanır** — bir Kasko hasarı Sağlık yenilemesini pahalılaştıramaz.
     // Hasarın branşı, hasarın bağlı olduğu poliçenin teklifinden (Policy → Quote.Branch) belirlenir.
     Task<int> CountReportableClaimsByCustomerAsync(
         Guid customerId, InsuranceBranch branch, CancellationToken cancellationToken = default);

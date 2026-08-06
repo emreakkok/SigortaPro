@@ -7,7 +7,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Pricing.Commands.UpdatePricingDraft;
 
-// ADR-048: TASLAK versiyonu düzenler. Domain, yalnızca taslağın düzenlenmesine izin verir (aktif/arşiv
+// TASLAK versiyonu düzenler. Domain, yalnızca taslağın düzenlenmesine izin verir (aktif/arşiv
 // versiyonda UpdateDraft DomainException fırlatır) → geçmiş primler yapısal olarak korunur.
 public sealed class UpdatePricingDraftCommandHandler
     : ICommandHandler<UpdatePricingDraftCommand, PricingVersionDto>

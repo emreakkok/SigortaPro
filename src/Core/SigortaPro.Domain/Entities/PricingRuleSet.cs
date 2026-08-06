@@ -2,7 +2,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Domain.Entities;
 
-// Bir tarife versiyonunun BAZ PRİM DIŞINDAKİ tüm çarpanları (ADR-048 ailesinin genişletilmesi):
+// Bir tarife versiyonunun BAZ PRİM DIŞINDAKİ tüm çarpanları:
 // ticari kaldıraçlar (paket çarpanları, il risk katsayıları, yenileme indirimi) + aktüeryal faktör grupları
 // (sürücü/araç/konut/sağlık). Versiyonla birlikte DEĞİŞMEZDİR (yalnızca taslak düzenlenirken kurulur); teklif
 // bu versiyonu sabitlediğinden (PricingVersionId + PricingSnapshot) geçmiş primler asla değişmez.

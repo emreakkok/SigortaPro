@@ -7,8 +7,8 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Seed;
 
-// TASKS.md Task 4: ürünler, teminatlar, örnek müşteri/poliçe seed edilir.
-// Admin kullanıcısı Identity gerektirdiği için Task 5'te seed edilecektir (ADR-014).
+// TASKS.md ürünler, teminatlar, örnek müşteri/poliçe seed edilir.
+// Admin kullanıcısı Identity gerektirdiği için 'te seed edilecektir.
 public static class DbSeeder
 {
     public static async Task SeedAsync(AppDbContext context, CancellationToken cancellationToken = default)

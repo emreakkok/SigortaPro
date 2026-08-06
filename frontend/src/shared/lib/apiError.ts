@@ -3,8 +3,8 @@ import type { ApiProblemDetails } from "@/shared/types/api.types";
 
 /**
  * Backend iki hata gövdesi üretir:
- * 1. RFC 7807 ProblemDetails (`errors`: alan → mesaj[] sözlüğü) — middleware (ADR-018).
- * 2. Auth soft-fail zarfı `{ errors: string[] }` — login 401 / register 409 (Task 5).
+ * 1. RFC 7807 ProblemDetails (`errors`: alan → mesaj sözlüğü) — middleware.
+ * 2. Auth soft-fail zarfı `{ errors: string }` — login 401 / register 409.
  * Bu yardımcı ikisini de kullanıcıya gösterilecek düz mesaj listesine indirger.
  */
 export function getApiErrorMessages(error: unknown): string[] {

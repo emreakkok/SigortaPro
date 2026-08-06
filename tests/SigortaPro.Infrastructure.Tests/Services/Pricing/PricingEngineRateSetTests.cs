@@ -5,7 +5,7 @@ using SigortaPro.Infrastructure.Services.Pricing;
 
 namespace SigortaPro.Infrastructure.Tests.Services.Pricing;
 
-// ADR-048: Motor, baz primi verilen tarifeden okur; tarife verilmezse yerleşik baseline kullanılır.
+// Motor, baz primi verilen tarifeden okur; tarife verilmezse yerleşik baseline kullanılır.
 // Bu, "eski teklif eski fiyatını korur / yeni teklif yeni fiyatı kullanır" garantisinin matematiksel temelidir.
 public class PricingEngineRateSetTests
 {

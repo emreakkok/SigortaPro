@@ -14,7 +14,7 @@ using SigortaPro.Domain.Enums;
 namespace SigortaPro.WebAPI.Tests.Integration;
 
 /// <summary>
-/// ADR-055/058: Deprem bölgesi kullanıcı beyanı değil, konutun adres İLİNDEN sistem tarafından türetilir.
+/// Deprem bölgesi kullanıcı beyanı değil, konutun adres İLİNDEN sistem tarafından türetilir.
 /// <para>
 /// Doğrulanan garantiler: bölge ilden türetilir, kullanıcı bunu API üzerinden gönderemez/değiştiremez,
 /// ve konut fiyatlamasında önizleme ↔ oluşturulan teklif paritesi korunur.
@@ -75,7 +75,7 @@ public sealed class EarthquakeZoneDerivationIntegrationTests
     [Fact]
     public async Task PropertyZone_Should_NotBeChangeableByCustomer()
     {
-        // Konut güncelleme ucu YOKTUR ve domain'de bölgeyi değiştiren bir metot bulunmaz (ADR-058):
+        // Konut güncelleme ucu YOKTUR ve domain'de bölgeyi değiştiren bir metot bulunmaz:
         // müşteri kaydettikten sonra bölgeyi değiştiremez.
         var client = await CustomerClientAsync();
         var property = await AddPropertyAsync(client, "İstanbul");
@@ -100,7 +100,7 @@ public sealed class EarthquakeZoneDerivationIntegrationTests
     [Fact]
     public async Task PropertyQuote_Preview_And_Created_Should_HaveIdenticalPremium()
     {
-        // ADR-056 paritesi konut branşında da korunur (bölge her iki yolda da AYNI builder'dan türetilir).
+        // paritesi konut branşında da korunur (bölge her iki yolda da AYNI builder'dan türetilir).
         var client = await CustomerClientAsync();
         var property = await AddPropertyAsync(client, "İstanbul");
 
@@ -142,7 +142,7 @@ public sealed class EarthquakeZoneDerivationIntegrationTests
     [Fact]
     public void RenewalFlow_Should_ResolveWithSharedPricingInputBuilder()
     {
-        // ADR-058: Yenileme artık deprem bölgesini kendisi çözmez; ortak IQuotePricingInputBuilder'ı alır.
+        // Yenileme artık deprem bölgesini kendisi çözmez; ortak IQuotePricingInputBuilder'ı alır.
         // Bu test DI kablolamasını korur — bağımlılık kaydı unutulursa yenileme arkaplan işi çalışmaz.
         using var scope = _factory.Services.CreateScope();
 

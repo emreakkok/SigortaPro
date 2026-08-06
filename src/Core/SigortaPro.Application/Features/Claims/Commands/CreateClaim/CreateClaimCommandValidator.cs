@@ -21,7 +21,7 @@ public sealed class CreateClaimCommandValidator : AbstractValidator<CreateClaimC
         RuleFor(command => command.EstimatedAmount)
             .GreaterThan(0).WithMessage("Tahmini hasar tutarı 0'dan büyük olmalıdır.");
 
-        // Belge (foto/PDF) yükleme sınırları: adet, tür ve boyut. Baytlar depolamaya yazılır (ADR-023).
+        // Belge (foto/PDF) yükleme sınırları: adet, tür ve boyut. Baytlar depolamaya yazılır.
         When(command => command.Documents is not null, () =>
         {
             RuleFor(command => command.Documents!)

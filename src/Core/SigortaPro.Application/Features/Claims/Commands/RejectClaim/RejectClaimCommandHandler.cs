@@ -27,7 +27,7 @@ public sealed class RejectClaimCommandHandler : ICommandHandler<RejectClaimComma
         var claim = await _claimRepository.GetTrackedByIdAsync(request.ClaimId, cancellationToken)
             ?? throw new NotFoundException(nameof(Claim), request.ClaimId);
 
-        // UnderReview değilse DomainException → UnhandledExceptionBehavior 409'a çevirir (ADR-013).
+        // UnderReview değilse DomainException → UnhandledExceptionBehavior 409'a çevirir.
         claim.Reject(request.ReviewNote);
 
         _claimRepository.Update(claim);

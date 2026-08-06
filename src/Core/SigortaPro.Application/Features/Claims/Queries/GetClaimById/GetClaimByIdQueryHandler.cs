@@ -27,7 +27,7 @@ public sealed class GetClaimByIdQueryHandler : IQueryHandler<GetClaimByIdQuery, 
         var claim = await _claimRepository.GetDetailByIdAsync(request.ClaimId, cancellationToken)
             ?? throw new NotFoundException(nameof(Claim), request.ClaimId);
 
-        // Kaynak sahipliği: müşteri yalnızca kendi hasarına erişir; Admin/Personel muaf (QuoteAuthorization — Task 9).
+        // Kaynak sahipliği: müşteri yalnızca kendi hasarına erişir; Admin/Personel muaf (QuoteAuthorization —).
         await QuoteAuthorization.EnsureCanAccessAsync(
             claim.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 

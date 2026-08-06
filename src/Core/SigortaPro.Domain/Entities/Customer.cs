@@ -27,7 +27,7 @@ public class Customer : BaseEntity, IAggregateRoot
     }
 
     // Identity kullanıcısına (Persistence katmanındaki AppUser : IdentityUser<Guid>) yalnızca Id ile bağlanır;
-    // Domain, Identity tipini bilmez (ADR-014).
+    // Domain, Identity tipini bilmez.
     public Guid AppUserId { get; private set; }
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;

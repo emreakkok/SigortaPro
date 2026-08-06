@@ -2,7 +2,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Infrastructure.Services.Pricing;
 
-// Fiyatlama kural sabitleri ve tabloları (ADR-008). Buradaki tüm değerler PRICING.md ile birebir
+// Fiyatlama kural sabitleri ve tabloları. Buradaki tüm değerler ile birebir
 // eşleşir; kural değiştiğinde iki dosya birlikte güncellenir.
 internal static class PricingRuleTables
 {
@@ -31,9 +31,9 @@ internal static class PricingRuleTables
 
     public const decimal DefaultCityRiskCoefficient = 1.00m;
 
-    // Kullanım amacı katsayıları (ADR-057). Hususi referans seviyedir (1.00); ticari ve taksi kullanım
+    // Kullanım amacı katsayıları. Hususi referans seviyedir (1.00); ticari ve taksi kullanım
     // daha yüksek yıllık kilometre/kaza sıklığı taşıdığından ek prim uygular.
-    // NOT: Bu değerler MVP SİMÜLASYONUDUR — gerçek aktüeryal tarife verisi değildir (PRICING.md).
+    // NOT: Bu değerler MVP SİMÜLASYONUDUR — gerçek aktüeryal tarife verisi değildir.
     public static readonly IReadOnlyDictionary<VehicleUsage, decimal> VehicleUsageCoefficients =
         new Dictionary<VehicleUsage, decimal>
         {
@@ -42,10 +42,10 @@ internal static class PricingRuleTables
             [VehicleUsage.Taksi] = 1.60m,
         };
 
-    // ADR-059: Bonus-Malus basamak çarpanları (−3 … +6). Negatif basamak MALUS (ek prim), pozitif
+    // Bonus-Malus basamak çarpanları (−3 … +6). Negatif basamak MALUS (ek prim), pozitif
     // basamak BONUS (indirim), 0 nötrdür (yeni müşteri / geçmişi bilinmeyen).
     // Malus tavanı (1.60), emekliye ayrılan ClaimHistoryFactor'ın tavanıyla BİREBİR aynıdır → ekonomik etki kontrollü.
-    // NOT: Değerler MVP SİMÜLASYONUDUR — gerçek aktüeryal tarife verisi değildir (PRICING.md).
+    // NOT: Değerler MVP SİMÜLASYONUDUR — gerçek aktüeryal tarife verisi değildir.
     public static readonly IReadOnlyDictionary<int, decimal> BonusMalusCoefficients =
         new Dictionary<int, decimal>
         {
@@ -61,7 +61,7 @@ internal static class PricingRuleTables
             [6] = 0.70m,
         };
 
-    // ── Bantlı faktör baseline'ları (ADR-048 genişletme) ─────────────────────────────────────────────
+    // ── Bantlı faktör baseline'ları ─────────────────────────────────────────────
     // Her faktör SIRALI bir çarpan listesidir; band sınırları/etiketleri motorda SABİTTİR (rating yapısı),
     // yalnızca bu çarpan DEĞERLERİ versiyonlanır. Değerler eskiden motor içinde satır-içiydi; buraya taşındı
     // (değer birebir aynı → determinizm korunur). Tarifenin kural seti bu faktörü içermiyorsa motor bunları kullanır.

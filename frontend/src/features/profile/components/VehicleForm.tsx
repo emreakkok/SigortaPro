@@ -28,7 +28,7 @@ interface VehicleFormProps {
 
 /**
  * Araç ekleme/güncelleme formu. Marka ve model için katalog tabanlı "cascading select"
- * (aranabilir combobox) kullanılır (Task 24, ADR-036); listede olmayan araçlar için "Diğer"
+ * (aranabilir combobox) kullanılır; listede olmayan araçlar için "Diğer"
  * seçeneğiyle serbest metin girişine düşülür. Backend sözleşmesi (brand/model string) değişmez.
  */
 export function VehicleForm({
@@ -188,7 +188,7 @@ export function VehicleForm({
       </div>
 
       {/*
-        ADR-057: Kullanım amacı Kasko/Trafik primini doğrudan etkiler. Varsayılan seçim YOKTUR
+        Kullanım amacı Kasko/Trafik primini doğrudan etkiler. Varsayılan seçim YOKTUR
         ("Seçiniz" disabled) — kullanıcı bilinçli olarak seçer; riskli bir seçenek öne alınmaz.
       */}
       <FormField

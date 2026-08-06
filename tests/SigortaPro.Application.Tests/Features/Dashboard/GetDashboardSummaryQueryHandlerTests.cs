@@ -10,7 +10,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Tests.Features.Dashboard;
 
-// ADR-052: Operasyon dashboard'ı. En kritik davranışlar: (1) önceki dönem EŞİT UZUNLUKTA ve hemen önce,
+// Operasyon dashboard'ı. En kritik davranışlar: (1) önceki dönem EŞİT UZUNLUKTA ve hemen önce,
 // (2) payda 0 iken oran/değişim **null** (yanıltıcı "%0"/"+%100" üretilmez), (3) kova genişliği aralıktan türer,
 // (4) huni monoton azalır ve dönüşüm gerçek kohorttan hesaplanır.
 public class GetDashboardSummaryQueryHandlerTests

@@ -2,7 +2,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Dashboard.DTOs;
 
-// ADR-052: Operasyon dashboard'ının tek veri kaynağı. Tüm bloklar SEÇİLEN TARİH ARALIĞINA göre hesaplanır;
+// Operasyon dashboard'ının tek veri kaynağı. Tüm bloklar SEÇİLEN TARİH ARALIĞINA göre hesaplanır;
 // karşılaştırma, hemen öncesindeki EŞİT UZUNLUKTAKİ dönemle yapılır. Oranlar 0..1 ondalıktır (frontend biçimler).
 // Bir oran güvenilir hesaplanamıyorsa (payda 0) **null** döner — "%0" veya "+%100" gibi yanıltıcı değer üretilmez.
 //

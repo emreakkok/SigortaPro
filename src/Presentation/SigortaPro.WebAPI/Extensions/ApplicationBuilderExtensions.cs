@@ -21,7 +21,7 @@ public static class ApplicationBuilderExtensions
         return app;
     }
 
-    // Serilog istek özeti logunu, korelasyon kimliği ve kullanıcı bilgisiyle zenginleştirerek ekler (ADR-011).
+    // Serilog istek özeti logunu, korelasyon kimliği ve kullanıcı bilgisiyle zenginleştirerek ekler.
     private static void UseSerilogRequestLoggingWithCorrelation(this WebApplication app)
     {
         app.UseSerilogRequestLogging(options =>

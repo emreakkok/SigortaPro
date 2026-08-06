@@ -9,7 +9,7 @@ import {
 import { formatPercent } from "@/shared/utils/format";
 
 /**
- * Satış hunisi (ADR-052). Kohort: seçilen dönemde OLUŞTURULAN teklifler ve bunların bugünkü durumu.
+ * Satış hunisi. Kohort: seçilen dönemde OLUŞTURULAN teklifler ve bunların bugünkü durumu.
  * "Onaylanan" adımı satın alınanları da içerir (satın alma onaydan geçer) → huni monoton azalır.
  * Dönüşüm oranı gerçek `Quote.Status` yaşam döngüsünden hesaplanır; teklif yoksa oran **gösterilmez**
  * (tanımsızdır — "%0" yanıltıcı olurdu).

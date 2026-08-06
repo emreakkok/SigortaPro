@@ -10,7 +10,7 @@ import { INSURANCE_BRANCH_LABELS } from "@/shared/types/insurance.types";
 import { formatCurrency, formatPercent } from "@/shared/utils/format";
 
 /**
- * Branş performansı (ADR-052). Tek kohort/tek sorgu: dönemde oluşturulan teklifler, bunların poliçeleşen
+ * Branş performansı. Tek kohort/tek sorgu: dönemde oluşturulan teklifler, bunların poliçeleşen
  * kısmı ve primi. Aynı kaynaktan geldiği için dönüşüm oranı asla %100'ü aşamaz (dönem kayması yok).
  * Prim çubuğu, en yüksek üreten branşa göre normalize edilir → hangi branşın işletmeye daha çok katkı
  * sağladığı ilk bakışta okunur. Teklifi olmayan branşta oran gösterilmez (tanımsız).

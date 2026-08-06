@@ -1,4 +1,4 @@
-/** Önem düzeyi → kurumsal tema renkleri (toast/zil/merkez aynı sistemi kullanır — ADR-042). */
+/** Önem düzeyi → kurumsal tema renkleri (toast/zil/merkez aynı sistemi kullanır). */
 export const SEVERITY_DOT: Record<string, string> = {
   success: "bg-success",
   info: "bg-primary",

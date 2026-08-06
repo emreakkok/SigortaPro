@@ -4,7 +4,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Tests.Features.Customers;
 
-// Müşteri modülü testlerinde kullanılan entity kurucuları (DEVELOPMENT_RULES.md §5.4: testler kendi verisini üretir).
+// Müşteri modülü testlerinde kullanılan entity kurucuları.
 internal static class CustomerTestData
 {
     public static Customer CreateCustomer(Guid appUserId, Guid customerId)

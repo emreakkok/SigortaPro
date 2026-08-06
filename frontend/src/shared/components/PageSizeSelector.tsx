@@ -7,7 +7,7 @@ interface PageSizeSelectorProps {
 }
 
 /*
- * Admin sayfa boyutu seçimi (ADR-045). Klasik <select> yerine modern **segmented control**:
+ * Admin sayfa boyutu seçimi. Klasik <select> yerine modern **segmented control**:
  * bir kapsayıcı içinde chip'ler; aktif seçim `bg-primary` ile belirgin. Renkler token tabanlı
  * (`bg-muted`/`bg-primary`/`bg-background`) → Dark Mode uyumlu.
  */

@@ -29,7 +29,7 @@ public static class PersistenceServiceRegistration
             options.AddInterceptors(serviceProvider.GetRequiredService<AuditableEntityInterceptor>());
         });
 
-        // ADR-014: ASP.NET Core Identity, AppUser/IdentityRole üzerinde EF store'larıyla kurulur.
+        // ASP.NET Core Identity, AppUser/IdentityRole üzerinde EF store'larıyla kurulur.
         // Cookie/SignInManager gerekmez; JWT akışı UserManager üzerinden yürür (AddIdentityCore yeterli).
         services.AddIdentityCore<AppUser>(options =>
             {
@@ -38,11 +38,11 @@ public static class PersistenceServiceRegistration
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<AppDbContext>()
-            // ADR-035: Şifre sıfırlama token'ları DataProtectorTokenProvider'a dayanır; default token
+            // Şifre sıfırlama token'ları DataProtectorTokenProvider'a dayanır; default token
             // provider'ları kayıtlı olmadan GeneratePasswordResetTokenAsync çalışmaz.
             .AddDefaultTokenProviders();
 
-        // ADR-035: Şifre sıfırlama token ömrü, güvenlik için varsayılan 1 günden 1 saate düşürülür.
+        // Şifre sıfırlama token ömrü, güvenlik için varsayılan 1 günden 1 saate düşürülür.
         // DataProtectionTokenProviderOptions tüm default token provider'larını etkiler; MVP'de yalnızca
         // şifre sıfırlama kullanıldığından kapsam bu akıştır.
         services.Configure<DataProtectionTokenProviderOptions>(options =>
@@ -61,7 +61,7 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IRenewalRepository, RenewalRepository>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
-        // ADR-048: versiyonlanmış tarife deposu.
+        // versiyonlanmış tarife deposu.
         services.AddScoped<IPricingVersionRepository, PricingVersionRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

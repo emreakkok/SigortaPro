@@ -2,7 +2,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Tests.Features.Claims;
 
-// Hasar modülü testlerinde kullanılan entity kurucuları (DEVELOPMENT_RULES.md §5.4: testler kendi verisini üretir).
+// Hasar modülü testlerinde kullanılan entity kurucuları.
 internal static class ClaimTestData
 {
     public static Policy CreateActivePolicy(Guid customerId, DateTime startDate, DateTime endDate) =>

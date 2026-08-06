@@ -15,8 +15,8 @@ import { cn } from "@/shared/lib/utils";
 import { ThemeToggle } from "@/shared/theme/ThemeToggle";
 
 /**
- * Admin paneli kabuğu: sol menü + üst çubuk + içerik alanı. Nav öğeleri ikon + etiketlidir (ADR-039).
- * `userMenu` slot'u routes.tsx'ten enjekte edilir — shared, features'a bağımlı olmaz (ADR-029).
+ * Admin paneli kabuğu: sol menü + üst çubuk + içerik alanı. Nav öğeleri ikon + etiketlidir.
+ * `userMenu` slot'u routes.tsx'ten enjekte edilir — shared, features'a bağımlı olmaz.
  */
 const NAV_ITEMS = [
   { to: "/admin", label: "Dashboard", end: true, icon: ChartIcon },
@@ -25,17 +25,17 @@ const NAV_ITEMS = [
   { to: "/admin/policies", label: "Poliçeler", end: false, icon: ShieldCheckIcon },
   { to: "/admin/claims", label: "Hasarlar", end: false, icon: AlertTriangleIcon },
   { to: "/admin/notifications", label: "Bildirimler", end: false, icon: BellIcon },
-  // ADR-060: Personel yönetimi yalnızca Admin'e görünür (Personel bu menüyü görmez).
+  // Personel yönetimi yalnızca Admin'e görünür (Personel bu menüyü görmez).
   { to: "/admin/staff", label: "Personel", end: false, icon: UserIcon, adminOnly: true },
-  // ADR-048: Fiyatlandırma yönetimini acente personeli GÖRÜNTÜLER; değiştirme (taslak/aktifleştir) yalnızca
+  // Fiyatlandırma yönetimini acente personeli GÖRÜNTÜLER; değiştirme (taslak/aktifleştir) yalnızca
   // Admin'e açıktır (sayfa içinde ve backend'de kilitli) → menü tüm personele gösterilir.
   { to: "/admin/pricing", label: "Fiyatlandırma", end: false, icon: ChartIcon },
 ];
 
-// `headerExtras` (ADR-041): userMenu'nün soluna eklenen ek header araçları (ör. bildirim zili) —
-// userMenu gibi routes.tsx'ten slot olarak verilir (shared ↛ features, ADR-029).
+// `headerExtras`: userMenu'nün soluna eklenen ek header araçları (ör. bildirim zili) —
+// userMenu gibi routes.tsx'ten slot olarak verilir (shared ↛ features).
 export function AdminLayout({ userMenu, headerExtras }: { userMenu?: ReactNode; headerExtras?: ReactNode }) {
-  // ADR-060: adminOnly menü öğeleri (Personel, Fiyatlandırma) yalnızca Admin'e gösterilir.
+  // adminOnly menü öğeleri (Personel, Fiyatlandırma) yalnızca Admin'e gösterilir.
   // Rol bilgisi merkezi useRoles'tan gelir (oturum değişiminde yeniden render tetikler).
   const { isAdmin } = useRoles();
   const visibleNavItems = NAV_ITEMS.filter((item) => item.adminOnly !== true || isAdmin);

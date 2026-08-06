@@ -4,7 +4,7 @@ using SigortaPro.Infrastructure.Email;
 
 namespace SigortaPro.Infrastructure.Services.Email;
 
-// IPasswordResetNotifier implementasyonu (ADR-035): reset linkini EmailSettings:ResetPasswordBaseUrl üzerinden
+// IPasswordResetNotifier implementasyonu: reset linkini EmailSettings:ResetPasswordBaseUrl üzerinden
 // URL-güvenli biçimde kurar, Türkçe e-posta şablonunu oluşturur ve genel IEmailService transport'u ile gönderir.
 // MockNotificationService deseninin izidir (mesajı Infrastructure oluşturur). Link/token loglanmaz.
 public sealed class PasswordResetNotifier : IPasswordResetNotifier
@@ -23,7 +23,7 @@ public sealed class PasswordResetNotifier : IPasswordResetNotifier
         var resetLink = BuildResetLink(email, resetToken);
 
         const string subject = "SigortaPro — Şifre Sıfırlama Talebi";
-        // ADR-040: kurumsal palet (bordo #7A1F2B, koyu gri, kırık beyaz) — web/PDF ile aynı kimlik.
+        // kurumsal palet (bordo #7A1F2B, koyu gri, kırık beyaz) — web/PDF ile aynı kimlik.
         // Yalnızca kozmetik inline stil; gönderim davranışı değişmez.
         var htmlBody =
             $"""

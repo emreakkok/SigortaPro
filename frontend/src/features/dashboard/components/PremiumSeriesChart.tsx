@@ -43,7 +43,7 @@ function bucketLabel(iso: string, granularity: PremiumGranularity): string {
 }
 
 /**
- * Prim üretimi zaman serisi (ADR-052). Kova genişliği (saat/gün/ay) seçilen tarih aralığından backend'de
+ * Prim üretimi zaman serisi. Kova genişliği (saat/gün/ay) seçilen tarih aralığından backend'de
  * türetilir; böylece "Bugün" tek noktalı, uzun aralıklar da yüzlerce noktalı olmaz.
  * Veri gerçek `Policy.TotalPremium` toplamıdır ve **üretim tarihine (Policy.CreatedAt)** göre gruplanır —
  * poliçe listesindeki `StartDate` (teminat başlangıcı) ile bilinçli olarak farklıdır; burada ölçülen

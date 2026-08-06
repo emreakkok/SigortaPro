@@ -18,10 +18,10 @@ interface RiskObjectStepProps {
   customerId: string | null;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
-  /** Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); kendim için null. */
+  /** Sağlıkta "başkası adına" sigortalı beyanı; kendim için null. */
   insuredPerson: InsuredPersonRequest | null;
   onInsuredPersonChange: (insured: InsuredPersonRequest | null) => void;
-  /** Sağlıkta sigara kullanım beyanı (ADR-054); null = henüz beyan edilmedi (varsayılan yok). */
+  /** Sağlıkta sigara kullanım beyanı; null = henüz beyan edilmedi (varsayılan yok). */
   isSmoker: boolean | null;
   onIsSmokerChange: (value: boolean) => void;
   onBack: () => void;
@@ -49,7 +49,7 @@ export function RiskObjectStep({
 }: RiskObjectStepProps) {
   const kind = branchRiskKind(branch);
   const [adding, setAdding] = useState(false);
-  // Sağlık: "Kendim için" (self) / "Başkası adına" (other) — gerçek sigortacılık akışı (ADR-041).
+  // Sağlık: "Kendim için" (self) / "Başkası adına" (other) — gerçek sigortacılık akışı.
   const [healthMode, setHealthMode] = useState<"self" | "other">(
     insuredPerson === null ? "self" : "other",
   );
@@ -57,7 +57,7 @@ export function RiskObjectStep({
   const addVehicle = useAddVehicle(customerId ?? undefined);
   const addProperty = useAddProperty(customerId ?? undefined);
 
-  // ADR-054: Sağlıkta sigara beyanı ZORUNLUDUR — beyan alınmadan ilerlenemez (varsayılan atanmaz).
+  // Sağlıkta sigara beyanı ZORUNLUDUR — beyan alınmadan ilerlenemez (varsayılan atanmaz).
   const canProceed =
     kind === "none"
       ? (healthMode === "self" || insuredPerson !== null) && isSmoker !== null
@@ -133,7 +133,7 @@ export function RiskObjectStep({
                       tckn: values.tckn,
                       birthDate: values.birthDate,
                       phoneNumber: values.phoneNumber,
-                      // "Diğer" seçildiyse açıklama, yakınlık derecesi olarak gönderilir (ADR-042).
+                      // "Diğer" seçildiyse açıklama, yakınlık derecesi olarak gönderilir.
                       relationship: resolveRelationship(values),
                     })
                   }
@@ -143,7 +143,7 @@ export function RiskObjectStep({
           )}
 
           {/*
-            ADR-054: Sigara beyanı fiyatı doğrudan etkiler (×1,25). Önceden hiç sorulmadan "içmiyor"
+            Sigara beyanı fiyatı doğrudan etkiler (×1,25). Önceden hiç sorulmadan "içmiyor"
             varsayılıyordu. Varsayılan seçim YOKTUR; beyan alınmadan devam edilemez. Sağlık verisinde
             veri minimizasyonu: yalnızca bu tek soru sorulur (tanı/tedavi bilgisi istenmez).
           */}

@@ -39,7 +39,7 @@ export interface PolicyDetail {
   customerId?: string;
   customerFullName?: string;
   customerPhone?: string | null;
-  /** Sağlıkta "başkası adına" poliçede Sigortalı özeti (ADR-041); Ettiren = müşteri. Değilse null. */
+  /** Sağlıkta "başkası adına" poliçede Sigortalı özeti; Ettiren = müşteri. Değilse null. */
   insuredPerson?: QuoteInsuredPerson | null;
 }
 

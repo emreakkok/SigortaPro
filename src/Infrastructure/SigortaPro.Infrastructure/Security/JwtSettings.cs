@@ -10,7 +10,7 @@ public sealed class JwtSettings
     public string Audience { get; init; } = string.Empty;
     public string SecretKey { get; init; } = string.Empty;
 
-    // DEVELOPMENT_RULES.md §7: access token 15 dk, refresh token 7 gün.
+    // : access token 15 dk, refresh token 7 gün.
     public int AccessTokenMinutes { get; init; } = 15;
     public int RefreshTokenDays { get; init; } = 7;
 }

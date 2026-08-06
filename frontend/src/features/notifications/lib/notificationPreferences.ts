@@ -1,5 +1,5 @@
 /**
- * Bildirim tercihleri (ADR-042). MVP kapsamı: yalnızca uygulama-içi teslim kanallarını (toast +
+ * Bildirim tercihleri. MVP kapsamı: yalnızca uygulama-içi teslim kanallarını (toast +
  * tarayıcı bildirimi) etkiler ve tarayıcıda (localStorage, kullanıcı başına anahtar) saklanır.
  * Kalıcı bildirim geçmişi TERCİHTEN BAĞIMSIZ her zaman sunucuya yazılır (denetim izi eksiksiz kalır).
  * Yapı, ileride sunucu-taraflı tercihe ve e-posta/mobil push kanallarına taşınmaya uygundur.

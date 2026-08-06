@@ -3,7 +3,7 @@ using SigortaPro.Application.Common.Pricing;
 
 namespace SigortaPro.Application.Tests.Common;
 
-// ADR-059: Hasar geçmişinin TEK ölçeği. Hesap durumsuzdur: hasarsız tamamlanan dönem +1, hasar −2,
+// Hasar geçmişinin TEK ölçeği. Hesap durumsuzdur: hasarsız tamamlanan dönem +1, hasar −2,
 // sonuç [−3, +6] aralığına sıkıştırılır. Dış (SigortaPro dışı) geçmiş varsayılmaz.
 public class BonusMalusScaleTests
 {

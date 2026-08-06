@@ -16,7 +16,7 @@ export const pricingQueryKeys = {
   versions: ["pricing", "versions"] as const,
 };
 
-/** Yürürlükteki tarife + taslak + geçmiş (tek sorgu — ADR-048). */
+/** Yürürlükteki tarife + taslak + geçmiş (tek sorgu). */
 export function usePricingVersions() {
   return useQuery({
     queryKey: pricingQueryKeys.versions,

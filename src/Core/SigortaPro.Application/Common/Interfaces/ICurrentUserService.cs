@@ -1,6 +1,6 @@
 namespace SigortaPro.Application.Common.Interfaces;
 
-// Implementasyonu WebAPI katmanında (HttpContext tabanlı) sağlanır — bkz. ARCHITECTURE_RULES.md §6.1.
+// Implementasyonu WebAPI katmanında (HttpContext tabanlı) sağlanır
 public interface ICurrentUserService
 {
     Guid? UserId { get; }

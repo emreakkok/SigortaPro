@@ -16,7 +16,7 @@ namespace SigortaPro.WebAPI.Tests.Integration;
 
 // Admin teklif/poliçe ekranlarında müşteri kimliklendirme + telefonla arama (format bağımsız).
 // EN KRİTİK: aynı isimli iki müşteri telefonla ayırt edilebilmeli; telefon araması yalnızca doğru müşteriyi getirmeli.
-// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi ISender ile korunur (ADR-034).
+// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi ISender ile korunur.
 [Collection(IntegrationTestCollection.Name)]
 public sealed class AdminCustomerIdentityIntegrationTests
 {

@@ -1,6 +1,6 @@
 import type { PaginationParams } from "@/shared/types/api.types";
 
-/** Personel liste satırı (backend `StaffListItemDto` — ADR-060). Hassas alan taşımaz. */
+/** Personel liste satırı (backend `StaffListItemDto`). Hassas alan taşımaz. */
 export interface StaffListItem {
   id: string;
   email: string;

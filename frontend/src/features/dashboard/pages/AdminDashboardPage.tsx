@@ -43,7 +43,7 @@ const COMPARISON_LABELS: Record<DashboardRangeKey, string> = {
 };
 
 /**
- * Acente operasyon dashboard'u (ADR-052). Görsel hiyerarşi 4 soruya göre kurulur:
+ * Acente operasyon dashboard'u. Görsel hiyerarşi 4 soruya göre kurulur:
  * (A) bu dönem ne oldu → KPI şeridi, (C) nerede problem var → Aksiyon Merkezi,
  * (B) nasıl gidiyoruz → prim serisi + huni + branş, (D) fırsat/portföy → hasar, aktivite, riskli müşteriler.
  * Tüm bloklar TEK sorgudan beslenir; tarih aralığı değiştiğinde hepsi tutarlı biçimde yenilenir.

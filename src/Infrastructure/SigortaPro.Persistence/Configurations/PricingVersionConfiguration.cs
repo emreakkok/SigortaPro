@@ -8,7 +8,7 @@ using SigortaPro.Persistence.Configurations.Common;
 
 namespace SigortaPro.Persistence.Configurations;
 
-// ADR-048: Versiyonlanmış tarife. Yaşam döngüsü durumuna göre sorgulanır (aktif/taslak) → Status index'lenir;
+// Versiyonlanmış tarife. Yaşam döngüsü durumuna göre sorgulanır (aktif/taslak) → Status index'lenir;
 // VersionNumber benzersizdir (kullanıcıya gösterilen sıra numarası).
 public sealed class PricingVersionConfiguration : BaseEntityConfiguration<PricingVersion>
 {

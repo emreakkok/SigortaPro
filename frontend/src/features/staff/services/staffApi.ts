@@ -10,7 +10,7 @@ import type {
 } from "@/features/staff/types/staff.types";
 
 /**
- * Personel yönetimi uçları (ADR-060) — tümü backend'de yalnızca Admin yetkisiyle erişilebilir.
+ * Personel yönetimi uçları — tümü backend'de yalnızca Admin yetkisiyle erişilebilir.
  * Mevcut tek Axios instance'ı kullanılır (interceptor'lar 401 yenileme + hata zarfını yönetir).
  */
 

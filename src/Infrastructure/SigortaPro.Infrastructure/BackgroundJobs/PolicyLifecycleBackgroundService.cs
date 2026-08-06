@@ -8,7 +8,7 @@ using SigortaPro.Application.Features.Renewals.Commands.GeneratePolicyRenewals;
 
 namespace SigortaPro.Infrastructure.BackgroundJobs;
 
-// Poliçe yaşam döngüsü arkaplan servisi (Task 13): periyodik olarak süresi dolmuş teklif/poliçeleri Expired'a
+// Poliçe yaşam döngüsü arkaplan servisi: periyodik olarak süresi dolmuş teklif/poliçeleri Expired'a
 // çeker ve bitişine ≤30 gün kalan poliçeler için yenileme teklifi üretir. İş mantığı Application katmanındaki
 // CQRS komutlarındadır; bu servis yalnızca zamanlama + scope yönetimi yapar (Clean Architecture korunur).
 public sealed class PolicyLifecycleBackgroundService : BackgroundService

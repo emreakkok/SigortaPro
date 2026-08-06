@@ -8,9 +8,9 @@ using SigortaPro.Application.Features.Dashboard.DTOs;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// ADR-052: Operasyon dashboard'ı uçtan uca. Doğrulanan kritik davranışlar: yetki (yalnızca personel),
+// Operasyon dashboard'ı uçtan uca. Doğrulanan kritik davranışlar: yetki (yalnızca personel),
 // tarih aralığının uygulanması, geçersiz aralığın reddi ve tüm blokların TEK çağrıda dönmesi.
-// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi ISender ile korunur (ADR-034).
+// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi ISender ile korunur.
 [Collection(IntegrationTestCollection.Name)]
 public sealed class DashboardSummaryIntegrationTests
 {

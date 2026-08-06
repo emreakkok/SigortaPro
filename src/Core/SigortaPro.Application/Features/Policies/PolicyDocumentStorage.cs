@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace SigortaPro.Application.Features.Policies;
 
-// Poliçe belgesi saklama anahtarları ve indirme dosya adı kuralları (ADR-023). Anahtar göreli tutulur;
+// Poliçe belgesi saklama anahtarları ve indirme dosya adı kuralları. Anahtar göreli tutulur;
 // yerel disk veya blob implementasyonu aynı anahtarı kullanır.
 internal static class PolicyDocumentStorage
 {

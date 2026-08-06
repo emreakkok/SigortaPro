@@ -6,7 +6,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// ICustomerRepository implementasyonu (ADR-005, ARCHITECTURE_RULES.md §4.2). Generic CRUD'u
+// ICustomerRepository implementasyonu. Generic CRUD'u
 // GenericRepository'den devralır; müşteri modülüne özgü include/arama sorgularını EF Core ile ekler.
 public sealed class CustomerRepository : GenericRepository<Customer>, ICustomerRepository
 {
@@ -61,12 +61,12 @@ public sealed class CustomerRepository : GenericRepository<Customer>, ICustomerR
         {
             var term = searchTerm.Trim();
 
-            // ADR-040: searchTerm ad/soyad/TCKN'e ek olarak e-posta ve telefonu da kapsar (sözleşme değişmez).
+            // searchTerm ad/soyad/TCKN'e ek olarak e-posta ve telefonu da kapsar (sözleşme değişmez).
             // Telefon araması normalize edilir: "0532 123-45 67" gibi girdiler boşluk/parantez/tire'den
             // arındırılıp baştaki 0/90 önekleri atılır; saklı format (+90XXXXXXXXXX) Contains ile eşleşir.
             var phoneDigits = NormalizePhoneTerm(term);
 
-            // E-posta Identity tarafındadır (AspNetUsers — ADR-014); AppUserId üzerinden EXISTS alt sorgusuyla
+            // E-posta Identity tarafındadır (AspNetUsers); AppUserId üzerinden EXISTS alt sorgusuyla
             // eşlenir (PK aramasıdır, ek Include/materialization yok — performans korunur).
             query = query.Where(customer =>
                 customer.FirstName.Contains(term)

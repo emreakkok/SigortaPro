@@ -1,6 +1,6 @@
 namespace SigortaPro.WebAPI.Middleware;
 
-// DEVELOPMENT_RULES.md §7: Tüm API yanıtlarına temel güvenlik header'larını ekler.
+// : Tüm API yanıtlarına temel güvenlik header'larını ekler.
 // Header'lar OnStarting geri çağrımında set edilir; böylece hata yanıtları dahil her yanıtta yer alır.
 public sealed class SecurityHeadersMiddleware
 {

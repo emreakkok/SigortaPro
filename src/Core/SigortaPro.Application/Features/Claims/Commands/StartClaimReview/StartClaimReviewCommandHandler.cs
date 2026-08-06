@@ -27,7 +27,7 @@ public sealed class StartClaimReviewCommandHandler : ICommandHandler<StartClaimR
         var claim = await _claimRepository.GetTrackedByIdAsync(request.ClaimId, cancellationToken)
             ?? throw new NotFoundException(nameof(Claim), request.ClaimId);
 
-        // Submitted değilse DomainException → UnhandledExceptionBehavior 409'a çevirir (ADR-013).
+        // Submitted değilse DomainException → UnhandledExceptionBehavior 409'a çevirir.
         claim.StartReview();
 
         _claimRepository.Update(claim);

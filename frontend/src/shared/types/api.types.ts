@@ -1,4 +1,4 @@
-/** Backend'in RFC 7807 hata zarfı (ExceptionHandlingMiddleware — ADR-018). */
+/** Backend'in RFC 7807 hata zarfı (ExceptionHandlingMiddleware). */
 export interface ApiProblemDetails {
   type?: string;
   title?: string;

@@ -96,7 +96,7 @@ function PricingStatusBadge({ version }: { version: PricingVersion }) {
 }
 
 /**
- * Fiyatlandırma Yönetimi (ADR-048). Gerçek sigortacılıktaki tarife yaşam döngüsü: TASLAK hazırla → düzenle →
+ * Fiyatlandırma Yönetimi. Gerçek sigortacılıktaki tarife yaşam döngüsü: TASLAK hazırla → düzenle →
  * (değişiklik özetini gör) → AKTİFLEŞTİR. Aktifleştirmeden sonra yalnızca YENİ teklifler yeni tarifeyi kullanır;
  * mevcut teklif/poliçe/PDF/rapor/snapshot primleri asla değişmez. Admin düzenler; Personel yalnızca görüntüler.
  */

@@ -41,7 +41,7 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
         }
 
         // TCKN benzersizliği transaction öncesi ön-kontrol edilir (e-posta ile aynı desen); aksi halde
-        // UQ_Customers_TCKN ihlali DbUpdateException olarak 500'e düşerdi. ADR-017 transaction akışı değişmez.
+        // UQ_Customers_TCKN ihlali DbUpdateException olarak 500'e düşerdi. transaction akışı değişmez.
         if (await _customerRepository.ExistsByTcknAsync(request.Tckn, cancellationToken))
         {
             return Result<AuthResponse>.Failure("Bu TCKN ile daha önce bir kayıt oluşturulmuş.");
@@ -50,7 +50,7 @@ public sealed class RegisterCommandHandler : ICommandHandler<RegisterCommand, Re
         var userId = Guid.Empty;
 
         // Identity kullanıcısı ve Domain Customer kaydı atomik oluşturulmalı; biri başarısız olursa
-        // diğeri de geri alınır (ADR-017).
+        // diğeri de geri alınır.
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             userId = await _identityService.CreateUserAsync(request.Email, request.Password, Roles.Customer, cancellationToken);

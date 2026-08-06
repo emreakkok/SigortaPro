@@ -48,7 +48,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("tr-TR", {
 });
 
 /**
- * Bildirim Merkezi (ADR-042): kalıcı bildirim geçmişi — okunma/önem filtreleri, metin araması,
+ * Bildirim Merkezi: kalıcı bildirim geçmişi — okunma/önem filtreleri, metin araması,
  * tarih aralığı ve sayfalama. Zil son bildirimleri gösterir; tam geçmiş buradadır.
  */
 export default function NotificationCenterPage() {
@@ -181,7 +181,7 @@ export default function NotificationCenterPage() {
       ) : (
         <>
           {/*
-            ADR-047: operasyonel activity-feed. Her kayıt "ne oldu / kim yaptı / hangi kayıt / ne zaman"
+            operasyonel activity-feed. Her kayıt "ne oldu / kim yaptı / hangi kayıt / ne zaman"
             sorularını tek başına cevaplar ve ilgili kayda tek tıkla götürür.
           */}
           <ul className="divide-y rounded-lg border bg-card">

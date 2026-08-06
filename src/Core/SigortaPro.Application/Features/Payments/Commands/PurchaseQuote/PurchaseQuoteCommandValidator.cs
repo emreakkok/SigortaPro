@@ -3,7 +3,7 @@ using SigortaPro.Application.Common.Payments;
 
 namespace SigortaPro.Application.Features.Payments.Commands.PurchaseQuote;
 
-// Yapısal kart/ödeme doğrulaması (400). Luhn ve senaryo bazlı ret gateway'in sorumluluğundadır (402 — ADR-007).
+// Yapısal kart/ödeme doğrulaması (400). Luhn ve senaryo bazlı ret gateway'in sorumluluğundadır (402).
 public sealed class PurchaseQuoteCommandValidator : AbstractValidator<PurchaseQuoteCommand>
 {
     public PurchaseQuoteCommandValidator()

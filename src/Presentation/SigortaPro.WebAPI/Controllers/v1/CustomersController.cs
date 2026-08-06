@@ -155,7 +155,7 @@ public sealed class CustomersController : ControllerBase
 }
 
 // Araç güncelleme istek gövdesi; araç kimliği route'tan alınır (gövdede tekrar edilmez).
-// UsagePurpose (ADR-057): kullanım amacı beyanı — zorunludur (Kasko/Trafik primini etkiler).
+// UsagePurpose: kullanım amacı beyanı — zorunludur (Kasko/Trafik primini etkiler).
 public sealed record UpdateVehicleRequest(
     string PlateNumber,
     string Brand,

@@ -1,7 +1,7 @@
 # SigortaPro — Frontend (React SPA)
 
 Tek acenteli sigorta poliçe yönetim sisteminin müşteri portalı + admin paneli.
-Backend API'si için bkz. kök dizindeki [`README.md`](../README.md).
+Backend API'si için dizindeki [`README.md`](../README.md).
 
 ## Stack
 
@@ -14,7 +14,7 @@ Backend API'si için bkz. kök dizindeki [`README.md`](../README.md).
 | HTTP | Axios (JWT interceptor + otomatik refresh-token yenileme) |
 | Form | React Hook Form + Zod (`@hookform/resolvers`) |
 | Styling | Tailwind CSS v3 + shadcn/ui tarzı el yazımı bileşen seti (cva + tailwind-merge) |
-| Grafikler | Recharts (admin dashboard — yalnızca lazy dashboard chunk'ında; ADR-033) |
+| Grafikler | Recharts (admin dashboard — yalnızca lazy dashboard chunk'ında) |
 
 ## Kurulum ve Çalıştırma
 
@@ -92,67 +92,67 @@ src/
 ## Mimari Notlar
 
 - **API katmanı:** Tüm HTTP çağrıları `shared/lib/axios.ts` içindeki tek `api`
-  instance'ı üzerinden yapılır. İstek interceptor'ı access token'ı ekler; 401'de
-  yanıt interceptor'ı **tek uçuşlu (single-flight)** refresh yapar, isteği bir kez
-  tekrarlar, yenileme de başarısızsa oturumu temizleyip `/401` sayfasına yönlendirir
-  (bkz. `docs/ai/DECISIONS.md` ADR-028).
+ instance'ı üzerinden yapılır. İstek interceptor'ı access token'ı ekler; 401'de
+ yanıt interceptor'ı **tek uçuşlu (single-flight)** refresh yapar, isteği bir kez
+ tekrarlar, yenileme de başarısızsa oturumu temizleyip `/401` sayfasına yönlendirir
+.
 - **Oturum:** `shared/lib/session.ts` (localStorage, kalıcı doğruluk kaynağı) +
-  `features/auth` içindeki `AuthProvider`/`useAuth` (React yansıması — ADR-029).
-  Kayıt sonrası otomatik giriş yapılır; çıkış `UserMenu` üzerinden. Login sonrası,
-  guard'ın bıraktığı `from` adresi rolle uyumluysa oraya dönülür.
+ `features/auth` içindeki `AuthProvider`/`useAuth` (React yansıması).
+ Kayıt sonrası otomatik giriş yapılır; çıkış `UserMenu` üzerinden. Login sonrası,
+ guard'ın bıraktığı `from` adresi rolle uyumluysa oraya dönülür.
 - **Rota koruması:** `ProtectedRoute` (oturumsuz → `/login`, rol uyuşmazlığı → `/403`)
-  ve `GuestRoute` (oturumlu kullanıcı login/register'dan kendi alanına) yalnızca UX
-  yönlendirmesidir; gerçek yetki kontrolü backend'dedir (`[Authorize]` + kaynak
-  sahipliği). Rol adları backend `UserRole` enum'u ile birebir aynıdır
-  (`Admin`, `Personel`, `Customer`).
+ ve `GuestRoute` (oturumlu kullanıcı login/register'dan kendi alanına) yalnızca UX
+ yönlendirmesidir; gerçek yetki kontrolü backend'dedir (`[Authorize]` + kaynak
+ sahipliği). Rol adları backend `UserRole` enum'u ile birebir aynıdır
+ (`Admin`, `Personel`, `Customer`).
 - **Form & doğrulama:** React Hook Form + Zod; şemalar backend FluentValidation
-  kurallarını Türkçe mesajlarıyla aynalar (TCKN/telefon/plaka regex, aralık
-  kontrolleri — `shared/utils/validation.ts`). Sunucu hataları `getApiErrorMessages`
-  ile tek listeye indirgenip `Alert` içinde gösterilir. İş mantığı frontend'de
-  yazılmaz (CLAUDE.md §10); doğrulamanın son sözü backend'dedir.
+ kurallarını Türkçe mesajlarıyla aynalar (TCKN/telefon/plaka regex, aralık
+ kontrolleri — `shared/utils/validation.ts`). Sunucu hataları `getApiErrorMessages`
+ ile tek listeye indirgenip `Alert` içinde gösterilir. İş mantığı frontend'de
+ yazılmaz; doğrulamanın son sözü backend'dedir.
 - **Enum'lar:** Backend Domain enum'ları JSON'da **sayısal** döner
-  (`JsonStringEnumConverter` yok); `shared/types/insurance.types.ts` bunları sayısal
-  mirror + Türkçe etiket/rozet haritaları olarak yansıtır ve API'ye sayısal gönderir
-  (bkz. `docs/ai/DECISIONS.md` ADR-030).
+ (`JsonStringEnumConverter` yok); `shared/types/insurance.types.ts` bunları sayısal
+ mirror + Türkçe etiket/rozet haritaları olarak yansıtır ve API'ye sayısal gönderir
+.
 - **Teklif sihirbazı:** `features/quotes` çok adımlı sihirbaz mevcut risk objesini
-  seçtirir veya `features/profile` form/hook'larını **yeniden kullanarak** aynı
-  ekranda ekletir (DRY); anlık prim + risk skoru + 3 paket tek `GET /quotes/compare`
-  çağrısından gelir. `features/quotes` → `features/profile` bağımlılığı tek yönlüdür.
-- **Ödeme & poliçe (Task 18 — ADR-031):** `features/payments` ödeme sayfası tek
-  sayfalı durum makinesidir — yalnızca `Approved` teklif için taksit seçenekleri
-  (`GET /payments/installment-options`) + kart formu gösterir, başarılı ödemede
-  (`POST /payments`) aynı sayfada başarı ekranına geçer; ödeme reddi (402) `detail`
-  mesajıyla gösterilir. `features/policies` "Poliçelerim" liste (durum sekmeleri:
-  Aktif/Süresi Dolmuş/İptal/Tümü) + teminat tablolu detay (`CoverageList` teklif
-  detayıyla ortaktır). **PDF indirme**, Bearer başlığı interceptor'da eklendiğinden
-  `responseType:"blob"` ile yapılır (dosya adı `Content-Disposition`'dan). Backend'de
-  poliçe listeleme/detay ucu olmadığından **iki salt okunur additive uç** eklendi
-  (`GET /policies`, `GET /policies/{id}`; mevcut sözleşme değişmedi — ADR-031).
-- **Hasar & yenileme (Task 19 — ADR-032):** `features/claims` hasar bildirim formu
-  poliçe seçicisini **yalnızca aktif poliçelerden** (Task 18 `GET /policies?status=Active`)
-  besler (DRY); mock foto yalnızca **dosya adı** metadatası olarak gönderilir (yükleme
-  yok — ADR-024). Hasar detayı `ClaimTimeline` ile durum zaman çizelgesini gösterir
-  (Bildirildi → İncelemede → Onaylandı → Ödendi | Reddedildi). `features/renewals`
-  yenileme kartındaki **onay** (`POST /renewals/{id}/accept`) yeni teklifi Approved'a
-  çeker ve "Ödemeye Geç" ile mevcut Task 18 ödeme akışına köprülenir. Cross-feature
-  bağımlılıklar tek yönlü: `claims → policies`, `renewals → quotes`. Backend'e dokunulmadı.
-- **Admin paneli (Task 20 — ADR-033):** `/admin` altında acente dashboard'u
-  (`features/dashboard` — Task 14 uçlarından KPI kartları + **Recharts** ile aylık prim
-  trendi/branş dağılımı; grafikler tema token'larını kullanır, Recharts yalnızca lazy
-  dashboard chunk'ındadır) ve yönetim ekranları: **Müşteriler** (`features/customers`,
-  debounce'lu arama + il filtresi), **Teklifler**/**Poliçeler**/**Hasarlar** admin sayfaları
-  kendi domain feature'ında yaşar (ayrı "admin" çatısı yok; rozet/teminat/döküm bileşenleri
-  iki yüzeyde ortak). Tüm listeler **tablo + filtre + detay çekmecesi** desenindedir (el
-  yazımı `Drawer` + `Pagination`, shared). Personel poliçe listesi, personelin tüm
-  poliçeleri görebildiği tek uç olan `GET /dashboard/reports/policies`'ten beslenir
-  (`policies → dashboard`, tek yönlü). **Hasar karar akışı** (`ClaimDecisionPanel`) durum
-  makinesini aynalar: incelemeye al → onayla (tutar+not) / reddet (gerekçe zorunlu) → öde;
-  geçersiz geçişin son sözü backend'dedir (409). Backend'e dokunulmadı.
+ seçtirir veya `features/profile` form/hook'larını **yeniden kullanarak** aynı
+ ekranda ekletir (DRY); anlık prim + risk skoru + 3 paket tek `GET /quotes/compare`
+ çağrısından gelir. `features/quotes` → `features/profile` bağımlılığı tek yönlüdür.
+- **Ödeme & poliçe:** `features/payments` ödeme sayfası tek
+ sayfalı durum makinesidir — yalnızca `Approved` teklif için taksit seçenekleri
+ (`GET /payments/installment-options`) + kart formu gösterir, başarılı ödemede
+ (`POST /payments`) aynı sayfada başarı ekranına geçer; ödeme reddi (402) `detail`
+ mesajıyla gösterilir. `features/policies` "Poliçelerim" liste (durum sekmeleri:
+ Aktif/Süresi Dolmuş/İptal/Tümü) + teminat tablolu detay (`CoverageList` teklif
+ detayıyla ortaktır). **PDF indirme**, Bearer başlığı interceptor'da eklendiğinden
+ `responseType:"blob"` ile yapılır (dosya adı `Content-Disposition`'dan). Backend'de
+ poliçe listeleme/detay ucu olmadığından **iki salt okunur additive uç** eklendi
+ (`GET /policies`, `GET /policies/{id}`; mevcut sözleşme değişmedi).
+- **Hasar & yenileme:** `features/claims` hasar bildirim formu
+ poliçe seçicisini **yalnızca aktif poliçelerden** (`GET /policies?status=Active`)
+ besler (DRY); mock foto yalnızca **dosya adı** metadatası olarak gönderilir (yükleme
+ yok). Hasar detayı `ClaimTimeline` ile durum zaman çizelgesini gösterir
+ (Bildirildi → İncelemede → Onaylandı → Ödendi | Reddedildi). `features/renewals`
+ yenileme kartındaki **onay** (`POST /renewals/{id}/accept`) yeni teklifi Approved'a
+ çeker ve "Ödemeye Geç" ile mevcut ödeme akışına köprülenir. Cross-feature
+ bağımlılıklar tek yönlü: `claims → policies`, `renewals → quotes`. Backend'e dokunulmadı.
+- **Admin paneli:** `/admin` altında acente dashboard'u
+ (`features/dashboard` — uçlarından KPI kartları + **Recharts** ile aylık prim
+ trendi/branş dağılımı; grafikler tema token'larını kullanır, Recharts yalnızca lazy
+ dashboard chunk'ındadır) ve yönetim ekranları: **Müşteriler** (`features/customers`,
+ debounce'lu arama + il filtresi), **Teklifler**/**Poliçeler**/**Hasarlar** admin sayfaları
+ kendi domain feature'ında yaşar (ayrı "admin" çatısı yok; rozet/teminat/döküm bileşenleri
+ iki yüzeyde ortak). Tüm listeler **tablo + filtre + detay çekmecesi** desenindedir (el
+ yazımı `Drawer` + `Pagination`, shared). Personel poliçe listesi, personelin tüm
+ poliçeleri görebildiği tek uç olan `GET /dashboard/reports/policies`'ten beslenir
+ (`policies → dashboard`, tek yönlü). **Hasar karar akışı** (`ClaimDecisionPanel`) durum
+ makinesini aynalar: incelemeye al → onayla (tutar+not) / reddet (gerekçe zorunlu) → öde;
+ geçersiz geçişin son sözü backend'dedir (409). Backend'e dokunulmadı.
 - **Tasarım sistemi:** shadcn/ui konvansiyonu — renkler `globals.css`'te HSL CSS
-  değişkenleri, bileşen varyantları `class-variance-authority` ile. Koyu tema
-  `<html class="dark">` ile hazır (toggle ileride). Feature bileşenleri (ör.
-  `UserMenu`) layout'lara `userMenu` slot'u ile routes.tsx'ten enjekte edilir —
-  `shared` katmanı feature'lara bağımlı olmaz (ADR-029).
+ değişkenleri, bileşen varyantları `class-variance-authority` ile. Koyu tema
+ `<html class="dark">` ile hazır (toggle ileride). Feature bileşenleri (ör.
+ `UserMenu`) layout'lara `userMenu` slot'u ile routes.tsx'ten enjekte edilir —
+ `shared` katmanı feature'lara bağımlı olmaz.
 
 ## Rotalar
 

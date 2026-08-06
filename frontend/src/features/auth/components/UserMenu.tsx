@@ -14,10 +14,10 @@ import { UserRoles } from "@/shared/types/auth.types";
 import { cn } from "@/shared/lib/utils";
 
 /**
- * Layout header'larına slot olarak enjekte edilen kullanıcı menüsü (ADR-029; kompozisyon routes.tsx'te).
- * ADR-040: avatar/ad tıklanınca modern bir dropdown açılır (el yazımı — ADR-027; harici menü kütüphanesi yok):
+ * Layout header'larına slot olarak enjekte edilen kullanıcı menüsü.
+ * avatar/ad tıklanınca modern bir dropdown açılır (el yazımı; harici menü kütüphanesi yok):
  * müşteri için Profil / Araçlarım / Konutlarım / Şifre Değiştir / Çıkış; personelde yalnızca Çıkış.
- * Ad-soyad müşteri profil sorgusundan gelir (ADR-039), yoksa e-postaya düşülür.
+ * Ad-soyad müşteri profil sorgusundan gelir, yoksa e-postaya düşülür.
  */
 // Rol adlarının kullanıcı dostu Türkçe etiketleri (yalnızca gösterim — yetki mantığı session'dadır).
 const ROLE_LABELS: Record<string, string> = {

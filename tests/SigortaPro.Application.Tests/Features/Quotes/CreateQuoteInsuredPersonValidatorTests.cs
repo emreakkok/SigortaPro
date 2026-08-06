@@ -4,7 +4,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Tests.Features.Quotes;
 
-// ADR-041: "başkası adına" sigortalı beyanının doğrulama kuralları.
+// "başkası adına" sigortalı beyanının doğrulama kuralları.
 public class CreateQuoteInsuredPersonValidatorTests
 {
     private readonly CreateQuoteCommandValidator _validator = new();
@@ -57,7 +57,7 @@ public class CreateQuoteInsuredPersonValidatorTests
     [Fact]
     public void Validate_Should_Pass_When_HealthQuoteWithoutInsured()
     {
-        // Kendisi için sağlık teklifi — sigortalı beyanı opsiyoneldir; sigara beyanı ise zorunludur (ADR-054).
+        // Kendisi için sağlık teklifi — sigortalı beyanı opsiyoneldir; sigara beyanı ise zorunludur.
         var command = new CreateQuoteCommand(
             InsuranceBranch.Saglik, null, null, CoveragePackage.Standart, IsSmoker: true);
 

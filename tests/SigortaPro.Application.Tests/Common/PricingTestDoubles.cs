@@ -6,7 +6,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Tests.Common;
 
-// ADR-048: Fiyatlandırma tarifesi çözümleyicisi için ortak test sahteleri.
+// Fiyatlandırma tarifesi çözümleyicisi için ortak test sahteleri.
 // Varsayılan davranış "baseline" tarifedir → tarife yönetimi eklenmeden önceki fiyatlar birebir korunur,
 // böylece mevcut fiyatlama testleri beklenen değerlerini değiştirmeden geçmeye devam eder.
 public static class PricingTestDoubles
@@ -23,7 +23,7 @@ public static class PricingTestDoubles
     }
 
     /// <summary>
-    /// ADR-056: GERÇEK girdi kurucusu (sahte değil) — önizleme ile teklif oluşturmanın aynı girdiyi
+    /// GERÇEK girdi kurucusu (sahte değil) — önizleme ile teklif oluşturmanın aynı girdiyi
     /// üretmesi testlerde de fiilen çalışır. Deprem bölgesi sağlayıcısı istenirse özelleştirilebilir.
     /// </summary>
     /// <param name="policyRepository">Verilmezse sahte döner → 0 hasarsız dönem (nötr basamak).</param>

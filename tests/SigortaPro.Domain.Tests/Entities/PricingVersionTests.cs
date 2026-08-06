@@ -5,7 +5,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Domain.Tests.Entities;
 
-// ADR-048: Tarife versiyonu değişmezdir ve eksiksiz olmalıdır.
+// Tarife versiyonu değişmezdir ve eksiksiz olmalıdır.
 public class PricingVersionTests
 {
     private static PricingVersion CreateVersion() =>

@@ -4,7 +4,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Features.Pricing;
 
-// ADR-048: IPricingRateResolver implementasyonu (Application servisi — iş kuralı içermez, yalnızca
+// IPricingRateResolver implementasyonu (Application servisi — iş kuralı içermez, yalnızca
 // "hangi tarife" sorusunu cevaplar). Versiyon bulunamazsa baseline'a düşer; böylece tarife tablosu
 // boş olsa dahi (ör. temiz kurulum) fiyatlama çalışmaya devam eder.
 public sealed class PricingRateResolver : IPricingRateResolver

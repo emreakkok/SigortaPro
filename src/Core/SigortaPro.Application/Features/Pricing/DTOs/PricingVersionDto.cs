@@ -2,7 +2,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Pricing.DTOs;
 
-// ADR-048: Bir tarife versiyonunun admin görünümü. Aktif/arşiv versiyonlar değişmezdir; yalnızca taslak
+// Bir tarife versiyonunun admin görünümü. Aktif/arşiv versiyonlar değişmezdir; yalnızca taslak
 // düzenlenir. "Geçmiş" bu kayıtların kendisidir (ayrı audit tablosu yoktur).
 public sealed record PricingVersionDto(
     Guid Id,
@@ -20,7 +20,7 @@ public sealed record PricingVersionDto(
     DateTime CreatedAt,
     // Şu an yürürlükte mi (Status == Active). Geriye dönük uyumluluk için ayrı alan olarak da verilir.
     bool IsCurrent,
-    // ADR-049: Yayınlanmış bir versiyon değil, yerleşik (kod-sabit) baz tarife (v0). Id/EffectiveFrom anlamsızdır.
+    // Yayınlanmış bir versiyon değil, yerleşik (kod-sabit) baz tarife (v0). Id/EffectiveFrom anlamsızdır.
     bool IsBaseline,
     IReadOnlyList<PricingBranchRateDto> Rates,
     // Baz prim dışındaki TÜM çarpanlar (ticari + aktüeryal faktör grupları). Versiyonun kendi seti; boşsa baseline.

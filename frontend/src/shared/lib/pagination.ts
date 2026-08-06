@@ -1,5 +1,5 @@
 /*
- * Sayfalama varsayılanları (ADR-045). Tek merkez → Portal ve Admin farkı burada yönetilir.
+ * Sayfalama varsayılanları. Tek merkez → Portal ve Admin farkı burada yönetilir.
  * Backend `pageSize` parametresini zaten kabul eder; bu dosya yalnızca istemci varsayılan/seçimidir
  * (yeni API yok, backend'e ek yük yok).
  */

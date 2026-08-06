@@ -37,7 +37,7 @@ public class GetMyProfileQueryHandlerTests
         result.Id.Should().Be(customerId);
         result.Email.Should().Be("ayse@ornek.com");
         result.Vehicles.Should().HaveCount(1);
-        // Ham TCKN sızdırılmaz; yalnızca maskeli değer döner (CODING_STANDARDS.md §4.2).
+        // Ham TCKN sızdırılmaz; yalnızca maskeli değer döner.
         result.MaskedTckn.Should().Be("*********10");
         result.MaskedTckn.Should().NotBe("11111111110");
     }

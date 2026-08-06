@@ -17,9 +17,9 @@ interface ComparisonStepProps {
   customerId: string | null;
   /** Seçilen risk objesi (araç veya konut) kimliği; Sağlık için null. */
   riskObjectId: string | null;
-  /** Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); kendim için null. */
+  /** Sağlıkta "başkası adına" sigortalı beyanı; kendim için null. */
   insuredPerson: InsuredPersonRequest | null;
-  /** Sağlıkta sigara kullanım beyanı (ADR-054); diğer branşlarda gönderilmez. */
+  /** Sağlıkta sigara kullanım beyanı; diğer branşlarda gönderilmez. */
   isSmoker: boolean | null;
   onBack: () => void;
   onCreated: (quoteId: string) => void;
@@ -35,9 +35,9 @@ export function ComparisonStep({ branch, customerId, riskObjectId, insuredPerson
     branch,
     vehicleId: kind === "vehicle" ? (riskObjectId ?? undefined) : undefined,
     propertyId: kind === "property" ? (riskObjectId ?? undefined) : undefined,
-    // "Başkası adına" sağlıkta önizleme primi sigortalının yaşından hesaplanır (ADR-041).
+    // "Başkası adına" sağlıkta önizleme primi sigortalının yaşından hesaplanır.
     insuredBirthDate: insuredPerson?.birthDate,
-    // ADR-056: Beyan önizlemeye de iletilir → gösterilen prim, oluşturulacak teklifin primiyle aynıdır.
+    // Beyan önizlemeye de iletilir → gösterilen prim, oluşturulacak teklifin primiyle aynıdır.
     isSmoker: kind === "none" ? isSmoker : null,
   };
 
@@ -55,7 +55,7 @@ export function ComparisonStep({ branch, customerId, riskObjectId, insuredPerson
         propertyId: params.propertyId ?? null,
         coveragePackage,
         insuredPerson,
-        // Beyan yalnızca Sağlıkta gönderilir; diğer branşlarda backend bunu reddeder (ADR-054).
+        // Beyan yalnızca Sağlıkta gönderilir; diğer branşlarda backend bunu reddeder.
         isSmoker: kind === "none" ? isSmoker : null,
       },
       {
@@ -86,7 +86,7 @@ export function ComparisonStep({ branch, customerId, riskObjectId, insuredPerson
   }
 
   const { productName, riskObject, packages } = comparison.data;
-  // Risk skoru pakete göre değişmez (ADR-021); ilk paketten alınır.
+  // Risk skoru pakete göre değişmez; ilk paketten alınır.
   const riskScore = packages[0]?.riskScore;
 
   return (

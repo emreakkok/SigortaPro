@@ -5,7 +5,7 @@ using SigortaPro.Application.Common.Authorization;
 
 namespace SigortaPro.Infrastructure.RealTime;
 
-// ADR-041: Gerçek zamanlı bildirim hub'ı. Sunucu → istemci tek yönlü yayın kanalıdır; istemciden
+// Gerçek zamanlı bildirim hub'ı. Sunucu → istemci tek yönlü yayın kanalıdır; istemciden
 // çağrılabilir bir metot yüzeyi yoktur (iş komutları her zaman HTTP/CQRS üzerinden yürür).
 // Bağlanan kullanıcı rolüne göre gruplanır: Admin/Personel → "staff"; her kullanıcı ayrıca
 // "user:{userId}" grubuna alınır (müşteri bildirimleri için hazır altyapı — MVP'de tüketici staff'tır).
@@ -20,7 +20,7 @@ public sealed class NotificationHub : Hub
     {
         var user = Context.User;
 
-        // ADR-060: staff kümesi (Admin ∪ Personel) tek kaynaktan (Roles.StaffRoles) türetilir.
+        // staff kümesi (Admin ∪ Personel) tek kaynaktan (Roles.StaffRoles) türetilir.
         if (user is not null && Roles.StaffRoles.Any(user.IsInRole))
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, StaffGroup);

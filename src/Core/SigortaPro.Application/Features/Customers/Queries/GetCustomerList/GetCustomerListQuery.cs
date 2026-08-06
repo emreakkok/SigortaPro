@@ -4,7 +4,7 @@ using SigortaPro.Application.Features.Customers.DTOs;
 
 namespace SigortaPro.Application.Features.Customers.Queries.GetCustomerList;
 
-// Admin müşteri listesi: sayfalama + ad/soyad/TCKN araması + il filtresi (TASKS.md Task 7).
+// Admin müşteri listesi: sayfalama + ad/soyad/TCKN araması + il filtresi (TASKS.md).
 public sealed record GetCustomerListQuery(
     int Page = 1,
     int PageSize = 20,

@@ -8,11 +8,11 @@ using SigortaPro.Domain.Entities;
 namespace SigortaPro.Application.Features.Policies;
 
 // Yüklenmiş Policy aggregate'inden PDF sertifika modelini kurar. Prim dökümü ve ölçekli teminatlar,
-// Task 8 motoru + Task 9 fiyatlama köprüsüyle teklifin CreatedAt referansıyla deterministik yeniden
-// hesaplanır (ADR-021 ile tutarlı: teklif detayı ve poliçe sertifikası aynı primi/dökümü üretir).
+// motoru + fiyatlama köprüsüyle teklifin CreatedAt referansıyla deterministik yeniden
+// hesaplanır.
 internal static class PolicyDocumentModelFactory
 {
-    // rates (ADR-048): poliçenin kaynaklandığı teklifin sabitlediği tarife — PDF'teki geçmiş prim/döküm
+    // rates: poliçenin kaynaklandığı teklifin sabitlediği tarife — PDF'teki geçmiş prim/döküm
     // tarife değişikliklerinden etkilenmez.
     public static PolicyDocumentModel Build(
         Policy policy, IPricingEngine pricingEngine, DateTime issuedAt, PricingRateSet? rates = null)
@@ -29,10 +29,10 @@ internal static class PolicyDocumentModelFactory
             product.Coverages, quote.CoveragePackage, quote.CreatedAt, quote.ClaimHistoryFactor,
             insuredBirthDate: quote.InsuredPerson?.BirthDate,
             rates: rates,
-            // ADR-053: PDF de dondurulmuş girdilerden üretilir → yeniden basımda risk skoru/döküm değişmez.
+            // PDF de dondurulmuş girdilerden üretilir → yeniden basımda risk skoru/döküm değişmez.
             snapshot: quote.PricingSnapshot);
 
-        // ADR-041: "başkası adına" teklifte PDF risk objesi satırı sigortalıyı gösterir.
+        // "başkası adına" teklifte PDF risk objesi satırı sigortalıyı gösterir.
         var riskObject = QuoteMappings.BuildRiskObject(quote.Vehicle, quote.Property, quote.InsuredPerson);
 
         var coverages = pricing.Coverages
@@ -64,7 +64,7 @@ internal static class PolicyDocumentModelFactory
             policy.TotalPremium,
             coverages,
             pricing.Breakdown,
-            // ADR-042: sigortalı ≠ sigorta ettiren ise PDF'te ayrı gösterilir (TCKN maskeli).
+            // sigortalı ≠ sigorta ettiren ise PDF'te ayrı gösterilir (TCKN maskeli).
             InsuredPersonSummary: quote.InsuredPerson is null
                 ? null
                 : $"{quote.InsuredPerson.FullName} ({quote.InsuredPerson.Relationship}) · TCKN {SensitiveDataMasker.MaskTckn(quote.InsuredPerson.Tckn)}");

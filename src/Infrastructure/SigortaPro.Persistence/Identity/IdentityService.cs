@@ -6,7 +6,7 @@ using SigortaPro.Application.Common.Models;
 
 namespace SigortaPro.Persistence.Identity;
 
-// ADR-014: IIdentityService implementasyonu Persistence katmanında UserManager<AppUser> üzerinden sağlanır.
+// IIdentityService implementasyonu Persistence katmanında UserManager<AppUser> üzerinden sağlanır.
 public sealed class IdentityService : IIdentityService
 {
     private readonly UserManager<AppUser> _userManager;
@@ -54,7 +54,7 @@ public sealed class IdentityService : IIdentityService
             return null;
         }
 
-        // ADR-061: Pasif hesap giriş yapamaz. Aktiflik durumu sızdırılmaz — şifre doğru olsa bile null döner,
+        // Pasif hesap giriş yapamaz. Aktiflik durumu sızdırılmaz — şifre doğru olsa bile null döner,
         // çağıran (LoginCommandHandler) "e-posta veya şifre hatalı" genel mesajını üretir.
         if (!user.IsActive)
         {
@@ -79,7 +79,7 @@ public sealed class IdentityService : IIdentityService
         }
 
         // DataProtectorTokenProvider tabanlı token (AddDefaultTokenProviders ile kayıtlı); ömrü
-        // DataProtectionTokenProviderOptions ile 1 saate yapılandırılmıştır (ADR-035). Token asla loglanmaz.
+        // DataProtectionTokenProviderOptions ile 1 saate yapılandırılmıştır. Token asla loglanmaz.
         return await _userManager.GeneratePasswordResetTokenAsync(user);
     }
 
@@ -114,7 +114,7 @@ public sealed class IdentityService : IIdentityService
         return users.Select(user => user.Id).ToList();
     }
 
-    // ── ADR-060: Personel (staff) yaşam döngüsü ────────────────────────────────────────────────
+    // ── Personel (staff) yaşam döngüsü ────────────────────────────────────────────────
 
     public async Task<IReadOnlyList<StaffUserInfo>> GetStaffUsersAsync(CancellationToken cancellationToken = default)
     {
@@ -155,7 +155,7 @@ public sealed class IdentityService : IIdentityService
             throw new BusinessRuleException(string.Join(" ", createResult.Errors.Select(error => error.Description)));
         }
 
-        // ADR-060 / güvenlik: rol SUNUCUDA sabittir — her koşulda yalnızca Personel atanır.
+        // / güvenlik: rol SUNUCUDA sabittir — her koşulda yalnızca Personel atanır.
         var roleResult = await _userManager.AddToRoleAsync(user, Roles.Personel);
         if (!roleResult.Succeeded)
         {

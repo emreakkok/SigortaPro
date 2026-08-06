@@ -24,8 +24,8 @@ import daskImage from "@/assets/services/dask.svg";
 import saglikImage from "@/assets/services/saglik.svg";
 
 /**
- * Giriş yapmamış kullanıcının karşılama sayfası (ADR-039). Modern SaaS düzeni: hero, hizmetler,
- * nasıl çalışır, avantajlar, SSS, CTA ve footer. Tasarım sistemi token'larıyla (ADR-027) çizilir →
+ * Giriş yapmamış kullanıcının karşılama sayfası. Modern SaaS düzeni: hero, hizmetler,
+ * nasıl çalışır, avantajlar, SSS, CTA ve footer. Tasarım sistemi token'larıyla çizilir →
  * koyu tema otomatik uyumlu. Framer Motion yalnızca hafif giriş animasyonlarında kullanılır
  * (transform/opacity; `useReducedMotion`'a saygılı).
  */

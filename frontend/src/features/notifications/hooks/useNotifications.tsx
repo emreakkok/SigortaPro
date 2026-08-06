@@ -27,7 +27,7 @@ import { UserRoles } from "@/shared/types/auth.types";
 export type ConnectionState = "disconnected" | "connecting" | "connected" | "reconnecting";
 
 interface NotificationContextValue {
-  /** SignalR bağlantı durumu (zil üzerindeki bağlantı göstergesi — ADR-042 dayanıklılık). */
+  /** SignalR bağlantı durumu (zil üzerindeki bağlantı göstergesi dayanıklılık). */
   connectionState: ConnectionState;
   preferences: NotificationPreferences;
   updatePreferences: (next: NotificationPreferences) => void;
@@ -38,7 +38,7 @@ interface NotificationContextValue {
 const NotificationContext = createContext<NotificationContextValue | null>(null);
 
 /**
- * Gerçek zamanlı bildirim sağlayıcısı v2 (ADR-041/ADR-042). Staff oturumunda hub'a bağlanır; gelen
+ * Gerçek zamanlı bildirim sağlayıcısı v2. Staff oturumunda hub'a bağlanır; gelen
  * bildirimde (1) sunucu destekli bildirim sorgularını geçersizleştirir (zil/merkez/rozet DB'den tazelenir),
  * (2) tercihlere göre sonner toast'u gösterir, (3) sekme arka plandaysa ve izin verildiyse tarayıcı
  * bildirimi üretir, (4) olay türüne göre dashboard/liste cache'lerini geçersizleştirir. Kopma/yeniden
@@ -129,7 +129,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             : notification.severity === "error"
               ? toast.error
               : toast.info;
-      // ADR-047: toast KISA ve anlıktır (olay + varsa referans); detaylı anlatım (kim/kimin için/tutar)
+      // toast KISA ve anlıktır (olay + varsa referans); detaylı anlatım (kim/kimin için/tutar)
       // Bildirim Merkezi'ne aittir. Uzun mesaj toast'a taşınmaz.
       show(notification.title, {
         description: notification.referenceCode ?? undefined,

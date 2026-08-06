@@ -4,7 +4,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Features.Policies;
 
-// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz — CODING_STANDARDS.md §4.2).
+// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz).
 // Branş/ürün/risk objesi/teminatlar poliçenin kaynaklandığı tekliften türetilir; teklif detayının
 // gösterim yardımcıları (QuoteMappings.BuildRiskObject) yeniden kullanılır (DRY).
 internal static class PolicyMappings
@@ -30,7 +30,7 @@ internal static class PolicyMappings
         policy.EndDate,
         policy.TotalPremium,
         policy.QuoteId,
-        // ADR-041 düzeltmesi: Sağlıkta "başkası adına" poliçede risk objesi/Sigortalı bilgisi teklifin
+        // düzeltmesi: Sağlıkta "başkası adına" poliçede risk objesi/Sigortalı bilgisi teklifin
         // InsuredPerson'ından gelir — poliçe detayı da (teklif detayı gibi) doğru Sigortalı'yı gösterir.
         QuoteMappings.BuildRiskObject(policy.Quote!.Vehicle, policy.Quote!.Property, policy.Quote!.InsuredPerson),
         pricing.Coverages,

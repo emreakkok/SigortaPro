@@ -10,7 +10,7 @@ using SigortaPro.Application.Features.Notifications.Queries.GetUnreadNotificatio
 
 namespace SigortaPro.WebAPI.Controllers.v1;
 
-// ADR-042: Kalıcı bildirim merkezi uçları. Tüm yüzey oturum sahibinin KENDİ bildirimleriyle sınırlıdır
+// Kalıcı bildirim merkezi uçları. Tüm yüzey oturum sahibinin KENDİ bildirimleriyle sınırlıdır
 // (alıcı bazlı satır modeli); staff bildirimleri şu an aktif kitledir, müşteri alıcılığı hazırdır.
 [ApiController]
 [Route("api/v1/notifications")]

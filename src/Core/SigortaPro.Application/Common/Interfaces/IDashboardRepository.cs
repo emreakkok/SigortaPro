@@ -5,7 +5,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// Admin dashboard & raporlama için özel salt okunur repository (ADR-005 §4.2, ADR-026). Tüm metotlar
+// Admin dashboard & raporlama için özel salt okunur repository. Tüm metotlar
 // birden çok aggregate üzerinde SQL tarafı projeksiyon/agregasyon (COUNT/SUM/GROUP BY) yapar; hiçbiri durum
 // değiştirmez ve hiçbiri tabloyu belleğe çekmez (N+1 yok). Türetilmiş oranlar (dönüşüm, yenileme, hasar/prim)
 // handler'da hesaplanır (Application) — payda 0 ise null döner, uydurma oran üretilmez.

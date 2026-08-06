@@ -36,7 +36,7 @@ public sealed class RejectQuoteCommandHandler : ICommandHandler<RejectQuoteComma
         await QuoteAuthorization.EnsureCanAccessAsync(
             quote.CustomerId, _currentUserService, _customerRepository, cancellationToken);
 
-        // Satın alınmış/süresi dolmuş teklif reddedilemez → DomainException → 409 (ADR-013).
+        // Satın alınmış/süresi dolmuş teklif reddedilemez → DomainException → 409.
         quote.Reject();
 
         _quoteRepository.Update(quote);

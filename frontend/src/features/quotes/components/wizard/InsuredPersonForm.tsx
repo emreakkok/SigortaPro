@@ -14,8 +14,8 @@ interface InsuredPersonFormProps {
 }
 
 /**
- * "Başkası adına" sağlık sigortalısı beyan formu (ADR-041). Bilgiler poliçe sahibinin beyanıdır;
- * gizlilik gereği sistemdeki diğer müşteriler aranamaz/eşleştirilemez (PROJECT_CONTEXT §3.2).
+ * "Başkası adına" sağlık sigortalısı beyan formu. Bilgiler poliçe sahibinin beyanıdır;
+ * gizlilik gereği sistemdeki diğer müşteriler aranamaz/eşleştirilemez.
  */
 export function InsuredPersonForm({ defaultValues, onSubmit, submitLabel }: InsuredPersonFormProps) {
   const {
@@ -28,7 +28,7 @@ export function InsuredPersonForm({ defaultValues, onSubmit, submitLabel }: Insu
     defaultValues,
   });
 
-  // "Diğer" seçildiğinde serbest açıklama alanı açılır (ADR-042).
+  // "Diğer" seçildiğinde serbest açıklama alanı açılır.
   const isOtherRelationship = watch("relationship") === "Diğer";
 
   return (

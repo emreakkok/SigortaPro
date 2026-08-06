@@ -1,6 +1,6 @@
 namespace SigortaPro.Application.Common.Validation;
 
-// Projede birden fazla validator tarafından paylaşılan regex kalıpları (CODING_STANDARDS.md §6.2).
+// Projede birden fazla validator tarafından paylaşılan regex kalıpları.
 public static class ValidationPatterns
 {
     // Türk plaka formatı: 01-81 il kodu + 1-3 harf + 2-4 rakam (opsiyonel boşluklarla).

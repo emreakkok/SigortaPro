@@ -3,11 +3,11 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Domain.Entities;
 
-// ADR-048: Versiyonlanmış tarife. Yaşam döngüsü: Taslak (Draft) → Aktif (Active) → Arşiv (Archived).
+// Versiyonlanmış tarife. Yaşam döngüsü: Taslak (Draft) → Aktif (Active) → Arşiv (Archived).
 //  • TASLAK serbestçe düzenlenebilir ve HİÇBİR teklifi fiyatlamaz (canlı fiyatları etkilemez).
 //  • AKTİF versiyon DEĞİŞMEZDİR; yeni teklifler onu kullanır ve kendilerinde sabitler (pin).
 //  • Yeni bir versiyon aktifleştirildiğinde eskisi ARŞİVLENİR (yine değişmez) → geçmiş teklif/poliçe primleri
-//    sabitledikleri versiyonla her zaman aynı sonucu üretir (ADR-021 determinizmi korunur).
+// sabitledikleri versiyonla her zaman aynı sonucu üretir.
 // Aynı anda yalnızca BİR aktif versiyon bulunur (aktifleştirme handler'ı bu tekilliği uygular).
 public class PricingVersion : BaseEntity, IAggregateRoot
 {
@@ -62,7 +62,7 @@ public class PricingVersion : BaseEntity, IAggregateRoot
 
     public string? Note { get; private set; }
 
-    // Değişikliği yapan admin: stabil kimlik + o andaki görünen ad snapshot'ı (ADR-047 ile aynı gerekçe).
+    // Değişikliği yapan admin: stabil kimlik + o andaki görünen ad snapshot'ı.
     public Guid? CreatedByUserId { get; private set; }
     public string? CreatedByName { get; private set; }
 

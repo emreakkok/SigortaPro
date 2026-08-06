@@ -4,7 +4,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Tests.Features.Payments;
 
-// Ödeme modülü testlerinde kullanılan entity/komut kurucuları (DEVELOPMENT_RULES.md §5.4).
+// Ödeme modülü testlerinde kullanılan entity/komut kurucuları.
 internal static class PaymentTestData
 {
     // Luhn-geçerli örnek başarı kartı (README test kartı).

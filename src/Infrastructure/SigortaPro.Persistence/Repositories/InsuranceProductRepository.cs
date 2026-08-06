@@ -6,7 +6,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// IInsuranceProductRepository implementasyonu (ADR-005, ARCHITECTURE_RULES.md §4.2).
+// IInsuranceProductRepository implementasyonu.
 public sealed class InsuranceProductRepository : GenericRepository<InsuranceProduct>, IInsuranceProductRepository
 {
     private readonly AppDbContext _context;

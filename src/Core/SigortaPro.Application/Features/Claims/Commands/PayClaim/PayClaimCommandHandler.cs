@@ -27,7 +27,7 @@ public sealed class PayClaimCommandHandler : ICommandHandler<PayClaimCommand, Cl
         var claim = await _claimRepository.GetTrackedByIdAsync(request.ClaimId, cancellationToken)
             ?? throw new NotFoundException(nameof(Claim), request.ClaimId);
 
-        // Approved değilse DomainException → UnhandledExceptionBehavior 409'a çevirir (ADR-013).
+        // Approved değilse DomainException → UnhandledExceptionBehavior 409'a çevirir.
         claim.MarkPaid();
 
         _claimRepository.Update(claim);

@@ -10,10 +10,10 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// ADR-042: Kalıcı bildirim merkezi uçtan uca — iş olayı (teklif) → behavior → dispatcher fan-out →
+// Kalıcı bildirim merkezi uçtan uca — iş olayı (teklif) → behavior → dispatcher fan-out →
 // DB kaydı → liste/rozet/okundu akışı gerçek pipeline'da doğrulanır. E-posta tetiklenmez (bildirim
 // kataloğunda e-posta kanalı yoktur; host NullEmailService kullanır). Auth HTTP bütçesi harcanmaz
-// (register/login ISender ile — ADR-034).
+// (register/login ISender ile).
 [Collection(IntegrationTestCollection.Name)]
 public sealed class NotificationCenterIntegrationTests
 {
@@ -53,7 +53,7 @@ public sealed class NotificationCenterIntegrationTests
         quoteNotification.ValueKind.Should().NotBe(JsonValueKind.Undefined);
         var notificationId = quoteNotification.GetProperty("id").GetString();
 
-        // Assert 1b (ADR-047): bildirim tek başına "kim / kimin için / ne / hangi kayıt" sorularını
+        // Assert 1b: bildirim tek başına "kim / kimin için / ne / hangi kayıt" sorularını
         // cevaplamalı ve ilgili kayda gidilebilmelidir. Hassas veri (TCKN) ASLA taşınmamalıdır.
         var message = quoteNotification.GetProperty("message").GetString();
         message.Should().Contain("Test Müşteri", "bildirim ilgili müşteriyi adıyla belirtmelidir");

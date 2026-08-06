@@ -1,6 +1,6 @@
 import { Alert } from "@/shared/components";
 
-/** Mock sanal POS test kartları (backend README + ADR-007). Gerçek kart kullanılmaz. */
+/** Mock sanal POS test kartları (backend README +). Gerçek kart kullanılmaz. */
 const TEST_CARDS = [
   { number: "4111 1111 1111 1111", result: "Başarılı ödeme" },
   { number: "4000 0000 0000 0002", result: "Yetersiz bakiye (başarısız)" },

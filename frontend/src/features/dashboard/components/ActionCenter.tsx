@@ -26,7 +26,7 @@ interface ActionRow {
 }
 
 /**
- * Aksiyon Merkezi (ADR-052) — dashboard'ın en operasyonel bölümü: admin'in dokunması gereken açık işler.
+ * Aksiyon Merkezi — dashboard'ın en operasyonel bölümü: admin'in dokunması gereken açık işler.
  * Satırlar ilgili admin ekranına götürür; böylece dashboard yalnızca rapor değil, operasyonu yönlendiren
  * bir merkez olur. Sayaçlar birden fazla durumu kapsadığından (ör. "bekleyen" = Fiyatlandı + Onaylandı)
  * bağlantılar sayfayı **filtresiz** açar — sayaçla eşleşmeyen bir filtre uygulayıp yanıltmayız.

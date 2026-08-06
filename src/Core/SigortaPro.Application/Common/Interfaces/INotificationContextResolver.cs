@@ -1,6 +1,6 @@
 namespace SigortaPro.Application.Common.Interfaces;
 
-// ADR-047: Bildirim kataloğunun "kim yaptı / kimin için" bağlamını çözen yardımcı servis.
+// Bildirim kataloğunun "kim yaptı / kimin için" bağlamını çözen yardımcı servis.
 // Yeni bir audit sistemi DEĞİLDİR — yalnızca mevcut Identity/Customer yapılarını yeniden kullanır.
 public interface INotificationContextResolver
 {

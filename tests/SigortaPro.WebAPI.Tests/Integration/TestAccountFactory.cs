@@ -10,8 +10,8 @@ using SigortaPro.Persistence.Seed;
 namespace SigortaPro.WebAPI.Tests.Integration;
 
 // Entegrasyon testlerinin arrange aşaması: müşteri kaydı HTTP yerine doğrudan MediatR (ISender) üzerinden
-// yapılır. Böylece (1) her test kendi verisini hazırlar (DEVELOPMENT_RULES.md §5.4), (2) auth uçlarındaki
-// IP bazlı rate limit (10 istek/dk — ADR-020) yalnızca fiilen test edilen HTTP çağrılarına harcanır.
+// yapılır. Böylece (1) her test kendi verisini hazırlar, (2) auth uçlarındaki
+// IP bazlı rate limit (10 istek/dk) yalnızca fiilen test edilen HTTP çağrılarına harcanır.
 internal static class TestAccountFactory
 {
     // Identity varsayılan şifre politikasıyla (büyük/küçük harf, rakam, özel karakter) uyumlu test şifresi.
@@ -96,7 +96,7 @@ internal static class TestAccountFactory
         return client;
     }
 
-    /// <summary>Seed edilmiş bir hesapla giriş yapar (ISender — HTTP auth rate-limit bütçesine dokunmaz, ADR-034).</summary>
+    /// <summary>Seed edilmiş bir hesapla giriş yapar (ISender — HTTP auth rate-limit bütçesine dokunmaz).</summary>
     public static async Task<AuthResponse> LoginAsync(
         SigortaProWebApplicationFactory factory, string email, string password)
     {
@@ -110,11 +110,11 @@ internal static class TestAccountFactory
         return result.Value!;
     }
 
-    /// <summary>Seed edilmiş Admin oturumu (ADR-060 Staff API testleri için).</summary>
+    /// <summary>Seed edilmiş Admin oturumu.</summary>
     public static Task<AuthResponse> AdminSessionAsync(SigortaProWebApplicationFactory factory) =>
         LoginAsync(factory, IdentitySeeder.AdminEmail, IdentitySeeder.AdminPassword);
 
-    /// <summary>Seed edilmiş örnek Personel oturumu (ADR-060 — K13).</summary>
+    /// <summary>Seed edilmiş örnek Personel oturumu.</summary>
     public static Task<AuthResponse> StaffSessionAsync(SigortaProWebApplicationFactory factory) =>
         LoginAsync(factory, IdentitySeeder.SampleStaffEmail, IdentitySeeder.SampleStaffPassword);
 

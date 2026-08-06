@@ -87,7 +87,7 @@ export interface ClaimOperation {
 }
 
 /**
- * Operasyon dashboard'ının tüm blokları (backend `DashboardSummaryDto` — ADR-052).
+ * Operasyon dashboard'ının tüm blokları (backend `DashboardSummaryDto`).
  * Oranlar 0..1 ondalıktır; güvenilir hesaplanamayanlar **null** döner.
  */
 export interface DashboardSummary {

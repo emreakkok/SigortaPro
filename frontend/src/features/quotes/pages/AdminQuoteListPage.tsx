@@ -42,7 +42,7 @@ export default function AdminQuoteListPage() {
   const [branch, setBranch] = useState<InsuranceBranch | undefined>(undefined);
   const [createdByMe, setCreatedByMe] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  // ADR-047: bildirimden `?focus=<id>` ile gelindiğinde ilgili teklifin çekmecesi doğrudan açılır.
+  // bildirimden `?focus=<id>` ile gelindiğinde ilgili teklifin çekmecesi doğrudan açılır.
   const [selectedId, setSelectedId] = useFocusedRecord();
 
   const debouncedSearch = useDebounce(searchTerm);

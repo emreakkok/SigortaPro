@@ -16,14 +16,14 @@ public sealed class QuoteConfiguration : BaseEntityConfiguration<Quote>
         builder.Property(q => q.CoveragePackage).IsRequired();
         builder.Property(q => q.TotalPremium).HasColumnType("decimal(18,2)").IsRequired();
 
-        // Yenileme hasar geçmişi çarpanı; mevcut/normal tekliflerde varsayılan 1.00 (ADR-025).
+        // Yenileme hasar geçmişi çarpanı; mevcut/normal tekliflerde varsayılan 1.00.
         builder.Property(q => q.ClaimHistoryFactor)
             .HasColumnType("decimal(18,2)")
             .HasDefaultValue(1.00m)
             .IsRequired();
 
         // Yenileme indirimi çarpanı; yalnızca yenileme tekliflerinde <1.00, aksi halde 1.00 (indirim yok).
-        // Teklifte dondurulur → tarife sonradan değişse bile bu teklifin primi/dökümü değişmez (ADR-048 ailesi).
+        // Teklifte dondurulur → tarife sonradan değişse bile bu teklifin primi/dökümü değişmez.
         builder.Property(q => q.RenewalDiscountFactor)
             .HasColumnType("decimal(18,2)")
             .HasDefaultValue(1.00m)
@@ -52,7 +52,7 @@ public sealed class QuoteConfiguration : BaseEntityConfiguration<Quote>
             .IsRequired(false);
 
         // Acente destekli teklif: teklifi müşteri adına oluşturan personelin AppUser kimliği (nullable).
-        // AppUser Identity katmanındadır ve Quote (Domain) ona navigation ile bağlanmaz (ADR-014) → yalnızca
+        // AppUser Identity katmanındadır ve Quote (Domain) ona navigation ile bağlanmaz → yalnızca
         // skaler kolon tutulur; personelin "kendi oluşturduğu teklifler" filtresi için indekslenir.
         builder.Property(q => q.CreatedByStaffUserId);
 
@@ -60,9 +60,9 @@ public sealed class QuoteConfiguration : BaseEntityConfiguration<Quote>
         builder.HasIndex(q => q.Status).HasDatabaseName("IX_Quotes_Status");
         builder.HasIndex(q => q.CreatedByStaffUserId).HasDatabaseName("IX_Quotes_CreatedByStaffUserId");
 
-        // ADR-041: "Başkası adına" sağlık sigortalısı — Quotes tablosuna gömülü (OwnsOne) nullable kolonlar;
+        // "Başkası adına" sağlık sigortalısı — Quotes tablosuna gömülü (OwnsOne) nullable kolonlar;
         // ayrı tablo/aggregate açılmaz (Address value object emsali). Ham TCKN yalnızca DB'de tutulur,
-        // DTO'larda maskeli döner (CODING_STANDARDS §4.2).
+        // DTO'larda maskeli döner.
         builder.OwnsOne(q => q.InsuredPerson, insured =>
         {
             insured.Property(p => p.FirstName).HasColumnName("InsuredFirstName").HasMaxLength(100);
@@ -73,7 +73,7 @@ public sealed class QuoteConfiguration : BaseEntityConfiguration<Quote>
             insured.Property(p => p.Relationship).HasColumnName("InsuredRelationship").HasMaxLength(50);
         });
 
-        // ADR-053: Fiyatlama girdisi snapshot'ı. Tüm kolonlar nullable — snapshot'sız (eski) kayıtlar
+        // Fiyatlama girdisi snapshot'ı. Tüm kolonlar nullable — snapshot'sız (eski) kayıtlar
         // mevcut davranışı korur. Branşa göre yalnızca ilgili alanlar dolar.
         builder.OwnsOne(q => q.PricingSnapshot, snapshot =>
         {

@@ -1,238 +1,161 @@
 # SigortaPro
 
-Tek acenteli, B2C sigorta poliçe yönetim sistemi (MVP). Müşteriler self-servis teklif alır, karşılaştırır, satın alır, poliçe PDF'ini indirir, hasar bildirir ve yenileme tekliflerini onaylar; acente personeli dashboard, raporlama ve hasar karar süreçlerini yönetir.
+Tek acenteli, B2C sigorta poliçe yönetim sistemi. Müşteriler self-servis olarak teklif alır, teminat paketlerini karşılaştırır, poliçe satın alır, poliçe sertifikası PDF'ini indirir, hasar bildirir ve yenileme tekliflerini onaylar. Acente personeli ise dashboard, raporlama, müşteri/teklif/poliçe yönetimi ve hasar karar süreçlerini yönetir.
 
-## Stack
+## İçindekiler
 
-- **Backend:** ASP.NET Core Web API (.NET 8), EF Core (Code-First), SQL Server, MediatR (CQRS), JWT
-- **Frontend:** React 18 + TypeScript + Vite 8, TanStack Query, Tailwind CSS (bkz. [`frontend/README.md`](frontend/README.md))
-- **Mimari:** Clean Architecture (Domain → Application → Infrastructure/Persistence → WebAPI)
+- [Proje Tanımı](#proje-tanımı)
+- [Kullanılan Teknolojiler](#kullanılan-teknolojiler)
+- [Mimari](#mimari)
+- [Kurulum](#kurulum)
+- [Çalıştırma](#çalıştırma)
+- [Testler](#testler)
+- [Ekran Görüntüleri](#ekran-görüntüleri)
+- [Lisans](#lisans)
 
-## Dokümantasyon
+## Proje Tanımı
 
-| Doküman | İçerik |
-|---------|--------|
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Katman yapısı, domain modeli, modül detayları, test altyapısı |
-| [`API.md`](API.md) | Tüm API uçlarının özeti (yetkiler, parametreler, enum sözleşmesi, durum kodları) |
-| [`PRICING.md`](PRICING.md) | Fiyatlama motoru kuralları (baz primler, çarpanlar, risk skoru) |
-| `docs/ai/DECISIONS.md` | Mimari karar kayıtları, ADR-001…059 (yerel geliştirme dokümanı — `.gitignore` ile repo dışında) |
-| [`frontend/README.md`](frontend/README.md) | SPA kurulumu, klasör yapısı, frontend mimari notları |
+SigortaPro iki ana kullanıcı yüzeyi sunar:
 
-## Proje Yapısı
+- **Müşteri Portalı** — Kayıt/giriş, profil ve risk objesi (araç/konut) yönetimi, çok adımlı teklif sihirbazı (anlık prim + risk skoru + paket karşılaştırma), ödeme ve poliçeleştirme, "Poliçelerim" ve poliçe PDF indirme, hasar bildirimi ve takibi, yenileme tekliflerinin onayı.
+- **Acente Paneli** — Operasyon dashboard'u (KPI'lar, grafikler, raporlar), müşteri/teklif/poliçe/hasar yönetimi, iki taraflı hasar karar akışı, versiyonlanmış fiyatlandırma yönetimi ve personel yönetimi.
+
+Desteklenen branşlar: **Kasko, Trafik, Konut, DASK, Sağlık.**
+
+## Kullanılan Teknolojiler
+
+**Backend**
+
+- ASP.NET Core Web API (.NET 8)
+- Entity Framework Core (Code-First) + SQL Server
+- MediatR (CQRS)
+- ASP.NET Core Identity + JWT kimlik doğrulama
+- FluentValidation, Serilog, QuestPDF (poliçe PDF), SignalR (gerçek zamanlı bildirim)
+
+**Frontend**
+
+- React 18 + TypeScript + Vite
+- TanStack Query, React Hook Form + Zod
+- Tailwind CSS
+
+Ayrıntılı frontend kurulumu ve klasör yapısı için [`frontend/README.md`](frontend/README.md).
+
+## Mimari
+
+Proje Clean Architecture katmanlarıyla düzenlenmiştir; bağımlılıklar içten dışa doğru akar (Domain hiçbir katmana bağımlı değildir).
 
 ```
 SigortaPro/
 ├── src/
 │   ├── Core/
-│   │   ├── SigortaPro.Domain/          ← Entity, enum, domain event, sabitler (sıfır bağımlılık)
-│   │   └── SigortaPro.Application/     ← CQRS, DTO, arayüzler, validasyon
+│   │   ├── SigortaPro.Domain/          # Entity, enum, domain kuralları (sıfır bağımlılık)
+│   │   └── SigortaPro.Application/     # CQRS, DTO, arayüzler, doğrulama
 │   ├── Infrastructure/
-│   │   ├── SigortaPro.Persistence/     ← EF Core, DbContext, repository, migration
-│   │   └── SigortaPro.Infrastructure/  ← PDF, e-posta mock, ödeme mock, JWT token servisi
+│   │   ├── SigortaPro.Persistence/     # EF Core, DbContext, repository, migration
+│   │   └── SigortaPro.Infrastructure/  # PDF, e-posta, ödeme, JWT token servisleri
 │   └── Presentation/
-│       └── SigortaPro.WebAPI/          ← Controller, middleware, DI kompozisyonu
-├── frontend/                           ← React SPA (müşteri portalı + admin paneli)
-├── tests/
-│   ├── SigortaPro.Domain.Tests/
-│   ├── SigortaPro.Application.Tests/
-│   ├── SigortaPro.Infrastructure.Tests/
-│   └── SigortaPro.WebAPI.Tests/
-├── docs/ai/                            ← AI asistan yönerge dokümanları
-├── SigortaPro.sln
-├── Directory.Build.props
-└── .editorconfig
+│       └── SigortaPro.WebAPI/          # Controller, middleware, DI kompozisyonu
+├── frontend/                           # React SPA (müşteri portalı + acente paneli)
+├── tests/                              # Birim + entegrasyon testleri
+├── API.md                              # API uçlarının özeti
+├── ARCHITECTURE.md                     # Katman yapısı ve modül detayları
+├── PRICING.md                          # Fiyatlama motoru kuralları
+└── SigortaPro.sln
 ```
 
-## Gereksinimler
+Katman detayları için [`ARCHITECTURE.md`](ARCHITECTURE.md), tüm API uçlarının özeti için [`API.md`](API.md), fiyatlama kuralları için [`PRICING.md`](PRICING.md).
+
+## Kurulum
+
+### Gereksinimler
 
 - .NET 8 SDK
-- SQL Server Express (geliştirme ortamı — bkz. `appsettings.Development.json`)
-- Node.js 20.19+ veya 22.12+ (frontend — Vite 8 gereksinimi)
+- SQL Server (geliştirme için SQL Server Express yeterlidir)
+- Node.js 20.19+ veya 22.12+ (frontend için)
 
-## Kurulum ve Çalıştırma
+### Bağımlılıklar
 
 ```bash
-# Solution'ı derle
+# Backend bağımlılıkları
+dotnet restore
+
+# Frontend bağımlılıkları
+cd frontend
+npm install
+cd ..
+```
+
+## Çalıştırma
+
+### Backend (API)
+
+```bash
+# Derle
 dotnet build
 
-# Testleri çalıştır
-dotnet test
+# Veritabanı migration'larını uygula
+dotnet ef database update --project src/Infrastructure/SigortaPro.Persistence
 
-# Veritabanı migration'larını uygula (Persistence projesinden)
-cd src/Infrastructure/SigortaPro.Persistence
-dotnet ef database update
-cd ../../..
-
-# API'yi çalıştır (Development ortamında başlangıçta migrate + seed otomatik çalışır)
+# API'yi çalıştır (geliştirme ortamında başlangıçta migrate + seed otomatik çalışır)
 dotnet run --project src/Presentation/SigortaPro.WebAPI
 ```
+
+- API varsayılan olarak `http://localhost:5153` adresinde çalışır.
+- Geliştirme ortamında etkileşimli API dokümantasyonu: `http://localhost:5153/swagger`
+- Sağlık kontrolü: `GET /health`
+
+Bağlantı dizesi `src/Presentation/SigortaPro.WebAPI/appsettings.Development.json` içinde yerel SQL Server Express instance'ını (`.\SQLEXPRESS`) hedefler; kendi ortamınıza göre düzenleyebilirsiniz. JWT imzalama anahtarı geliştirmede bir placeholder'dır; yerel çalıştırmadan önce en az 32 karakterlik bir değerle (örneğin `dotnet user-secrets` ile) sağlayın. Üretimde imzalama anahtarı ve bağlantı dizesi ortam değişkeni / secret store ile verilmelidir.
 
 ### Frontend (React SPA)
 
 ```bash
 cd frontend
-npm install
 cp .env.example .env    # varsayılan: VITE_API_BASE_URL=http://localhost:5153/api/v1
-npm run dev             # http://localhost:5173 (backend CORS bu origin'e açık)
-npm run build           # prodüksiyon derlemesi (tsc + vite → dist/)
+npm run dev             # http://localhost:5173
+npm run build           # prodüksiyon derlemesi (dist/)
 ```
 
-Detaylı kurulum, klasör yapısı ve mimari notlar için bkz. [`frontend/README.md`](frontend/README.md).
+### Geliştirme Seed Kullanıcıları
 
-> **Not:** Development connection string `appsettings.Development.json` içinde yerel SQL Server Express instance'ını (`.\SQLEXPRESS`) hedefler; kendi ortamınıza göre düzenleyebilir veya `SIGORTAPRO_DESIGN_CONNECTION` ortam değişkeniyle geçersiz kılabilirsiniz. `dotnet run` Development ortamında `Database.MigrateAsync()` + `DbSeeder` + `IdentitySeeder` çağırır; ilk çalıştırmada veritabanı, ürünler, örnek müşteri, roller ve seed kullanıcıları otomatik oluşur.
->
-> JWT imzalama anahtarı Development'ta `appsettings.Development.json > JwtSettings:SecretKey` içinde bir **placeholder**'dır; yerel çalıştırmadan önce en az 32 karakterlik bir değerle değiştirin (ör. `dotnet user-secrets`). **Üretimde** `appsettings.json`'daki `SecretKey` boştur ve deploy sırasında ortam değişkeni / user-secrets ile sağlanmalıdır (boşsa uygulama başlangıçta hata verir — fail-fast).
-
-### E-posta / SMTP Yapılandırması (Task 23)
-
-Şifre sıfırlama e-postaları `EmailSettings` bölümünden yapılandırılır. **Gerçek SMTP kullanıcı adı/parola `appsettings*.json` dosyalarına YAZILMAZ** — `appsettings.json` yalnızca boş placeholder yapısını, `appsettings.Development.json` yalnızca hassas olmayan alanları (host/port/`ResetPasswordBaseUrl`) taşır. Kimlik bilgileri geliştirmede `dotnet user-secrets`, üretimde ortam değişkeni/secret store ile sağlanır (ADR-035).
-
-Gmail App Password ile yerel geliştirme kurulumu (WebAPI projesinden; gerçek değerleri kendiniz girin, placeholder'ları değiştirin):
-
-```bash
-cd src/Presentation/SigortaPro.WebAPI
-dotnet user-secrets set "EmailSettings:Username" "YOUR_GMAIL_ADDRESS"
-dotnet user-secrets set "EmailSettings:Password" "YOUR_GMAIL_APP_PASSWORD"
-dotnet user-secrets set "EmailSettings:FromEmail" "YOUR_GMAIL_ADDRESS"
-cd ../../..
-```
-
-> Gmail App Password, hesabınızda 2 adımlı doğrulama açıkken **Google Hesabı → Güvenlik → Uygulama Şifreleri** üzerinden üretilir (normal hesap şifreniz değildir, 16 hanelidir). SMTP host/port/`ResetPasswordBaseUrl` gibi hassas olmayan alanlar `appsettings.Development.json`'da tanımlıdır; yalnızca `Username`/`Password`/`FromEmail` user-secrets'tan okunur. `ResetPasswordBaseUrl` (varsayılan `http://localhost:5173`), e-postadaki bağlantının işaret ettiği SPA adresidir. **Token, parola veya bağlantı hiçbir log kaydına yazılmaz.**
->
-> **User-secrets yalnızca Development ortamında yüklenir** (`WebApplication.CreateBuilder` davranışı); dolayısıyla gerçek SMTP kimlik bilgileri yalnızca `dotnet run` ile Development ortamında etkindir. SMTP yapılandırılmadıysa (host/kullanıcı boş) sıfırlama e-postası gönderilemez; bu durumda uç yine **generic `200`** döner ve hata yalnızca loglanır (kullanıcıya sızdırılmaz).
->
-> ### Testlerde e-posta gönderimi devre dışıdır
->
-> **Hiçbir otomatik test gerçek SMTP kullanmaz ve internete çıkmaz.** Entegrasyon/`WebApplicationFactory` test host'u ("Testing" ortamı), gerçek `SmtpEmailService` yerine no-op **`NullEmailService`** enjekte eder (`SigortaProWebApplicationFactory.ReplaceEmailServiceWithNull`); ayrıca "Testing" ortamında user-secrets yüklenmez. Birim testler zaten `IEmailService`/`IPasswordResetNotifier`'ı mock'lar. Böylece `dotnet test` sırasında rastgele/gerçek e-posta adreslerine **mail gönderilmesi imkânsızdır**. Gerçek SMTP yalnızca siz Development'ta Şifremi Unuttum ekranından kendi adresinizi girerek manuel test yaptığınızda çalışır.
-
-## Ekran Görüntüleri
-
-> Yer tutucular — görüntüler `docs/screenshots/` altına eklendiğinde otomatik görünür.
-
-| Müşteri Portalı | Admin Paneli |
-|-----------------|--------------|
-| ![Teklif sihirbazı — anlık prim + paket karşılaştırma](docs/screenshots/quote-wizard.png) | ![Admin dashboard — KPI kartları + grafikler](docs/screenshots/admin-dashboard.png) |
-| ![Ödeme sayfası — taksit seçimi + test kartları](docs/screenshots/purchase.png) | ![Hasar yönetimi — karar akışı + zaman çizelgesi](docs/screenshots/admin-claims.png) |
-| ![Poliçelerim — durum sekmeleri + PDF indirme](docs/screenshots/policies.png) | ![Müşteri yönetimi — arama + detay çekmecesi](docs/screenshots/admin-customers.png) |
-
-## Testler (Task 21)
-
-```bash
-dotnet test                 # tüm paket: 317 test (MVP 263 + Post-MVP 54: şifre akışları, kataloglar, arama, bildirim merkezi, sigortalı)
-```
-
-- **Birim testler** — `tests/SigortaPro.{Domain,Application,Infrastructure}.Tests`: fiyatlama motoru kural senaryoları, domain durum makineleri (Quote/Policy/Claim/Payment/Renewal), handler/validator/pipeline testleri (xUnit + FluentAssertions + NSubstitute).
-- **Entegrasyon testleri** — `tests/SigortaPro.WebAPI.Tests/Integration`: `WebApplicationFactory` + **SQLite in-memory** ile gerçek HTTP pipeline (middleware → JWT → MediatR → EF Core → Identity) test edilir; **hiçbir dış bağımlılık gerekmez** (SQL Server/Docker kurulumu olmadan çalışır). Kapsam: auth akışı (register → login → refresh rotasyonu + negatifler), teklif→satın alma akışı (teklif → onay → mock POS → aktif poliçe; 402/409/403 senaryoları), **şifre sıfırlama akışı** (Task 23 — `forgot-password` generic 200, `reset-password` gerçek Identity token'ıyla şifre değişimi) **araç kataloğu** (Task 24 — `GET /vehicle-catalog` gömülü JSON'dan 200 + markalar, yetkisiz 401) ve **il kataloğu** (`GET /city-catalog` anonim 200 + 81 il — ADR-039). Tasarım kararları için bkz. ADR-034…039.
-
-> **Tüm API uçlarının derli toplu özeti** (müşteri/teklif uçları dahil, yetki ve parametreleriyle) için bkz. [`API.md`](API.md); canlı şema dokümantasyonu için Development'ta Swagger (`/swagger`). Aşağıdaki bölümler öne çıkan akışların bağlamlı özetidir.
-
-## Kimlik Doğrulama Endpoint'leri (Task 5)
-
-| Metot | Endpoint | Açıklama |
-|-------|----------|----------|
-| `POST` | `/api/v1/auth/register` | Müşteri kaydı (Customer profili ile birlikte) — access + refresh token döner |
-| `POST` | `/api/v1/auth/login` | Giriş — access + refresh token döner |
-| `POST` | `/api/v1/auth/refresh-token` | Refresh token ile yeni access + refresh token (rotasyonlu) |
-| `POST` | `/api/v1/auth/forgot-password` | Şifre sıfırlama talebi — kayıtlı e-postaya bağlantı gönderir (Task 23) |
-| `POST` | `/api/v1/auth/reset-password` | Token + yeni şifre ile şifreyi günceller (Task 23) |
-| `POST` | `/api/v1/auth/change-password` | Oturum sahibi, mevcut şifresini doğrulayarak şifresini değiştirir (ADR-040) |
-
-Access token 15 dakika, refresh token 7 gün geçerlidir; token yenilendiğinde eski refresh token iptal edilir. Kimlik doğrulama uçları rate limit ile korunur (IP başına dakikada 10 istek; aşımda `429`).
-
-**Şifre sıfırlama (Task 23, ADR-035):** `forgot-password`, güvenlik gereği e-posta kayıtlı olsun ya da olmasın **her zaman aynı generic `200`** yanıtını döner (kullanıcı varlığı sızdırılmaz). Reset token'ı ASP.NET Core Identity'nin `DataProtectorTokenProvider`'ıyla üretilir ve **1 saat** geçerlidir. E-posta, sağlayıcıdan bağımsız `IEmailService` (MVP: SMTP/MailKit) üzerinden gönderilir; SMTP yapılandırması aşağıdaki gibi sağlanır (bkz. [E-posta / SMTP Yapılandırması](#e-posta--smtp-yapılandırması-task-23)).
-
-## API Altyapısı (Task 6)
-
-- **Swagger/OpenAPI:** Development ortamında `GET /swagger` (JWT "Authorize" desteğiyle). API çalışırken ör. `http://localhost:5153/swagger`.
-- **Health check:** `GET /health` — veritabanı bağlantısını kontrol eden JSON yanıt (`{"status":"Healthy",...}`).
-- **Hata formatı:** Tüm hatalar RFC 7807 `ProblemDetails` (`application/problem+json`) olarak döner; her yanıtta `traceId` ve `correlationId` bulunur.
-- **Loglama:** Serilog ile console + günlük rolling dosya (`logs/sigortapro-.log`, 7 gün saklanır — `.gitignore` ile hariç). Her istek `X-Correlation-ID` header'ıyla ilişkilendirilir (gelen header korunur, yoksa üretilir).
-- **CORS:** `appsettings.json > Cors:AllowedOrigins` (varsayılan Vite dev sunucusu `http://localhost:5173`).
-- **Güvenlik header'ları:** `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`; HSTS yalnızca üretimde.
-
-### Seed Test Kullanıcıları (yalnızca geliştirme)
+İlk çalıştırmada aşağıdaki örnek hesaplar oluşturulur (yalnızca geliştirme; üretimde kullanılmamalıdır):
 
 | Rol | E-posta | Şifre |
 |-----|---------|-------|
 | Admin | `admin@sigortapro.com` | `Admin!2345` |
 | Personel | `personel@sigortapro.com` | `Personel!2345` |
-| Customer | `musteri@sigortapro.com` | `Musteri!2345` |
+| Müşteri | `musteri@sigortapro.com` | `Musteri!2345` |
 
-> ⚠️ Bu kimlik bilgileri yalnızca geliştirme seed'i içindir; üretimde kullanılmamalıdır.
+### Test Ödeme Kartları
 
-### Mock Sanal POS Test Kartları (yalnızca geliştirme)
-
-Ödeme akışı (`POST /api/v1/payments`) gerçek POS yerine `MockVirtualPosService` kullanır (ADR-007). Kart numarası Luhn ile doğrulanır; aşağıdaki senaryo kartları belirli sonuçlar üretir. Kart numarası **asla** tam saklanmaz (yalnızca son 4 hane).
+Ödeme akışı, geliştirme ortamında gerçek POS yerine bir simülasyon kullanır. Kart numarası Luhn ile doğrulanır ve yalnızca son 4 hane saklanır.
 
 | Kart Numarası | Sonuç |
 |---------------|-------|
-| `4111 1111 1111 1111` (veya Luhn-geçerli diğer kartlar) | Başarılı ödeme → poliçe oluşur |
-| `4000 0000 0000 0002` | Başarısız — "Yetersiz bakiye." (402) |
-| `4000 0000 0000 0069` | Başarısız — "3D Secure doğrulaması başarısız." (402) |
-| Luhn-geçersiz numara | Başarısız — "Geçersiz kart numarası." (402) |
+| `4111 1111 1111 1111` | Başarılı ödeme → poliçe oluşur |
+| `4000 0000 0000 0002` | Başarısız — yetersiz bakiye |
+| `4000 0000 0000 0069` | Başarısız — 3D Secure doğrulaması başarısız |
 
-> İzin verilen taksit sayıları: **1, 3, 6, 9, 12** (faizsiz mock; toplam tutar sabit).
+İzin verilen taksit sayıları: 1, 3, 6, 9, 12.
 
-## Ödeme & Poliçe Endpoint'leri (Task 10, 11, 18)
+## Testler
 
-| Metot | Endpoint | Açıklama | Yetki |
-|-------|----------|----------|-------|
-| `POST` | `/api/v1/payments` | Onaylanmış teklifi mock POS ile satın al → ödeme + aktif poliçe (başarısızsa `402`) | `Customer` |
-| `GET` | `/api/v1/payments` | Ödeme geçmişi (sayfalı; maskeli kart) | `Customer` |
-| `GET` | `/api/v1/payments/installment-options?quoteId=` | Onaylanmış teklifin taksit seçenekleri | `Customer` |
-| `GET` | `/api/v1/policies` | **Poliçelerim**: müşterinin poliçeleri (sayfalı + durum filtresi) — Task 18 | `Customer` |
-| `GET` | `/api/v1/policies/{id}` | Poliçe detayı (teminat tablosu ile) — Task 18 | Sahip müşteri / personel |
-| `GET` | `/api/v1/policies/{id}/document` | Poliçe sertifikası PDF'i (ilk erişimde üretilir) | Sahip müşteri / personel |
+```bash
+dotnet test        # tüm birim ve entegrasyon testleri
+```
 
-> `GET /policies` ve `GET /policies/{id}` **salt okunur, additive** uçlardır (Task 18, ADR-031); mevcut hiçbir uç/DTO/şema değişmemiştir (migration yok).
+- **Birim testleri** — fiyatlama motoru kuralları, domain durum makineleri (teklif/poliçe/hasar/ödeme/yenileme), handler ve doğrulama testleri (xUnit + FluentAssertions + NSubstitute).
+- **Entegrasyon testleri** — gerçek HTTP pipeline'ı (middleware → JWT → MediatR → EF Core → Identity) **SQLite in-memory** ile test edilir; SQL Server veya Docker kurulumu gerekmez.
 
-## Hasar (Claim) Endpoint'leri (Task 12)
+## Ekran Görüntüleri
 
-İki taraflı hasar süreci: müşteri bildirir, acente personeli (Admin/Personel) inceleyip karara bağlar; **ödeme yalnızca Admin tarafından** yapılır (ADR-060 — görevler ayrılığı). Hasar durum makinesi: `Submitted → UnderReview → Approved/Rejected → Paid`.
+> Ekran görüntüleri `docs/screenshots/` klasörüne eklendiğinde burada görünecektir.
 
-| Metot | Endpoint | Açıklama | Yetki |
-|-------|----------|----------|-------|
-| `POST` | `/api/v1/claims` | Hasar bildirimi (aktif poliçe + dönem içi olay + tahmini tutar + mock foto) | `Customer` |
-| `GET` | `/api/v1/claims` | Hasar listesi (müşteri kendi / personel tümü; durum/poliçe filtresi + sayfalama) | Kimliği doğrulanmış |
-| `GET` | `/api/v1/claims/{id}` | Hasar detayı (sahiplik kontrollü) | Sahip müşteri / personel |
-| `POST` | `/api/v1/claims/{id}/start-review` | İncelemeye al (Submitted → UnderReview) | `Admin`, `Personel` |
-| `POST` | `/api/v1/claims/{id}/approve` | Onayla (→ Approved; onay tutarı + değerlendirme notu) | `Admin`, `Personel` |
-| `POST` | `/api/v1/claims/{id}/reject` | Reddet (→ Rejected; gerekçe) | `Admin`, `Personel` |
-| `POST` | `/api/v1/claims/{id}/pay` | Ödeme yap (Approved → Paid) | **Yalnızca `Admin`** (ADR-060) |
+| Müşteri Portalı | Acente Paneli |
+|-----------------|---------------|
+| Teklif sihirbazı | Dashboard |
+| Ödeme ekranı | Hasar yönetimi |
+| Poliçelerim | Fiyatlandırma yönetimi |
 
-> **Not:** Hasar yalnızca **aktif** poliçeye ve poliçe **dönemi içindeki** (gelecekte olmayan) bir olaya açılabilir; aksi halde `409` döner. **Foto yükleme mock'tur:** yüklenen dosya adları doğrulanır (`.jpg/.jpeg/.png/.pdf`, en fazla 10) ancak saklanmaz — gerçek hasar fotoğraf depolama MVP kapsamı dışıdır. Onaylanan/ödenen hasarların sayısı, ileride yenileme fiyatlamasına (Task 13) beslenmek üzere repository seviyesinde erişilebilir.
+## Lisans
 
-## Poliçe Yenileme (Renewal) Endpoint'leri (Task 13)
-
-Bir arkaplan servisi (`PolicyLifecycleBackgroundService`) uygulama açılışında ve periyodik olarak (6 saat) çalışır: süresi geçen teklif/poliçeleri `Expired`'a çeker ve bitişine **≤30 gün** kalan poliçeler için otomatik yenileme teklifi üretir (güncel fiyatlama + **hasar geçmişi çarpanı** — bkz. [`PRICING.md`](PRICING.md) §6.1). Üretilen teklif için müşteriye mock bildirim (log) gönderilir.
-
-| Metot | Endpoint | Açıklama | Yetki |
-|-------|----------|----------|-------|
-| `GET` | `/api/v1/renewals` | Müşterinin yenileme teklifleri (sayfalı) | `Customer` |
-| `POST` | `/api/v1/renewals/{id}/accept` | Yenilemeyi onayla → yeni teklif `Approved` olur (ödemeye hazır) | `Customer` |
-
-> **Not:** Yenileme onaylandıktan sonra ödeme ve yeni dönem poliçesi oluşturma **mevcut** ödeme akışıyla (`POST /api/v1/payments`) yürür — yenileme için ayrı bir ödeme ucu yoktur. Hasarlı müşterinin yenileme primi, önceki dönem hasar geçmişine göre artar (her `Approved`/`Paid` hasar +%20, tavan +%60).
-
-## Admin Dashboard & Raporlama Endpoint'leri (Task 14)
-
-Acente personeli (Admin/Personel) için admin panelinin veri kaynağı. Tüm uçlar **salt okunur** ve `[Authorize(Roles = Staff)]` ile korunur; metrikler SQL tarafı agregasyonla (projection + `AsNoTracking`) üretilir (bkz. ADR-026 — `docs/ai/DECISIONS.md`, yerel).
-
-| Metot | Endpoint | Açıklama | Yetki |
-|-------|----------|----------|-------|
-| `GET` | `/api/v1/dashboard/summary` | Özet metrikler: prim üretimi, aktif poliçe, bekleyen teklif/hasar, yenileme oranı, hasar/prim oranı, aylık satış trendi (son 12 ay), branş dağılımı | `Staff` |
-| `GET` | `/api/v1/dashboard/reports/policies?from=&to=&page=&pageSize=` | Tarih aralıklı poliçe raporu (başlangıç tarihine göre, sayfalı) | `Staff` |
-| `GET` | `/api/v1/dashboard/reports/payments?from=&to=&page=&pageSize=` | Tarih aralıklı ödeme/ciro raporu (işlem tarihine göre, sayfalı) | **Yalnızca `Admin`** (ADR-060) |
-| `GET` | `/api/v1/dashboard/reports/riskiest-customers?top=` | En riskli müşteri segmentleri (hasar sayısına göre ilk N) | **Yalnızca `Admin`** (ADR-062) |
-
-> **Not:** Oranlar 0–1 aralığında ondalık döner (frontend biçimlendirir): yenileme oranı = onaylanan/sunulan yenileme; hasar/prim oranı = ödenen hasar tutarı/üretilen prim. Rapor uçlarında `from`/`to` **dahil** (inclusive) tarih aralığıdır ve `to`, `from`'dan önce olamaz (`400`).
-
-## Durum
-
-**MVP tamamlandı** — tüm fazlar (FAZ 0–3, Task 1–22) teslim edilmiştir:
-
-- **FAZ 0 — Temel & İskelet (Task 1–6):** Clean Architecture solution'ı, domain modeli, CQRS omurgası, EF Core + SQL Server, JWT + Identity kimlik doğrulama, cross-cutting API altyapısı (RFC 7807 hata zarfı, Serilog, CORS, Swagger, rate limiting, güvenlik header'ları, health check).
-- **FAZ 1 — Çekirdek İş Modülleri (Task 7–14):** Müşteri & profil, kural tabanlı mock fiyatlama motoru, teklif (durum makinesi + paket karşılaştırma), mock POS ödeme + poliçeleştirme, QuestPDF poliçe sertifikası, iki taraflı hasar süreci, otomatik poliçe yenileme (arkaplan servisi + hasar geçmişi çarpanı), admin dashboard & raporlama API'si.
-- **FAZ 2 — Frontend (Task 15–20):** React SPA — oturum akışı, profil + risk objesi yönetimi, çok adımlı teklif sihirbazı (anlık prim + risk skoru + paket karşılaştırma), ödeme sayfası + başarı ekranı, Poliçelerim (PDF indirme), hasar bildirim/takip, yenileme onayı ve tam admin paneli (dashboard grafikleri + yönetim ekranları + hasar karar akışı). Seed kullanıcılarıyla giriş yapılabilir (yukarıdaki tablo).
-- **FAZ 3 — Kalite & Teslim (Task 21–22):** 263 testlik yeşil paket (birim + WebApplicationFactory/SQLite entegrasyon testleri) ve dokümantasyon finali ([`ARCHITECTURE.md`](ARCHITECTURE.md), [`API.md`](API.md), bu README).
-
-Bilinçli MVP sınırları (gerçek POS/e-posta/foto depolama entegrasyonları mock'tur) ve gelecek faz adayları için bkz. `docs/ai/PROJECT_CONTEXT.md` §9 (yerel) ve [`ARCHITECTURE.md`](ARCHITECTURE.md).
+© 2026 SigortaPro. Tüm hakları saklıdır.

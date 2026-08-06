@@ -3,7 +3,7 @@ using SigortaPro.WebAPI.Extensions;
 
 namespace SigortaPro.WebAPI.Middleware;
 
-// Her isteğe bir korelasyon kimliği atar (ADR-011). Gelen "X-Correlation-ID" header'ı varsa korunur, yoksa üretilir.
+// Her isteğe bir korelasyon kimliği atar. Gelen "X-Correlation-ID" header'ı varsa korunur, yoksa üretilir.
 // Kimlik hem yanıt header'ına eklenir hem de Serilog LogContext'e basılır; böylece isteğe ait tüm loglar aynı kimlikle etiketlenir.
 public sealed class CorrelationIdMiddleware
 {

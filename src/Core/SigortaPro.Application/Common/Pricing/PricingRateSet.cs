@@ -3,7 +3,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Common.Pricing;
 
-// ADR-048: Fiyatlama motoruna dışarıdan verilen tarife (branş → baz prim + ticari kaldıraç seti). Bir
+// Fiyatlama motoruna dışarıdan verilen tarife (branş → baz prim + ticari kaldıraç seti). Bir
 // `PricingVersion`'ın salt okunur görünümüdür; motor saf/deterministik kalmaya devam eder (girdi ne ise çıktı odur).
 // `null` geçildiğinde motor yerleşik baseline tarifeyi kullanır → bu alan eklenmeden önceki davranış birebir
 // korunur (eski teklifler bit-aynı yeniden hesaplanır). RuleSet (paket/şehir/yenileme katsayıları) opsiyoneldir:

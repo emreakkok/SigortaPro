@@ -5,7 +5,7 @@ import { formatMultiplier, formatMultiplierEffect } from "@/shared/utils/format"
 /**
  * Prim dökümü: her risk faktörünün prime etkisi (fiyatlama şeffaflığı). Çıplak "×1,25" değeri
  * kullanıcı için anlamlı olmadığından etki, "+%25 ek prim" / "−%10 indirim" diline çevrilir ve
- * artış/indirim renkle ayrıştırılır (ADR-039 — yalnızca sunum; hesaplama backend'dedir).
+ * artış/indirim renkle ayrıştırılır.
  */
 export function PremiumBreakdownList({ items }: { items: PricingBreakdownItem[] }) {
   return (

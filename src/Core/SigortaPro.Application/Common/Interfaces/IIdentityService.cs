@@ -3,7 +3,7 @@ using SigortaPro.Application.Common.Models;
 namespace SigortaPro.Application.Common.Interfaces;
 
 // Kullanıcı/kimlik işlemlerinin Application soyutlaması. Implementasyonu Persistence katmanında
-// UserManager<AppUser> kullanılarak sağlanır (ADR-014, ARCHITECTURE_RULES.md §6.1).
+// UserManager<AppUser> kullanılarak sağlanır.
 // Identity tipleri (AppUser vb.) bu arayüzün dışına sızmaz; yalnızca primitif değerler/DTO'lar taşınır.
 public interface IIdentityService
 {
@@ -19,7 +19,7 @@ public interface IIdentityService
 
     Task<IdentityUserInfo?> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
-    // Şifre sıfırlama token'ı üretir (ASP.NET Core Identity DataProtectorTokenProvider — ADR-035).
+    // Şifre sıfırlama token'ı üretir (ASP.NET Core Identity DataProtectorTokenProvider).
     // Kullanıcı bulunamazsa null döner (varlık sızdırmamak için çağıran katman bunu sessizce ele alır).
     Task<string?> GeneratePasswordResetTokenAsync(string email, CancellationToken cancellationToken = default);
 
@@ -27,15 +27,15 @@ public interface IIdentityService
     // (hangisinin hatalı olduğu bilgisi sızdırılmaz — güvenlik).
     Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken = default);
 
-    // Oturum sahibinin şifresini mevcut şifre doğrulamasıyla değiştirir (ADR-040). Kullanıcı yoksa veya
+    // Oturum sahibinin şifresini mevcut şifre doğrulamasıyla değiştirir. Kullanıcı yoksa veya
     // mevcut şifre yanlışsa false döner (hangisinin hatalı olduğu sızdırılmaz).
     Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
 
-    // Verilen roldeki kullanıcıların Id'lerini döner (ADR-042 — kalıcı bildirim fan-out'u için;
+    // Verilen roldeki kullanıcıların Id'lerini döner (— kalıcı bildirim fan-out'u için;
     // staff kitlesi Admin ∪ Personel olarak çağıran tarafça birleştirilir).
     Task<IReadOnlyList<Guid>> GetUserIdsInRoleAsync(string role, CancellationToken cancellationToken = default);
 
-    // ── ADR-060: Personel (staff) yaşam döngüsü ────────────────────────────────────────────────
+    // ── Personel (staff) yaşam döngüsü ────────────────────────────────────────────────
     // Yalnızca `Personel` rolündeki kullanıcıları döner (Admin'ler listeye dahil edilmez). Filtreleme
     // ve sayfalama çağıran handler'da yapılır (MVP ölçeğinde personel sayısı düşük).
     Task<IReadOnlyList<StaffUserInfo>> GetStaffUsersAsync(CancellationToken cancellationToken = default);

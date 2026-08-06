@@ -20,7 +20,7 @@ import { getApiErrorMessages } from "@/shared/lib/apiError";
 import type { AdminPageSize } from "@/shared/lib/pagination";
 import { formatDate } from "@/shared/utils/format";
 
-/** Müşteri yönetimi: arama (ad/soyad/TCKN/e-posta/telefon — ADR-040) + il filtresi + tablo + detay çekmecesi. */
+/** Müşteri yönetimi: arama (ad/soyad/TCKN/e-posta/telefon) + il filtresi + tablo + detay çekmecesi. */
 export default function AdminCustomerListPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useAdminPageSize();

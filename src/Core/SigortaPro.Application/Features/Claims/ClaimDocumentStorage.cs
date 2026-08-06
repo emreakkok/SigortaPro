@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace SigortaPro.Application.Features.Claims;
 
-// Hasar belgesi depolama anahtarı kuralı (ADR-023 — IFileStorageService ile ortak). Anahtar göreli tutulur;
+// Hasar belgesi depolama anahtarı kuralı. Anahtar göreli tutulur;
 // yerel disk veya blob implementasyonu aynı anahtarı kullanır. Hasar bazında klasörlenir.
 internal static class ClaimDocumentStorage
 {

@@ -9,8 +9,8 @@ import {
 } from "@/shared/components";
 
 /*
- * Olay türü → ikon (ADR-047). Bildirim merkezinde/zilde olayın ne olduğu bir bakışta anlaşılır.
- * Mevcut el yazımı ikon seti kullanılır (ADR-027); yeni ikon kütüphanesi eklenmez.
+ * Olay türü → ikon. Bildirim merkezinde/zilde olayın ne olduğu bir bakışta anlaşılır.
+ * Mevcut el yazımı ikon seti kullanılır; yeni ikon kütüphanesi eklenmez.
  */
 export function notificationIcon(type: string): ReactNode {
   switch (type) {

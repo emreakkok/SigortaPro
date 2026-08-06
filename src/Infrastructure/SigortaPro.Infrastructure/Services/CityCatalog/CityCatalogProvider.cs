@@ -5,9 +5,9 @@ using SigortaPro.Application.Features.Cities.DTOs;
 
 namespace SigortaPro.Infrastructure.Services.CityCatalog;
 
-// ADR-037: İl kataloğu, harici API veya yeni tablo yerine Infrastructure'da gömülü JSON kaynağından okunur.
+// İl kataloğu, harici API veya yeni tablo yerine Infrastructure'da gömülü JSON kaynağından okunur.
 // Veri bir defa (thread-safe, Lazy) yüklenip In-Memory cache'lenir → sonraki çağrılar diske/kaynağa gitmez.
-// DI: Singleton (ARCHITECTURE_RULES.md §6.2). VehicleCatalogProvider (ADR-036) deseninin birebir izidir.
+// DI: Singleton. VehicleCatalogProvider deseninin birebir izidir.
 public sealed class CityCatalogProvider : ICityCatalogProvider
 {
     private const string ResourceFileName = "city-catalog.json";

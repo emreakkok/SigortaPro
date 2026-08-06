@@ -6,9 +6,9 @@ namespace SigortaPro.Application.Features.Quotes.Commands.CreateQuote;
 
 // Oturum sahibi müşteri, branş + risk objesi + teminat paketi seçerek teklif oluşturur.
 // Fiyatlama motoru çağrılır ve teklif Priced durumunda (geçerlilik süresiyle) döner.
-// InsuredPerson (ADR-041, additive): Sağlıkta "başkası adına" teklif için sigortalı beyanı;
+// InsuredPerson: Sağlıkta "başkası adına" teklif için sigortalı beyanı;
 // null = poliçe sahibi kendisi. Sağlık dışı branşlarda gönderilirse 409 (domain guard).
-// IsSmoker (ADR-054, additive): SAĞLIK branşında sigortalanan kişinin sigara kullanım BEYANI.
+// IsSmoker: SAĞLIK branşında sigortalanan kişinin sigara kullanım BEYANI.
 // Sağlıkta zorunludur (varsayılan atanmaz — önceden sessizce "false" varsayılıyor ve fiyat yanlış
 // hesaplanıyordu). Sağlık dışı branşlarda gönderilmez/yok sayılır. Yalnızca fiyatlama amacıyla kullanılır;
 // bildirimlere, aktivite akışına veya admin listelerine taşınmaz (KVKK — veri minimizasyonu).
@@ -25,8 +25,7 @@ public sealed record CreateQuoteCommand(
     Guid? CustomerId = null) : ICommand<QuoteDto>;
 
 // Sigortalı beyanı (gerçek akış: sigorta ettiren ≠ sigortalı). Kimlik/iletişim bilgileri poliçe
-// sahibinin beyanıdır; sistemdeki diğer müşterilerle eşleştirilmez/aranmaz (kaynak sahipliği/KVKK —
-// PROJECT_CONTEXT §3.2, ADR-041).
+// sahibinin beyanıdır; sistemdeki diğer müşterilerle eşleştirilmez/aranmaz (kaynak sahipliği/KVKK).
 public sealed record InsuredPersonInput(
     string FirstName,
     string LastName,

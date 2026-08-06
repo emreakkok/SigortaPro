@@ -51,7 +51,7 @@ public class ForgotPasswordCommandHandlerTests
     [Fact]
     public async Task Handle_Should_ReturnSuccess_When_EmailDeliveryFails()
     {
-        // SMTP hatası kullanıcıya sızdırılmaz; akış yine generic başarı döner (ADR-035).
+        // SMTP hatası kullanıcıya sızdırılmaz; akış yine generic başarı döner.
         _identityService.GeneratePasswordResetTokenAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("reset-token");
         _passwordResetNotifier.SendResetLinkAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())

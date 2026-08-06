@@ -64,7 +64,7 @@ export function useUpdateStaff() {
 
 /**
  * Personeli aktif/pasif yapar. Başarıda liste + detay tazelenir. Toplu token iptali backend'de
- * yapılır (ADR-061) — frontend yalnızca durum değişimini tetikler ve sonucu bildirir.
+ * yapılır — frontend yalnızca durum değişimini tetikler ve sonucu bildirir.
  */
 export function useSetStaffStatus() {
   const queryClient = useQueryClient();

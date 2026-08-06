@@ -5,7 +5,7 @@ using SigortaPro.Application.Common.Models;
 
 namespace SigortaPro.Application.Features.Auth.Commands.ForgotPassword;
 
-// Güvenlik ilkeleri (ADR-035):
+// Güvenlik ilkeleri:
 //  - Kullanıcı varlığı hiçbir şekilde sızdırılmaz: e-posta kayıtlı olsun ya da olmasın sonuç aynıdır (Success).
 //  - SMTP gönderimi başarısız olsa bile kullanıcıya hata dönmez; yalnızca loglanır (tiplenmiş EmailDeliveryException).
 //  - Reset token'ı ve link hiçbir log kaydına yazılmaz.

@@ -1,4 +1,4 @@
-/** Telefon formatı (CODING_STANDARDS.md §6.2): +90 prefiksi + 10 hane. */
+/** Telefon formatı: +90 prefiksi + 10 hane. */
 export const TURKISH_PHONE_REGEX = /^\+90\d{10}$/;
 
 /**

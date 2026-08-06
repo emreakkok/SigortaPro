@@ -59,7 +59,7 @@ export interface Quote {
   riskObject: QuoteRiskObject;
   coverages: QuoteCoverage[];
   premiumBreakdown: PricingBreakdownItem[];
-  /** Sağlıkta "başkası adına" teklifte sigortalı özeti (ADR-041); kendisi için null. */
+  /** Sağlıkta "başkası adına" teklifte sigortalı özeti; kendisi için null. */
   insuredPerson?: QuoteInsuredPerson | null;
   /** Müşteri (Sigorta Ettiren) kimliği — admin detayında ad + telefon özeti (additive). */
   customerFullName?: string;
@@ -78,7 +78,7 @@ export interface QuoteInsuredPerson {
   relationship: string;
 }
 
-/** Sigortalı beyanı (backend `InsuredPersonInput` — ADR-041). */
+/** Sigortalı beyanı (backend `InsuredPersonInput`). */
 export interface InsuredPersonRequest {
   firstName: string;
   lastName: string;
@@ -113,9 +113,9 @@ export interface CreateQuoteRequest {
   vehicleId: string | null;
   propertyId: string | null;
   coveragePackage: CoveragePackage;
-  /** Sağlıkta "başkası adına" sigortalı beyanı (ADR-041); kendisi için gönderilmez. */
+  /** Sağlıkta "başkası adına" sigortalı beyanı; kendisi için gönderilmez. */
   insuredPerson?: InsuredPersonRequest | null;
-  /** Sağlıkta sigara kullanım beyanı (ADR-054) — zorunlu; diğer branşlarda gönderilmez. */
+  /** Sağlıkta sigara kullanım beyanı — zorunlu; diğer branşlarda gönderilmez. */
   isSmoker?: boolean | null;
 }
 
@@ -136,10 +136,10 @@ export interface QuoteComparisonParams {
   branch: InsuranceBranch;
   vehicleId?: string;
   propertyId?: string;
-  /** Sağlıkta "başkası adına" önizleme için sigortalının doğum tarihi (ADR-041). */
+  /** Sağlıkta "başkası adına" önizleme için sigortalının doğum tarihi. */
   insuredBirthDate?: string;
   /**
-   * Sağlıkta sigara beyanı (ADR-056) — önizlemenin, oluşturulacak teklifle AYNI fiyatı göstermesi için
+   * Sağlıkta sigara beyanı — önizlemenin, oluşturulacak teklifle AYNI fiyatı göstermesi için
    * zorunludur. Gönderilmezse backend 400 döner (kural teklif oluşturmayla birebir aynıdır).
    */
   isSmoker?: boolean | null;

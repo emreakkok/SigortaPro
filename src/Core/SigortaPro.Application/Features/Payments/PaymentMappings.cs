@@ -3,7 +3,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Features.Payments;
 
-// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz — CODING_STANDARDS.md §4.2).
+// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz).
 internal static class PaymentMappings
 {
     public static PurchaseResultDto ToPurchaseResult(Payment payment, Policy policy) => new(

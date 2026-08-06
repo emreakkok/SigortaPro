@@ -5,7 +5,7 @@ using SigortaPro.Domain.Common;
 
 namespace SigortaPro.Persistence.Interceptors;
 
-// ARCHITECTURE_RULES.md §7.2: CreatedAt/UpdatedAt/CreatedBy/UpdatedBy SaveChanges interceptor'ı ile
+// : CreatedAt/UpdatedAt/CreatedBy/UpdatedBy SaveChanges interceptor'ı ile
 // otomatik doldurulur.
 public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
 {

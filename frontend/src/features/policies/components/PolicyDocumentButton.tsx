@@ -9,7 +9,7 @@ interface PolicyDocumentButtonProps {
   className?: string;
 }
 
-/** Poliçe PDF'ini indiren buton (ilk indirmede backend belgeyi üretir — ADR-023). */
+/** Poliçe PDF'ini indiren buton (ilk indirmede backend belgeyi üretir). */
 export function PolicyDocumentButton({
   policyId,
   policyNumber,

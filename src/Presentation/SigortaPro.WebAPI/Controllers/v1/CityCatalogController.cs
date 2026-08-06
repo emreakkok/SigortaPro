@@ -6,9 +6,9 @@ using SigortaPro.Application.Features.Cities.Queries.GetCityCatalog;
 
 namespace SigortaPro.WebAPI.Controllers.v1;
 
-// Post-MVP (ADR-037/ADR-039): İl kataloğu (Türkiye'nin 81 ili) — adres formlarındaki aranabilir combobox verisi.
+// Post-MVP: İl kataloğu (Türkiye'nin 81 ili) — adres formlarındaki aranabilir combobox verisi.
 // Salt okunur, hassas olmayan kamu referans verisi; kayıt (register) formu anonim olduğundan uç [AllowAnonymous]
-// olmalıdır — aksi hâlde kayıt sayfasındaki il seçici 401 alıp serbest metne düşer (ADR-039).
+// olmalıdır — aksi hâlde kayıt sayfasındaki il seçici 401 alıp serbest metne düşer.
 [ApiController]
 [Route("api/v1/city-catalog")]
 [AllowAnonymous]

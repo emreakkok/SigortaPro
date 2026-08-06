@@ -185,7 +185,7 @@ export function PaymentForm({ installmentOptions, onSubmit, isPending, error }: 
 }
 
 /**
- * Ödeme özeti (ADR-039): kullanıcı hiçbir hesap yapmadan seçili plana göre aylık tutarı ve
+ * Ödeme özeti: kullanıcı hiçbir hesap yapmadan seçili plana göre aylık tutarı ve
  * ödenecek toplamı görür. Değerler backend'in taksit önizlemesinden gelir (frontend hesap yapmaz);
  * mock POS faizsiz olduğundan vergi/faiz kalemi yoktur ve toplam prim ile ödenecek tutar eşittir.
  */

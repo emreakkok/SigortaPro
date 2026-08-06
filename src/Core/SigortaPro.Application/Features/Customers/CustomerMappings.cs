@@ -5,7 +5,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Features.Customers;
 
-// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz — CODING_STANDARDS.md §4.2).
+// Entity → DTO manuel eşlemeleri (AutoMapper kullanılmaz).
 internal static class CustomerMappings
 {
     public static CustomerDto ToDto(this Customer customer, string? email) => new(

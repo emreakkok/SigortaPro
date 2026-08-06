@@ -2,9 +2,9 @@ import type { AuthSession, UserRole } from "@/shared/types/auth.types";
 import { STAFF_ROLES, UserRoles } from "@/shared/types/auth.types";
 
 /**
- * Oturum saklama katmanı (ADR-028): oturum localStorage'da tek anahtar altında tutulur
+ * Oturum saklama katmanı: oturum localStorage'da tek anahtar altında tutulur
  * ve kalıcı doğruluk kaynağıdır. Axios interceptor'ları buradan okur/yazar; React
- * tarafındaki yansıması `features/auth` içindeki AuthProvider'dır (ADR-029).
+ * tarafındaki yansıması `features/auth` içindeki AuthProvider'dır.
  */
 const SESSION_STORAGE_KEY = "sigortapro.session";
 
@@ -40,7 +40,7 @@ export function isStaff(session: AuthSession): boolean {
 }
 
 /**
- * Admin rolü kontrolü (ADR-060). Yalnızca navigasyon/aksiyon görünürlüğü içindir — gerçek yetki
+ * Admin rolü kontrolü. Yalnızca navigasyon/aksiyon görünürlüğü içindir — gerçek yetki
  * her zaman backend'de `[Authorize(Roles = Admin)]` ile sağlanır (fiyatlandırma, personel yönetimi,
  * hasar ödeme, ciro raporu).
  */

@@ -6,7 +6,7 @@ namespace SigortaPro.Application.Features.Quotes.Commands.CreateQuote;
 
 public sealed class CreateQuoteCommandValidator : AbstractValidator<CreateQuoteCommand>
 {
-    // Telefon formatı CODING_STANDARDS.md §6.2 ile aynı: +90 + 10 hane (Register/Profil kurallarının aynası).
+    // Telefon formatı ile aynı: +90 + 10 hane (Register/Profil kurallarının aynası).
     private const string PhoneRegex = @"^\+90\d{10}$";
 
     public CreateQuoteCommandValidator()
@@ -30,7 +30,7 @@ public sealed class CreateQuoteCommandValidator : AbstractValidator<CreateQuoteC
                 .NotEmpty().WithMessage("Konut/DASK teklifi için konut seçimi zorunludur.");
         });
 
-        // ADR-054: Sağlıkta sigara beyanı ZORUNLUDUR. Önceden hiç sorulmadan "false" varsayılıyor ve prim
+        // Sağlıkta sigara beyanı ZORUNLUDUR. Önceden hiç sorulmadan "false" varsayılıyor ve prim
         // yanlış hesaplanıyordu; artık beyan alınmadan teklif oluşturulamaz (sessiz varsayım yasak).
         When(command => command.Branch == InsuranceBranch.Saglik, () =>
         {
@@ -45,7 +45,7 @@ public sealed class CreateQuoteCommandValidator : AbstractValidator<CreateQuoteC
                 .Null().WithMessage("Sigara beyanı yalnızca Sağlık branşında gönderilebilir.");
         });
 
-        // ADR-041: "Başkası adına" sigortalı beyanı yalnızca Sağlık branşında anlamlıdır ve verildiğinde
+        // "Başkası adına" sigortalı beyanı yalnızca Sağlık branşında anlamlıdır ve verildiğinde
         // alanları Register/Profil kurallarını aynalar. Branş uyumsuzluğunun son sözü domain guard'ındadır (409).
         When(command => command.InsuredPerson is not null, () =>
         {

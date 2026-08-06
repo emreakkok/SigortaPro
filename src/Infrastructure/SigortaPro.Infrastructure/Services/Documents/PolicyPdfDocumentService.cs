@@ -9,12 +9,12 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Infrastructure.Services.Documents;
 
-// ADR-006: QuestPDF ile poliçe sertifikası üretimi. Saf render — DB/dosya I/O yapmaz, modelden PDF baytları üretir.
+// QuestPDF ile poliçe sertifikası üretimi. Saf render — DB/dosya I/O yapmaz, modelden PDF baytları üretir.
 public sealed class PolicyPdfDocumentService : IPolicyDocumentService
 {
     private static readonly CultureInfo Tr = new("tr-TR");
 
-    // ADR-040: Kurumsal palet — web temasıyla (globals.css token'ları) aynı kimlik.
+    // Kurumsal palet — web temasıyla (globals.css token'ları) aynı kimlik.
     // Bordo (primary), koyu gri (metin), nötr gri (ikincil) ve kırık beyaz (zemin).
     private static readonly Color Accent = Color.FromHex("#7A1F2B");      // bordo / koyu kırmızı
     private static readonly Color DarkText = Color.FromHex("#26262B");    // koyu gri (gövde metni)
@@ -84,7 +84,7 @@ public sealed class PolicyPdfDocumentService : IPolicyDocumentService
                     ("Bitiş", Date(model.EndDate)),
                 }));
 
-                // ADR-042: "Başkası adına" poliçede sigorta ettiren ile sigortalı ayrı gösterilir;
+                // "Başkası adına" poliçede sigorta ettiren ile sigortalı ayrı gösterilir;
                 // sigortalı poliçe sahibinin kendisiyse kutu başlığı birleşik kalır.
                 row.RelativeItem().Element(box => InfoBox(
                     box,
@@ -97,7 +97,7 @@ public sealed class PolicyPdfDocumentService : IPolicyDocumentService
         });
     }
 
-    // Sigorta ettiren satırları; "başkası adına" poliçede sigortalı ayrı satır olarak eklenir (ADR-042).
+    // Sigorta ettiren satırları; "başkası adına" poliçede sigortalı ayrı satır olarak eklenir.
     private static (string Label, string Value)[] BuildPolicyholderRows(PolicyDocumentModel model)
     {
         var rows = new List<(string Label, string Value)>

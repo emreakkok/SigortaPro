@@ -12,7 +12,7 @@ import type { AuthResponse, AuthSession } from "@/shared/types/auth.types";
 interface AuthContextValue {
   /** Aktif oturum; yoksa null. */
   session: AuthSession | null;
-  /** Login/register yanıtını oturuma çevirir: localStorage + React state (ADR-029). */
+  /** Login/register yanıtını oturuma çevirir: localStorage + React state. */
   signIn: (auth: AuthResponse) => AuthSession;
   /** Oturumu sonlandırır (çıkış); yönlendirme çağıranın sorumluluğundadır. */
   signOut: () => void;
@@ -21,7 +21,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
- * Oturum state'inin React tarafı (ADR-029): localStorage (session.ts) kalıcı doğruluk
+ * Oturum state'inin React tarafı: localStorage (session.ts) kalıcı doğruluk
  * kaynağıdır, bu provider onu React state olarak yansıtır. Axios'un sessiz token
  * yenilemesi yalnızca localStorage'ı günceller — state'teki token'lar bayatlayabilir
  * ancak UI token okumaz (istekler interceptor'da localStorage'dan okur); zorunlu

@@ -15,7 +15,7 @@ using SigortaPro.WebAPI.Services;
 
 namespace SigortaPro.WebAPI.Extensions;
 
-// WebAPI composition root yardımcıları (ARCHITECTURE_RULES.md §6.2).
+// WebAPI composition root yardımcıları.
 public static class ServiceCollectionExtensions
 {
     // Health check "ready" etiketi (CA1861: tekrar eden inline dizi yerine tek örnek).
@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
     }
 
     // [ApiController] otomatik model doğrulama hatalarını, ExceptionHandlingMiddleware ile aynı RFC 7807
-    // formatına (CODING_STANDARDS.md §5.4) getirir; böylece model-binding ve iş kuralı doğrulamaları tutarlı yanıt verir.
+    // formatına getirir; böylece model-binding ve iş kuralı doğrulamaları tutarlı yanıt verir.
     private static IServiceCollection AddConsistentModelValidationResponse(this IServiceCollection services)
     {
         services.Configure<ApiBehaviorOptions>(options =>
@@ -104,7 +104,7 @@ public static class ServiceCollectionExtensions
                     RoleClaimType = ClaimTypes.Role,
                 };
 
-                // ADR-041: SignalR WebSocket bağlantıları Authorization header taşıyamaz; hub yoluna gelen
+                // SignalR WebSocket bağlantıları Authorization header taşıyamaz; hub yoluna gelen
                 // isteklerde token, SignalR istemcisinin standart "access_token" query parametresinden okunur.
                 // Yalnızca hub path'i ile sınırlıdır — normal API uçlarında davranış değişmez.
                 options.Events = new JwtBearerEvents
@@ -126,7 +126,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    // ARCHITECTURE_RULES.md §7.3 / DEVELOPMENT_RULES.md §7: React SPA origin'lerine kısıtlı CORS.
+    // /: React SPA origin'lerine kısıtlı CORS.
     private static IServiceCollection AddCorsPolicy(this IServiceCollection services, IConfiguration configuration)
     {
         var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
@@ -149,7 +149,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    // Swagger/OpenAPI + JWT "Authorize" desteği (CLAUDE.md §5.2 uyarınca .NET 8 uyumlu güncel Swashbuckle sürümü).
+    // Swagger/OpenAPI + JWT "Authorize" desteği.
     private static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
@@ -195,7 +195,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    // DEVELOPMENT_RULES.md §7: Login uçlarına rate limiting (built-in ASP.NET Core 8 rate limiter — ADR-020).
+    // : Login uçlarına rate limiting (built-in ASP.NET Core 8 rate limiter).
     private static IServiceCollection AddAuthRateLimiting(this IServiceCollection services)
     {
         services.AddRateLimiter(options =>

@@ -1,7 +1,7 @@
 namespace SigortaPro.Application.Common.Pricing;
 
 /// <summary>
-/// ADR-059: Hasar geçmişinin TEK ölçeği (bonus-malus basamağı). Önceden iki bağımsız çarpan vardı
+/// Hasar geçmişinin TEK ölçeği (bonus-malus basamağı). Önceden iki bağımsız çarpan vardı
 /// (<c>ClaimHistoryFactor</c> malus, <c>NoClaimTier</c> bonus); aralarında hiçbir değişmez olmadığından
 /// çelişkili sonuç üretebiliyorlardı (ör. 3 hasarlı + yüksek basamaklı müşteri neredeyse nötr fiyat).
 /// Artık hasar geçmişi tek bir basamakla temsil edilir.

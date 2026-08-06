@@ -110,7 +110,7 @@ public sealed class ClaimsController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Onaylanmış hasarın ödemesini gerçekleştirir (Approved → Paid). Yalnızca Admin (ADR-060: görevler ayrılığı — para çıkışı Personel'e kapalı).</summary>
+    /// <summary>Onaylanmış hasarın ödemesini gerçekleştirir (Approved → Paid). Yalnızca Admin.</summary>
     [HttpPost("{id:guid}/pay")]
     [Authorize(Roles = Roles.Admin)]
     [ProducesResponseType(typeof(ClaimSummaryDto), StatusCodes.Status200OK)]

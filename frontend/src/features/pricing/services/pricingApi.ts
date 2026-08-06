@@ -5,7 +5,7 @@ import type {
   UpdatePricingDraftRequest,
 } from "@/features/pricing/types/pricing.types";
 
-/** Yürürlükteki tarife + taslak + geçmiş (ADR-048). Okuma acente personeline açıktır. */
+/** Yürürlükteki tarife + taslak + geçmiş. Okuma acente personeline açıktır. */
 export async function getPricingVersions(): Promise<PricingVersion[]> {
   const response = await api.get<PricingVersion[]>("/pricing/versions");
   return response.data;

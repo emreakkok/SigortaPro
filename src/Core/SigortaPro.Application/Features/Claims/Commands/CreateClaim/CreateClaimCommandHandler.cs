@@ -57,7 +57,7 @@ public sealed class CreateClaimCommandHandler : ICommandHandler<CreateClaimComma
             throw new ForbiddenAccessException();
         }
 
-        // İş kuralı (TASKS.md Task 12): yalnızca aktif poliçeye, poliçe dönemi içindeki bir olaya hasar açılabilir.
+        // İş kuralı (TASKS.md): yalnızca aktif poliçeye, poliçe dönemi içindeki bir olaya hasar açılabilir.
         if (policy.Status != PolicyStatus.Active)
         {
             throw new BusinessRuleException("Yalnızca aktif poliçe için hasar bildirilebilir.");
@@ -77,7 +77,7 @@ public sealed class CreateClaimCommandHandler : ICommandHandler<CreateClaimComma
 
         var claim = new Claim(policy.Id, customer.Id, request.IncidentDate, request.Description, request.EstimatedAmount);
 
-        // Belgeler (foto/PDF): baytlar dosya depolamaya yazılır (ADR-023), metadata aggregate'e eklenir.
+        // Belgeler (foto/PDF): baytlar dosya depolamaya yazılır, metadata aggregate'e eklenir.
         // Doğrulama (adet/boyut/tür) CreateClaimCommandValidator'dadır; burada kalıcılaştırılır.
         if (request.Documents is { Count: > 0 } documents)
         {

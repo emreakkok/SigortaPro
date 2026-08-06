@@ -13,7 +13,7 @@ using SigortaPro.Domain.Enums;
 namespace SigortaPro.WebAPI.Tests.Integration;
 
 /// <summary>
-/// ADR-057: Araç kullanım amacı (hususi/ticari/taksi) fiyatlaması — uçtan uca.
+/// Araç kullanım amacı (hususi/ticari/taksi) fiyatlaması — uçtan uca.
 /// Doğrulanan garantiler: faktör yalnızca araç branşlarını etkiler, önizleme ↔ teklif paritesi korunur,
 /// beyan teklif anında snapshot'lanır (araç sonradan değişse bile eski teklif değişmez) ve
 /// beyanı olmayan araçlardan üretilen tekliflere faktör geriye dönük uygulanmaz.
@@ -49,7 +49,7 @@ public sealed class VehicleUsagePricingIntegrationTests
     [InlineData(VehicleUsage.Taksi)]
     public async Task Preview_And_CreatedQuote_Should_HaveIdenticalPremium(VehicleUsage usage)
     {
-        // ADR-056 paritesi yeni faktörle de korunuyor mu? (Ortak QuotePricingInputBuilder sayesinde.)
+        // paritesi yeni faktörle de korunuyor mu? (Ortak QuotePricingInputBuilder sayesinde.)
         var client = await CustomerClientAsync();
         var vehicle = await AddVehicleAsync(client, usage);
 
@@ -77,7 +77,7 @@ public sealed class VehicleUsagePricingIntegrationTests
     [Fact]
     public async Task ChangingVehicleUsage_Should_NotAffectExistingQuote()
     {
-        // ADR-053 determinizmi: beyan teklif anında dondurulur.
+        // determinizmi: beyan teklif anında dondurulur.
         var client = await CustomerClientAsync();
         var vehicle = await AddVehicleAsync(client, VehicleUsage.Hususi);
 

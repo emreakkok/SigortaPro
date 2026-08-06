@@ -4,7 +4,7 @@ using SigortaPro.Application.Features.Payments.DTOs;
 namespace SigortaPro.Application.Features.Payments.Commands.PurchaseQuote;
 
 // Onaylanmış teklifi mock sanal POS ile satın alır. Ödeme başarılıysa poliçe üretilir ve teklif Purchased olur.
-// Kart bilgileri yalnızca ödeme gateway'ine iletilir; kalıcı kayıt maskeli tutulur (ADR-007).
+// Kart bilgileri yalnızca ödeme gateway'ine iletilir; kalıcı kayıt maskeli tutulur.
 public sealed record PurchaseQuoteCommand(
     Guid QuoteId,
     string CardNumber,

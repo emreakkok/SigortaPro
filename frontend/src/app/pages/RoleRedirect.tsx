@@ -4,7 +4,7 @@ import { homePathFor, useAuth } from "@/features/auth/hooks/useAuth";
 
 /**
  * Kök adres ("/"): oturum varsa role göre portal/panele yönlendirir; oturum yoksa
- * karşılama (landing) sayfasını gösterir (ADR-039 — önceden doğrudan /login'e yönleniyordu).
+ * karşılama (landing) sayfasını gösterir.
  */
 export function RoleRedirect({ landing }: { landing: ReactNode }) {
   const { session } = useAuth();

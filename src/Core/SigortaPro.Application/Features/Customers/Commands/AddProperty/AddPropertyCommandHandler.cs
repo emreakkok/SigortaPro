@@ -42,7 +42,7 @@ public sealed class AddPropertyCommandHandler : ICommandHandler<AddPropertyComma
 
         var address = new Address(request.City, request.District, request.Neighborhood, request.PostalCode);
 
-        // ADR-055: Deprem bölgesi kullanıcı beyanı değil, adresin İLİNDEN türetilir. İl tanınmıyorsa bölge
+        // Deprem bölgesi kullanıcı beyanı değil, adresin İLİNDEN türetilir. İl tanınmıyorsa bölge
         // atanmaz (0) → fiyatlama motoru "bilinmeyen bölge" davranışını açık açıklamasıyla uygular;
         // sessizce yanlış (ve müşteri lehine) bir bölge atanmaz.
         var earthquakeZone = _earthquakeZoneProvider.ResolveZone(address.City) ?? EarthquakeZoneDefaults.Unknown;

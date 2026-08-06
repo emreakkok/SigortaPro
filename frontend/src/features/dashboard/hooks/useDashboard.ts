@@ -17,7 +17,7 @@ export const dashboardQueryKeys = {
 };
 
 /**
- * Operasyon dashboard'ının tek veri kaynağı (ADR-052). Tarih aralığı query key'in parçasıdır →
+ * Operasyon dashboard'ının tek veri kaynağı. Tarih aralığı query key'in parçasıdır →
  * filtre değiştiğinde TÜM bloklar tek istekle tutarlı biçimde yenilenir (blok başına ayrı çağrı yoktur).
  * `placeholderData` ile filtre değişiminde eski veri korunur → ekran boşalmaz/zıplamaz.
  */

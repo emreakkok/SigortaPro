@@ -2,7 +2,7 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/shared/lib/utils";
 
 /*
- * Yükleme iskeleti (ADR-044). Çıplak spinner yerine içerik-şekilli placeholder → layout zıplaması
+ * Yükleme iskeleti. Çıplak spinner yerine içerik-şekilli placeholder → layout zıplaması
  * olmadan modern bekleme deneyimi. Renk token'dan gelir (`bg-muted`) → Dark Mode uyumlu; `animate-pulse`
  * ile nabız efekti. Boyut/şekil `className` ile verilir.
  */

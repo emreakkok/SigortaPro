@@ -11,7 +11,7 @@ using SigortaPro.Domain.Enums;
 namespace SigortaPro.WebAPI.Tests.Integration;
 
 /// <summary>
-/// ADR-056 — REGRESYON KORUMASI: Karşılaştırma önizlemesinde gösterilen prim ile aynı seçimle
+/// — REGRESYON KORUMASI: Karşılaştırma önizlemesinde gösterilen prim ile aynı seçimle
 /// OLUŞTURULAN teklifin primi **birebir aynı** olmalıdır.
 /// <para>
 /// Bu test, önizleme ve oluşturma akışlarının fiyatlama girdisini ayrı ayrı kurmasından doğan gerçek bir
@@ -19,7 +19,7 @@ namespace SigortaPro.WebAPI.Tests.Integration;
 /// yolunda uygulanıyordu; kullanıcıya bir fiyat gösterilip başka fiyat uygulanıyordu.
 /// Gelecekte biri yeni bir risk faktörünü YALNIZCA tek akışa eklerse bu testler kırılır.
 /// </para>
-/// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi ISender ile korunur (ADR-034).
+/// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi ISender ile korunur.
 /// </summary>
 [Collection(IntegrationTestCollection.Name)]
 public sealed class PricingPreviewParityIntegrationTests
@@ -51,7 +51,7 @@ public sealed class PricingPreviewParityIntegrationTests
     [Fact]
     public async Task Preview_And_CreatedQuote_Should_HaveIdenticalPremium_ForPropertyBranch()
     {
-        // Deprem bölgesi her iki akışta da adresin İLİNDEN türetilmelidir (ADR-055).
+        // Deprem bölgesi her iki akışta da adresin İLİNDEN türetilmelidir.
         var client = await CustomerClientAsync();
         var property = await AddPropertyAsync(client);
 
@@ -68,7 +68,7 @@ public sealed class PricingPreviewParityIntegrationTests
     [InlineData(false)]
     public async Task Preview_And_CreatedQuote_Should_HaveIdenticalPremium_ForHealthBranch(bool isSmoker)
     {
-        // Sigara beyanı (ADR-054) her iki akışta da UYGULANMALIDIR; aksi hâlde beyan eden kullanıcıya
+        // Sigara beyanı her iki akışta da UYGULANMALIDIR; aksi hâlde beyan eden kullanıcıya
         // önizlemede düşük fiyat gösterilip teklifte %25 fazlası uygulanırdı.
         var client = await CustomerClientAsync();
 
@@ -124,7 +124,7 @@ public sealed class PricingPreviewParityIntegrationTests
 
     private static async Task<PropertyDto> AddPropertyAsync(HttpClient client)
     {
-        // ADR-055: earthquakeZone artık istekte YOKTUR — sistem adresin ilinden türetir.
+        // earthquakeZone artık istekte YOKTUR — sistem adresin ilinden türetir.
         var response = await client.PostAsJsonAsync("/api/v1/customers/me/properties",
             new AddPropertyCommand("İstanbul", "Kadıköy", "Caferağa", "34710", 10, 120));
         response.StatusCode.Should().Be(HttpStatusCode.Created);

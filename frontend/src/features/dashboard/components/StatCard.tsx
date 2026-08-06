@@ -12,7 +12,7 @@ interface StatCardProps {
 }
 
 /*
- * Dashboard KPI kartı (ADR-044). Sadece sayı yerine kurumsal SaaS düzeni: başlık + ikon rozeti +
+ * Dashboard KPI kartı. Sadece sayı yerine kurumsal SaaS düzeni: başlık + ikon rozeti +
  * büyük tabular değer + opsiyonel açıklama ve alt görsel (sparkline). Hover'da hafif yükselir
  * (Card taban geçişini kullanır). Renkler token tabanlı → Dark Mode uyumlu.
  */

@@ -48,7 +48,7 @@ export async function addProperty(request: PropertyRequest, customerId?: string)
 }
 
 /**
- * `POST /auth/change-password` — oturum sahibinin şifresini değiştirir (ADR-040).
+ * `POST /auth/change-password` — oturum sahibinin şifresini değiştirir.
  * Hesap öz-yönetimi profil yüzeyinin parçası olduğundan bu feature'da yaşar
  * (auth → profile bağımlılığı zaten var — ters import feature döngüsü yaratırdı).
  * Mevcut şifre hatalıysa backend 400 `{ errors }` döner.

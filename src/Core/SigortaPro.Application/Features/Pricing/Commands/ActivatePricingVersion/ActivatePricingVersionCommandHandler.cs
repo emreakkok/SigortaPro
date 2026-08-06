@@ -7,7 +7,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Features.Pricing.Commands.ActivatePricingVersion;
 
-// ADR-048: Taslak → Aktif. Önceki aktif versiyon ARŞİVLENİR (tek aktif invariant'ı). Bu işlem hiçbir mevcut
+// Taslak → Aktif. Önceki aktif versiyon ARŞİVLENİR (tek aktif invariant'ı). Bu işlem hiçbir mevcut
 // teklif/poliçe kaydını GÜNCELLEMEZ — onlar kendi sabitledikleri versiyonla hesaplanmaya devam eder.
 public sealed class ActivatePricingVersionCommandHandler
     : ICommandHandler<ActivatePricingVersionCommand, PricingVersionDto>

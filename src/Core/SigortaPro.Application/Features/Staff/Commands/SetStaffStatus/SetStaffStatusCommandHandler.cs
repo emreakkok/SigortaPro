@@ -26,14 +26,14 @@ public sealed class SetStaffStatusCommandHandler : ICommandHandler<SetStaffStatu
     public async Task Handle(SetStaffStatusCommand request, CancellationToken cancellationToken)
     {
         // Hedef Personel değilse (bulunamadı/Admin/Customer) false → 404. Böylece hiçbir Admin
-        // (son Admin dahil) pasifleştirilemez — son-Admin invariant'ı yapısal olarak korunur (ADR-060).
+        // (son Admin dahil) pasifleştirilemez — son-Admin invariant'ı yapısal olarak korunur.
         var changed = await _identityService.SetStaffActiveAsync(request.Id, request.IsActive, cancellationToken);
         if (!changed)
         {
             throw new NotFoundException("Personel", request.Id);
         }
 
-        // ADR-061: Pasifleştirmede eldeki tüm refresh token'lar iptal edilir → yenileme anında kesilir.
+        // Pasifleştirmede eldeki tüm refresh token'lar iptal edilir → yenileme anında kesilir.
         if (!request.IsActive)
         {
             await _refreshTokenService.RevokeAllForUserAsync(request.Id, cancellationToken);

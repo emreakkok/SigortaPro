@@ -19,12 +19,12 @@ using SigortaPro.Application.Features.Quotes.DTOs;
 
 namespace SigortaPro.Application.Common.Behaviors;
 
-// ADR-041: Gerçek zamanlı bildirimler, iş handler'larına dokunmadan tek bir cross-cutting pipeline
-// behavior'ından yayınlanır (ARCHITECTURE_RULES.md §3.5 deseninin devamı). Handler başarıyla tamamlandıktan
+// Gerçek zamanlı bildirimler, iş handler'larına dokunmadan tek bir cross-cutting pipeline
+// behavior'ından yayınlanır. Handler başarıyla tamamlandıktan
 // sonra komut türü bildirim kataloğuna eşlenir; eşleşme yoksa hiçbir şey yapılmaz. Böylece:
 //  - CQRS handler'ları bildirim altyapısını bilmez (SRP; mevcut handler/test'ler değişmez),
 //  - olay→bildirim eşlemesi tek yerde genişletilir (yeni olay = bu katalogda bir blok).
-// ADR-047: Katalog artık "kim yaptı / kimin için / hangi kayıt" bağlamını üretir (INotificationContextResolver).
+// Katalog artık "kim yaptı / kimin için / hangi kayıt" bağlamını üretir (INotificationContextResolver).
 // Bağlam çözümü ve yayın hatası iş akışını ASLA bozamaz: tamamı geniş yakalanıp loglanır
 // (yutulmaz — loglanır; bildirim yan kanaldır, iş sonucu değildir).
 public sealed class RealTimeNotificationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
@@ -68,7 +68,7 @@ public sealed class RealTimeNotificationBehavior<TRequest, TResponse> : IPipelin
         return response;
     }
 
-    // Olay → bildirim kataloğu (ADR-047 ile bağlamlandırılmış).
+    // Olay → bildirim kataloğu.
     // KVKK/veri minimizasyonu: TCKN, tam telefon, kart/CVV, şifre/token ve sağlık detayı ASLA yazılmaz.
     // Yalnızca operasyon için gereken ad, ürün adı, tutar ve poliçe numarası taşınır.
     private async Task<RealTimeNotification?> MapToNotificationAsync(
@@ -136,7 +136,7 @@ public sealed class RealTimeNotificationBehavior<TRequest, TResponse> : IPipelin
                     purchase.Policy.PolicyNumber);
             }
 
-            // ADR-047: hasar bildiriminde RelatedEntityId artık set edilir (önceden navigasyon yapılamıyordu).
+            // hasar bildiriminde RelatedEntityId artık set edilir (önceden navigasyon yapılamıyordu).
             case CreateClaimCommand when response is ClaimDto claim:
             {
                 var actor = await _contextResolver.ResolveActorAsync(cancellationToken);
@@ -175,7 +175,7 @@ public sealed class RealTimeNotificationBehavior<TRequest, TResponse> : IPipelin
             case PayClaimCommand when response is ClaimSummaryDto summary:
                 return await ClaimStatusChangedAsync(summary, "ödemesi gerçekleştirildi", NotificationSeverity.Success, cancellationToken);
 
-            // Anonim akış: hesap varlığını sızdırmamak için e-posta/kimlik bilgisi YAZILMAZ (ADR-035).
+            // Anonim akış: hesap varlığını sızdırmamak için e-posta/kimlik bilgisi YAZILMAZ.
             case ForgotPasswordCommand:
                 return new RealTimeNotification(
                     "password-reset-requested",

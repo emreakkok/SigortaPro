@@ -2,10 +2,10 @@ using SigortaPro.Application.Common.Pricing;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// ADR-048: Fiyatlamada kullanılacak tarifeyi çözen servis. İki farklı soru vardır ve karıştırılmamalıdır:
+// Fiyatlamada kullanılacak tarifeyi çözen servis. İki farklı soru vardır ve karıştırılmamalıdır:
 //  1) YENİ fiyatlama (teklif oluşturma / karşılaştırma önizlemesi) → o an YÜRÜRLÜKTEKİ tarife,
 //  2) MEVCUT teklifin yeniden hesabı (detay, PDF, poliçe görünümü) → teklifin SABİTLEDİĞİ tarife.
-// (2) sayesinde admin tarifeyi değiştirse bile geçmiş teklif/poliçe primleri değişmez (ADR-021 korunur).
+// (2) sayesinde admin tarifeyi değiştirse bile geçmiş teklif/poliçe primleri değişmez.
 public interface IPricingRateResolver
 {
     // Yürürlükteki tarife: yeni fiyatlamalarda kullanılır. Versiyon yoksa (VersionId: null, Rates: null)

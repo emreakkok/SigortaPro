@@ -1,6 +1,6 @@
 namespace SigortaPro.Application.Common.Notifications;
 
-// Gerçek zamanlı bildirim önem düzeyi (frontend toast/rozet varyantlarıyla birebir — ADR-041).
+// Gerçek zamanlı bildirim önem düzeyi (frontend toast/rozet varyantlarıyla birebir).
 public static class NotificationSeverity
 {
     public const string Success = "success";
@@ -9,13 +9,13 @@ public static class NotificationSeverity
     public const string Error = "error";
 }
 
-// Taşıyıcıdan bağımsız gerçek zamanlı bildirim sözleşmesi (ADR-041). Hassas veri (TCKN, e-posta,
+// Taşıyıcıdan bağımsız gerçek zamanlı bildirim sözleşmesi. Hassas veri (TCKN, e-posta,
 // kart, şifre/token) TAŞIMAZ — yalnızca olay türü + kullanıcıya gösterilecek Türkçe başlık/mesaj.
 // Type, frontend'in cache invalidation/yönlendirme eşlemesi için makine-okur kimliktir (ör. "quote-created").
-// RelatedEntityId/Type (ADR-042, additive): bildirimin işaret ettiği kayıt (ör. Policy/Claim) —
+// RelatedEntityId/Type: bildirimin işaret ettiği kayıt (ör. Policy/Claim) —
 // bildirim merkezinde tıkla-git navigasyonuna ve kalıcı kayda taşınır; hassas veri değildir.
-// ActorUserId/ActorName (ADR-047, additive): işlemi yapan kullanıcı — ad, oluşturma anındaki snapshot'tır.
-// ReferenceCode (ADR-047, additive): operasyonel referans (ör. poliçe numarası); karşılığı yoksa null.
+// ActorUserId/ActorName: işlemi yapan kullanıcı — ad, oluşturma anındaki snapshot'tır.
+// ReferenceCode: operasyonel referans (ör. poliçe numarası); karşılığı yoksa null.
 public sealed record RealTimeNotification(
     string Type,
     string Severity,

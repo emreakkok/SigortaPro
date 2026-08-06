@@ -13,11 +13,11 @@ import { ThemeToggle } from "@/shared/theme/ThemeToggle";
 
 /**
  * Müşteri portalı kabuğu: üst navigasyon + içerik alanı. Tüm müşteri modülleri (teklif,
- * poliçe, hasar, yenileme, profil) Task 16–19 ile aktiftir. Nav öğeleri ikon + etiketlidir (ADR-039).
- * `userMenu` slot'u routes.tsx'ten enjekte edilir — shared, features'a bağımlı olmaz (ADR-029).
+ * poliçe, hasar, yenileme, profil) –19 ile aktiftir. Nav öğeleri ikon + etiketlidir.
+ * `userMenu` slot'u routes.tsx'ten enjekte edilir — shared, features'a bağımlı olmaz.
  */
 // "Profilim" nav'dan kaldırıldı — profil/araçlar/konutlar/şifre artık sağ üstteki
-// kullanıcı dropdown menüsünden erişilir (ADR-040).
+// kullanıcı dropdown menüsünden erişilir.
 const NAV_ITEMS = [
   { to: "/portal", label: "Ana Sayfa", end: true, icon: HomeIcon },
   { to: "/portal/quotes", label: "Tekliflerim", end: false, icon: FileTextIcon },

@@ -7,7 +7,7 @@ namespace SigortaPro.Application.Features.Staff.Queries.GetStaffList;
 
 public sealed class GetStaffListQueryHandler : IQueryHandler<GetStaffListQuery, PagedResult<StaffListItemDto>>
 {
-    // Türkçe İ/ı duyarlı, büyük/küçük harf bağımsız arama (ADR-051 deseni).
+    // Türkçe İ/ı duyarlı, büyük/küçük harf bağımsız arama.
     private static readonly CultureInfo TurkishCulture = CultureInfo.GetCultureInfo("tr-TR");
 
     private readonly IIdentityService _identityService;

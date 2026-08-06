@@ -1,7 +1,7 @@
 /**
  * Kart görseli (CardPreview) için saf biçimlendirme ve marka algılama yardımcıları.
  * Yalnızca sunum amaçlıdır: ödeme mantığı, Luhn doğrulaması ve şema kuralları backend'de/`paymentSchema`'da
- * kalır (CLAUDE.md §10 — frontend'de iş mantığı yok).
+ * kalır.
  */
 export type CardBrand = "visa" | "mastercard" | "troy" | "unknown";
 

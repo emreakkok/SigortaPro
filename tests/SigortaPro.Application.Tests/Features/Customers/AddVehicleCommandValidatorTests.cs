@@ -21,7 +21,7 @@ public class AddVehicleCommandValidatorTests
     [Fact]
     public void Validate_Should_HaveError_When_UsagePurposeMissing()
     {
-        // ADR-057: Kullanım amacı beyanı zorunludur — sessizce varsayılan atanmaz.
+        // Kullanım amacı beyanı zorunludur — sessizce varsayılan atanmaz.
         var command = Valid() with { UsagePurpose = null };
 
         _validator.TestValidate(command).ShouldHaveValidationErrorFor(c => c.UsagePurpose);

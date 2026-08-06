@@ -22,7 +22,7 @@ public sealed class GetQuoteComparisonQueryValidator : AbstractValidator<GetQuot
                 .NotEmpty().WithMessage("Konut/DASK karşılaştırması için konut seçimi zorunludur.");
         });
 
-        // ADR-056: Kurallar teklif OLUŞTURMA ile birebir aynıdır. Aksi hâlde önizleme, beyanı olmayan bir
+        // Kurallar teklif OLUŞTURMA ile birebir aynıdır. Aksi hâlde önizleme, beyanı olmayan bir
         // girdiyle fiyatlanır ve gösterilen prim oluşacak teklifin priminden sapardı.
         When(query => query.Branch == InsuranceBranch.Saglik, () =>
         {

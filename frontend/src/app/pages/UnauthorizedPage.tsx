@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/shared/components";
 
-/** 401 — oturum geçersiz/süresi dolmuş (axios interceptor'ı buraya yönlendirir, ADR-028). */
+/** 401 — oturum geçersiz/süresi dolmuş (axios interceptor'ı buraya yönlendirir). */
 export default function UnauthorizedPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-4 text-center">

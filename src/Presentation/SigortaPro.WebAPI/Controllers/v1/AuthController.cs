@@ -15,7 +15,7 @@ namespace SigortaPro.WebAPI.Controllers.v1;
 
 [ApiController]
 [Route("api/v1/auth")]
-// Kimlik doğrulama uçları brute-force denemelerine karşı rate limit ile korunur (DEVELOPMENT_RULES.md §7).
+// Kimlik doğrulama uçları brute-force denemelerine karşı rate limit ile korunur.
 [EnableRateLimiting(WebApiConstants.AuthRateLimitPolicy)]
 public sealed class AuthController : ControllerBase
 {
@@ -70,7 +70,7 @@ public sealed class AuthController : ControllerBase
 
     /// <summary>Şifre sıfırlama talebi: kayıtlı e-postaya sıfırlama bağlantısı gönderir.</summary>
     /// <remarks>Güvenlik gereği (kullanıcı varlığını sızdırmama) e-posta kayıtlı olsun ya da olmasın
-    /// her zaman aynı generic başarı yanıtı döner (ADR-035).</remarks>
+    /// her zaman aynı generic başarı yanıtı döner.</remarks>
     [HttpPost("forgot-password")]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -81,7 +81,7 @@ public sealed class AuthController : ControllerBase
         return Ok(new { message = "Eğer bu e-posta adresi kayıtlıysa, şifre sıfırlama bağlantısı gönderildi." });
     }
 
-    /// <summary>Oturum sahibinin şifresini mevcut şifre doğrulamasıyla değiştirir (ADR-040).</summary>
+    /// <summary>Oturum sahibinin şifresini mevcut şifre doğrulamasıyla değiştirir.</summary>
     /// <returns>Başarılıysa 200; mevcut şifre hatalıysa 400.</returns>
     [HttpPost("change-password")]
     [Authorize]

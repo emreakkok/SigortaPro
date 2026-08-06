@@ -76,7 +76,7 @@ public class RealTimeNotificationBehaviorTests
     [Fact]
     public async Task Handle_Should_EnrichQuoteNotification_WithCustomerAmountAndNavigation()
     {
-        // ADR-047: bildirim "kim/kimin için/ne/hangi kayıt" sorularını tek başına cevaplamalıdır.
+        // bildirim "kim/kimin için/ne/hangi kayıt" sorularını tek başına cevaplamalıdır.
         var behavior = CreateBehavior<CreateQuoteCommand, QuoteDto>();
         var command = new CreateQuoteCommand(InsuranceBranch.Saglik, null, null, CoveragePackage.Standart);
         var quote = SampleQuote();
@@ -132,7 +132,7 @@ public class RealTimeNotificationBehaviorTests
     [Fact]
     public async Task Handle_Should_MakeClaimNotificationNavigable_When_ClaimIsCreated()
     {
-        // ADR-047 öncesi hasar bildirimlerinde RelatedEntityId set edilmiyordu → tıkla-git yapılamıyordu.
+        // öncesi hasar bildirimlerinde RelatedEntityId set edilmiyordu → tıkla-git yapılamıyordu.
         var behavior = CreateBehavior<CreateClaimCommand, ClaimDto>();
         var command = new CreateClaimCommand(Guid.NewGuid(), DateTime.UtcNow, "Çarpma", 5000m);
         var claim = new ClaimDto(
@@ -194,7 +194,7 @@ public class RealTimeNotificationBehaviorTests
     [Fact]
     public async Task Handle_Should_ReturnResponse_When_NotifierThrows()
     {
-        // Bildirim bir yan kanaldır: yayın hatası tamamlanan iş operasyonunun sonucunu bozamaz (ADR-041).
+        // Bildirim bir yan kanaldır: yayın hatası tamamlanan iş operasyonunun sonucunu bozamaz.
         _dispatcher.PublishToStaffAsync(Arg.Any<RealTimeNotification>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromException(new InvalidOperationException("hub kapalı")));
         var behavior = CreateBehavior<CreateQuoteCommand, QuoteDto>();
@@ -208,7 +208,7 @@ public class RealTimeNotificationBehaviorTests
     [Fact]
     public async Task Handle_Should_ReturnResponse_When_ContextResolutionThrows()
     {
-        // Bağlam çözümü de yan kanaldır (DB okuması) — hatası iş sonucunu bozmamalıdır (ADR-047).
+        // Bağlam çözümü de yan kanaldır (DB okuması) — hatası iş sonucunu bozmamalıdır.
         _contextResolver.ResolveActorAsync(Arg.Any<CancellationToken>())
             .Returns<Task<NotificationActor>>(_ => throw new InvalidOperationException("veritabanı yok"));
         var behavior = CreateBehavior<CreateQuoteCommand, QuoteDto>();

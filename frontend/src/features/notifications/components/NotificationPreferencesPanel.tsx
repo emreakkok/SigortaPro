@@ -9,7 +9,7 @@ const GROUP_LABELS: { key: keyof Omit<NotificationPreferences, "browserNotificat
 ];
 
 /**
- * Bildirim tercihleri (ADR-042). MVP: yalnızca uygulama-içi teslimi (toast + tarayıcı bildirimi)
+ * Bildirim tercihleri. MVP: yalnızca uygulama-içi teslimi (toast + tarayıcı bildirimi)
  * etkiler; bildirim geçmişi her koşulda kaydedilir. Yapı ileride e-posta/mobil push kanallarına hazırdır.
  */
 export function NotificationPreferencesPanel() {

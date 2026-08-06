@@ -9,7 +9,7 @@ using SigortaPro.Infrastructure.Security;
 
 namespace SigortaPro.Infrastructure.Services;
 
-// ADR-003 / ADR-014: JWT access token + rastgele refresh token üretir. Yalnızca primitif değerlerle çalışır,
+// / JWT access token + rastgele refresh token üretir. Yalnızca primitif değerlerle çalışır,
 // bu yüzden Infrastructure'da kalır (Persistence'a bağımlı değildir).
 public sealed class TokenService : ITokenService
 {

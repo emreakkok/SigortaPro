@@ -1,6 +1,6 @@
 namespace SigortaPro.Application.Common.Documents;
 
-// MVP tekil acente kimliği (mock). Poliçe sertifikası başlığında kullanılır (PROJECT_CONTEXT: tek acente).
+// MVP tekil acente kimliği (mock). Poliçe sertifikası başlığında kullanılır (tek acente).
 public static class AgencyProfile
 {
     public const string Name = "SigortaPro Sigorta Acentesi";

@@ -2,7 +2,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// ADR-048: Fiyatlandırma versiyonlarının okuma/yazma soyutlaması (ARCHITECTURE_RULES.md §4.2).
+// Fiyatlandırma versiyonlarının okuma/yazma soyutlaması.
 // Aktif/arşiv versiyonlar değişmezdir; yalnızca TASLAK düzenlenir (yeni değer = yeni versiyon / taslak).
 public interface IPricingVersionRepository : IWriteRepository<PricingVersion>
 {

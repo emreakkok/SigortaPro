@@ -4,7 +4,7 @@ namespace SigortaPro.Domain.Entities;
 
 // Hasar bildirimine eklenen belge/görsel (foto veya PDF). Claim aggregate'inin bir parçasıdır.
 // Dosya BAYTLARI IFileStorageService'te (StorageKey ile) saklanır; bu entity yalnızca metadata tutar
-// (ad, tür, boyut, depolama anahtarı) — ADR-023 depolama soyutlaması yeniden kullanılır.
+// (ad, tür, boyut, depolama anahtarı) depolama soyutlaması yeniden kullanılır.
 public class ClaimDocument : BaseEntity
 {
     protected ClaimDocument()

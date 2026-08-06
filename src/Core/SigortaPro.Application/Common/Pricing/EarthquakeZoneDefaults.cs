@@ -1,6 +1,6 @@
 namespace SigortaPro.Application.Common.Pricing;
 
-// ADR-055/058: Deprem bölgesiyle ilgili ortak sabitler. Önceden "bilinmeyen bölge" sentinel'i birden fazla
+// Deprem bölgesiyle ilgili ortak sabitler. Önceden "bilinmeyen bölge" sentinel'i birden fazla
 // yerde ayrı ayrı tanımlıydı; tek kaynağa alınarak yolların sessizce ayrışması engellenir.
 public static class EarthquakeZoneDefaults
 {

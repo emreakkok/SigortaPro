@@ -6,7 +6,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Repositories;
 
-// INotificationRepository implementasyonu (ADR-042). Liste sorguları AsNoTracking + sayfalıdır;
+// INotificationRepository implementasyonu. Liste sorguları AsNoTracking + sayfalıdır;
 // okundu işaretleme yolları tracked çalışır (domain MarkAsRead metodu üzerinden).
 public sealed class NotificationRepository : GenericRepository<Notification>, INotificationRepository
 {
@@ -45,7 +45,7 @@ public sealed class NotificationRepository : GenericRepository<Notification>, IN
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            // ADR-047: arama actor adı ve operasyonel referansı (ör. poliçe numarası) da kapsar —
+            // arama actor adı ve operasyonel referansı (ör. poliçe numarası) da kapsar —
             // personel "POL-2026-000123" veya "Ahmet" yazarak ilgili olayları bulabilir.
             var term = searchTerm.Trim();
             query = query.Where(notification =>

@@ -29,7 +29,7 @@ public class PricingEngineTests
         result.BasePremium.Should().Be(expectedBase);
         result.TotalPremium.Should().Be(expectedBase);
         result.RiskScore.Should().Be(RiskScore.Low);
-        // ADR-059: Basamak 0 (nötr) iken Bonus-Malus kalemi ÜRETİLMEZ → 4 kalem.
+        // Basamak 0 (nötr) iken Bonus-Malus kalemi ÜRETİLMEZ → 4 kalem.
         result.Breakdown.Should().HaveCount(4);
         result.Breakdown.Should().NotContain(item => item.Factor == "Hasarsızlık Basamağı");
     }
@@ -87,7 +87,7 @@ public class PricingEngineTests
     [Fact]
     public void CalculatePremium_Should_ApplyBonus_When_StepIsPositive()
     {
-        // ADR-059: +4 basamak → 0.80 indirim.
+        // +4 basamak → 0.80 indirim.
         var result = _engine.CalculatePremium(StandardVehicle() with { NoClaimTier = 4 });
 
         result.Breakdown.Single(item => item.Factor == "Hasarsızlık Basamağı").Multiplier.Should().Be(0.80m);
@@ -98,7 +98,7 @@ public class PricingEngineTests
     [Fact]
     public void CalculatePremium_Should_ApplyMalus_When_StepIsNegative()
     {
-        // ADR-059: −2 basamak → 1.40 ek prim (eski sistemde bonus tarafı hiç çalışmıyordu).
+        // −2 basamak → 1.40 ek prim (eski sistemde bonus tarafı hiç çalışmıyordu).
         var result = _engine.CalculatePremium(StandardVehicle() with { NoClaimTier = -2 });
 
         result.Breakdown.Single(item => item.Factor == "Hasarsızlık Basamağı").Multiplier.Should().Be(1.40m);

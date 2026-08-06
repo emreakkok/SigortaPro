@@ -32,7 +32,7 @@ export default function AdminClaimListPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useAdminPageSize();
   const [status, setStatus] = useState<ClaimStatus | undefined>(undefined);
-  // ADR-047: bildirimden `?focus=<id>` ile gelindiğinde ilgili hasar dosyasının çekmecesi doğrudan açılır.
+  // bildirimden `?focus=<id>` ile gelindiğinde ilgili hasar dosyasının çekmecesi doğrudan açılır.
   const [selectedId, setSelectedId] = useFocusedRecord();
 
   const handlePageSizeChange = (size: AdminPageSize) => {

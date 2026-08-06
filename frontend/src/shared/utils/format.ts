@@ -86,7 +86,7 @@ export function formatMultiplier(multiplier: number): string {
 }
 
 /**
- * Bir çarpanın prime etkisini kullanıcı diline çevirir (ADR-039 — sunum katmanı, hesaplama backend'de):
+ * Bir çarpanın prime etkisini kullanıcı diline çevirir:
  * 1.25 → "+%25 ek prim", 0.90 → "−%10 indirim", 1.00 → "Etkisi yok".
  */
 export function formatMultiplierEffect(multiplier: number): string {

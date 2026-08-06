@@ -9,7 +9,7 @@ import {
 import { formatCurrency } from "@/shared/utils/format";
 
 /**
- * Hasar operasyonu (ADR-052): dönemde bildirilen hasarların durum kırılımı.
+ * Hasar operasyonu: dönemde bildirilen hasarların durum kırılımı.
  * "Ödenen tutar" YALNIZCA `Paid` kayıtların onay tutarıdır — onaylanmış ama ödenmemiş tutarla karıştırılmaz.
  * "Tahmini tutar" müşteri BEYANIDIR; onaylanan tutar değildir ve öyle sunulmaz.
  */

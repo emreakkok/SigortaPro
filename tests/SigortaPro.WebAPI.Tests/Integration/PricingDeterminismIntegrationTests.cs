@@ -10,10 +10,10 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// ADR-053/054: Fiyatlama girdilerinin teklifte dondurulması ve gerçek veriye dayalı faktörler.
+// Fiyatlama girdilerinin teklifte dondurulması ve gerçek veriye dayalı faktörler.
 // EN KRİTİK GARANTİ: teklif oluşturulduktan sonra müşteri profili değişse bile eski teklifin primi VE
 // prim dökümü DEĞİŞMEZ. Ayrıca kullanıcıya sorulmamış hiçbir faktör dökümde gösterilmez.
-// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi ISender ile korunur (ADR-034).
+// E-posta tetiklenmez (host NullEmailService); auth HTTP bütçesi ISender ile korunur.
 [Collection(IntegrationTestCollection.Name)]
 public sealed class PricingDeterminismIntegrationTests
 {
@@ -39,7 +39,7 @@ public sealed class PricingDeterminismIntegrationTests
             new UpdateProfileCommand("Test", "Müşteri", "+905321112233", "Konya", "Selçuklu", "Bosna", "42250"));
         move.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // Eski teklif yeniden okunur → hem prim hem DÖKÜM birebir aynı kalmalıdır (ADR-053).
+        // Eski teklif yeniden okunur → hem prim hem DÖKÜM birebir aynı kalmalıdır.
         var (premiumAfter, breakdownAfter) = await ReadPricingAsync(client, quoteId);
 
         premiumAfter.Should().Be(premiumBefore, "teklif primi profil değişikliğinden etkilenmemelidir");
@@ -50,7 +50,7 @@ public sealed class PricingDeterminismIntegrationTests
     [Fact]
     public async Task Breakdown_Should_NeverContainNoClaimFactor()
     {
-        // Hasarsızlık basamağı sistemde türetilmiyor → kullanıcıya aktif bir faktör gibi GÖSTERİLMEZ (ADR-054).
+        // Hasarsızlık basamağı sistemde türetilmiyor → kullanıcıya aktif bir faktör gibi GÖSTERİLMEZ.
         var client = await CustomerClientAsync();
         var vehicle = await AddVehicleAsync(client);
         var quoteId = await CreateKaskoQuoteAsync(client, vehicle.Id);
@@ -65,7 +65,7 @@ public sealed class PricingDeterminismIntegrationTests
     [Fact]
     public async Task HealthQuote_Should_RequireSmokerDeclaration()
     {
-        // Beyan alınmadan sağlık teklifi oluşturulamaz — sessizce "içmiyor" varsayılmaz (ADR-054).
+        // Beyan alınmadan sağlık teklifi oluşturulamaz — sessizce "içmiyor" varsayılmaz.
         var client = await CustomerClientAsync();
 
         var response = await client.PostAsJsonAsync("/api/v1/quotes",

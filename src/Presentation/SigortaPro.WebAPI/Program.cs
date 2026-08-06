@@ -21,7 +21,7 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    // Serilog'u host'a bağla; asıl yapılandırma appsettings.json "Serilog" bölümünden okunur (ADR-011).
+    // Serilog'u host'a bağla; asıl yapılandırma appsettings.json "Serilog" bölümünden okunur.
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
@@ -77,7 +77,7 @@ try
     app.MapControllers();
     app.MapSigortaProHealthChecks();
 
-    // ADR-041: Gerçek zamanlı bildirim hub'ı (hub sınıfı Infrastructure'da; uç nokta composition root'ta).
+    // Gerçek zamanlı bildirim hub'ı (hub sınıfı Infrastructure'da; uç nokta composition root'ta).
     app.MapHub<SigortaPro.Infrastructure.RealTime.NotificationHub>("/hubs/notifications");
 
     app.Run();

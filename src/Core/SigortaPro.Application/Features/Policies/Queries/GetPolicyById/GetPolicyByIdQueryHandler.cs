@@ -41,8 +41,8 @@ public sealed class GetPolicyByIdQueryHandler : IQueryHandler<GetPolicyByIdQuery
 
         // Teminatlar (ölçekli limitler), poliçenin kaynaklandığı teklifin saklanan seçiminden (CoveragePackage)
         // teklifin oluşturma referansıyla (CreatedAt) deterministik yeniden hesaplanır — teklif detayı ve poliçe
-        // PDF'iyle birebir tutarlıdır (ADR-021).
-        // ADR-048: baz primler poliçenin kaynaklandığı teklifin sabitlediği tarifeden okunur → satın
+        // PDF'iyle birebir tutarlıdır.
+        // baz primler poliçenin kaynaklandığı teklifin sabitlediği tarifeden okunur → satın
         // alınmış poliçenin primi ve dökümü tarife değişikliklerinden etkilenmez.
         var rates = await _pricingRateResolver.ResolveForQuoteAsync(quote.PricingVersionId, cancellationToken);
 
@@ -58,7 +58,7 @@ public sealed class GetPolicyByIdQueryHandler : IQueryHandler<GetPolicyByIdQuery
             quote.ClaimHistoryFactor,
             insuredBirthDate: quote.InsuredPerson?.BirthDate,
             rates: rates,
-            // ADR-053: poliçenin kaynaklandığı teklifin dondurulmuş girdileri kullanılır.
+            // poliçenin kaynaklandığı teklifin dondurulmuş girdileri kullanılır.
             snapshot: quote.PricingSnapshot);
 
         return PolicyMappings.ToDetailDto(policy, pricing);

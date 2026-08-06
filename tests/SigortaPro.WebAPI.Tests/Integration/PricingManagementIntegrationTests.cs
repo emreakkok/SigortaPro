@@ -21,7 +21,7 @@ using SigortaPro.Persistence.Seed;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// ADR-048: Fiyatlandırma yönetiminin uçtan uca doğrulaması. Yaşam döngüsü Taslak → Aktifleştir. EN KRİTİK
+// Fiyatlandırma yönetiminin uçtan uca doğrulaması. Yaşam döngüsü Taslak → Aktifleştir. EN KRİTİK
 // GARANTİ: tarife değiştiğinde ESKİ teklif/poliçe primi DEĞİŞMEZ; yalnızca aktifleştirmeden SONRA oluşturulan
 // teklifler yeni tarifeyi kullanır. Taslak, aktifleştirilene kadar canlı fiyatları etkilemez.
 [Collection(IntegrationTestCollection.Name)]

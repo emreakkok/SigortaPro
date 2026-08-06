@@ -1,9 +1,9 @@
 import type { SVGProps } from "react";
 
 /**
- * Küçük, el yazımı inline SVG ikon seti (ADR-027 konvansiyonu — ikon kütüphanesi eklenmez).
+ * Küçük, el yazımı inline SVG ikon seti.
  * Tümü stroke tabanlı ve `currentColor` kullanır → metin rengiyle/temayla otomatik uyumlu.
- * Nav ve menü gibi tekrar eden yüzeylerde metin yükünü azaltmak için kullanılır (ADR-039).
+ * Nav ve menü gibi tekrar eden yüzeylerde metin yükünü azaltmak için kullanılır.
  */
 type IconProps = SVGProps<SVGSVGElement>;
 

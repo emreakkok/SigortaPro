@@ -42,7 +42,7 @@ public sealed class UpdateVehicleCommandHandler : ICommandHandler<UpdateVehicleC
         var vehicle = await _vehicleReadRepository.GetByIdAsync(request.VehicleId, cancellationToken)
             ?? throw new NotFoundException(nameof(Vehicle), request.VehicleId);
 
-        // Kaynak sahipliği kontrolü: müşteri yalnızca kendi aracını güncelleyebilir (DEVELOPMENT_RULES.md §7).
+        // Kaynak sahipliği kontrolü: müşteri yalnızca kendi aracını güncelleyebilir.
         if (vehicle.CustomerId != customer.Id)
         {
             throw new ForbiddenAccessException();

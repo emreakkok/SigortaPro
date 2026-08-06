@@ -5,12 +5,12 @@ export interface AppNotification {
   severity: "success" | "info" | "warning" | "error";
   title: string;
   message: string;
-  /** Kısa operasyonel referans (ör. poliçe numarası) — toast'ta gösterilir (ADR-047). */
+  /** Kısa operasyonel referans (ör. poliçe numarası) — toast'ta gösterilir. */
   referenceCode: string | null;
   occurredAt: string;
 }
 
-/** Kalıcı bildirim kaydı (backend `NotificationDto` — ADR-042; actor/referans ADR-047). */
+/** Kalıcı bildirim kaydı (backend `NotificationDto`; actor/referans). */
 export interface StoredNotificationDto {
   id: string;
   type: string;

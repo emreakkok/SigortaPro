@@ -12,7 +12,7 @@ public class Property : BaseEntity, IAggregateRoot
     }
 
     /// <param name="derivedEarthquakeZone">
-    /// ADR-055: Sistem tarafından <b>adresin ilinden türetilen</b> deprem bölgesi. Kullanıcı beyanı DEĞİLDİR;
+    /// Sistem tarafından <b>adresin ilinden türetilen</b> deprem bölgesi. Kullanıcı beyanı DEĞİLDİR;
     /// bu değeri çözmek çağıranın (Application katmanı, <c>IEarthquakeZoneProvider</c>) sorumluluğundadır.
     /// Çözülemeyen ilde <c>EarthquakeZoneDefaults.Unknown</c> geçilir.
     /// </param>
@@ -35,9 +35,9 @@ public class Property : BaseEntity, IAggregateRoot
     /// <summary>
     /// Kayıt anında belirlenen deprem bölgesi (1 = en yüksek risk … 5 = en düşük; 0 = bilinmiyor).
     /// <para>
-    /// ADR-055'ten itibaren bu değer <b>yalnızca sistem tarafından</b> adresin ilinden türetilir.
-    /// ADR-055 ÖNCESİ kaydedilmiş konutlarda ise müşterinin o gün yaptığı <b>beyandır</b> ve tarihsel
-    /// doğruluk için <b>olduğu gibi korunur</b> (geriye dönük düzeltilmez — ADR-058).
+    /// itibaren bu değer <b>yalnızca sistem tarafından</b> adresin ilinden türetilir.
+    /// ÖNCESİ kaydedilmiş konutlarda ise müşterinin o gün yaptığı <b>beyandır</b> ve tarihsel
+    /// doğruluk için <b>olduğu gibi korunur</b> (geriye dönük düzeltilmez).
     /// </para>
     /// <para>
     /// <b>Yeni tekliflerin fiyatı bu alandan okunmaz:</b> fiyatlama girdisi her seferinde adresin ilinden
@@ -45,7 +45,7 @@ public class Property : BaseEntity, IAggregateRoot
     /// yeniden hesabında ve gösterimde kullanılır. Bu yüzden değeri değiştirmek, geçmiş tekliflerin
     /// prim dökümünü bozardı.
     /// </para>
-    /// Bölgeyi sonradan değiştirecek bir domain metodu <b>bilinçli olarak yoktur</b> (ADR-058).
+    /// Bölgeyi sonradan değiştirecek bir domain metodu <b>bilinçli olarak yoktur</b>.
     /// </summary>
     public int EarthquakeZone { get; private set; }
 }

@@ -3,9 +3,9 @@ using SigortaPro.Domain.Enums;
 namespace SigortaPro.Domain.Entities;
 
 /// <summary>
-/// ADR-053: Teklifin fiyatlandığı andaki RİSK GİRDİLERİNİN dondurulmuş kopyası.
+/// Teklifin fiyatlandığı andaki RİSK GİRDİLERİNİN dondurulmuş kopyası.
 /// <para>
-/// ADR-021 primi saklayıp dökümü yeniden hesaplar; ADR-048 tarifeyi teklifte sabitler. Eksik olan halka,
+/// primi saklayıp dökümü yeniden hesaplar tarifeyi teklifte sabitler. Eksik olan halka,
 /// motora giden <b>girdilerin</b> canlı (değiştirilebilir) entity'lerden okunmasıydı: müşteri ilini
 /// değiştirdiğinde veya aracını güncellediğinde eski teklifin risk skoru ve prim dökümü kayıyordu.
 /// Bu değer nesnesi, motorun ihtiyaç duyduğu <b>tüm primitifleri</b> teklif oluşturulurken kopyalar;
@@ -73,29 +73,29 @@ public sealed class PricingSnapshot
     public int? VehicleAge { get; private set; }
     public int? EnginePowerHp { get; private set; }
 
-    // ADR-057: Aracın kullanım amacı beyanı, teklif anında dondurulur. null = beyan alınmadan (bu alan
+    // Aracın kullanım amacı beyanı, teklif anında dondurulur. null = beyan alınmadan (bu alan
     // eklenmeden) oluşmuş kayıt → faktör uygulanmaz ve prim dökümünde gösterilmez.
     public VehicleUsage? UsagePurpose { get; private set; }
 
     // Fiyatlamada kullanılan risk ili. MVP'de müşterinin adres ili vekil olarak kullanılır
-    // (teknik borç: aracın tescil/kullanım ili ayrı tutulmuyor — ADR-053'te kayıtlı).
+    // (teknik borç: aracın tescil/kullanım ili ayrı tutulmuyor kayıtlı).
     public string? RiskCity { get; private set; }
 
     // Hasarsızlık basamağı. Şu an sistemde güvenilir biçimde türetilemediğinden daima 0'dır ve
-    // fiyata etkisi yoktur; bu nedenle prim dökümünde de gösterilmez (ADR-054).
+    // fiyata etkisi yoktur; bu nedenle prim dökümünde de gösterilmez.
     public int? NoClaimTier { get; private set; }
 
     // --- Konut/DASK ---
     public int? BuildingAge { get; private set; }
     public int? SquareMeters { get; private set; }
 
-    // Deprem bölgesi: kullanıcı beyanı değil, konut adresinin İLİNDEN türetilir (ADR-055).
+    // Deprem bölgesi: kullanıcı beyanı değil, konut adresinin İLİNDEN türetilir.
     public int? EarthquakeZone { get; private set; }
 
     // --- Sağlık ---
     public int? InsuredAge { get; private set; }
 
-    // Sigara kullanım beyanı (ADR-054). null = beyan alınmadan oluşturulmuş eski kayıt → faktör uygulanmaz
+    // Sigara kullanım beyanı. null = beyan alınmadan oluşturulmuş eski kayıt → faktör uygulanmaz
     // ve dökümde gösterilmez. Yeni sağlık tekliflerinde beyan zorunludur.
     public bool? IsSmoker { get; private set; }
 }

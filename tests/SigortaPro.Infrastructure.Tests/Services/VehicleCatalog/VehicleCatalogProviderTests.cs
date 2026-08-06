@@ -31,7 +31,7 @@ public sealed class VehicleCatalogProviderTests
     [Fact]
     public void GetCatalog_Should_ReturnSameCachedInstance_When_CalledTwice()
     {
-        // In-Memory cache (Lazy): ikinci çağrı kaynağı yeniden okumaz, aynı referansı döner (ADR-036).
+        // In-Memory cache (Lazy): ikinci çağrı kaynağı yeniden okumaz, aynı referansı döner.
         var first = _provider.GetCatalog();
         var second = _provider.GetCatalog();
 

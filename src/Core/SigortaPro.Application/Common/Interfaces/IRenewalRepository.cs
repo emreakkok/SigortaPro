@@ -3,7 +3,7 @@ using SigortaPro.Domain.Entities;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// Yenileme modülüne özgü sorgular (ARCHITECTURE_RULES.md §4.2, ADR-005).
+// Yenileme modülüne özgü sorgular.
 public interface IRenewalRepository : IReadRepository<Renewal>, IWriteRepository<Renewal>
 {
     // İzlemeli (tracked) yenileme — onay komutu için; yeni teklif (onaylanacak) ve poliçe ile birlikte.

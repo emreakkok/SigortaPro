@@ -19,7 +19,7 @@ namespace SigortaPro.WebAPI.Tests.Integration;
 // TIMEZONE (T1/T5): Instant DateTime alanlarının veritabanından okunduktan SONRA da API çıktısında
 // UTC + "Z" ile serileştirildiğini kanıtlar (13:23 → 10:23 kök nedeninin çözümü). Kök neden: EF `datetime2`
 // materializasyonu Kind=Unspecified üretiyor, System.Text.Json "Z" koymuyordu; UtcDateTimeConverters bunu
-// okumada Kind=Utc'ye çekiyor. E-posta tetiklenmez (NullEmailService); auth ISender ile (ADR-034).
+// okumada Kind=Utc'ye çekiyor. E-posta tetiklenmez (NullEmailService); auth ISender ile.
 [Collection(IntegrationTestCollection.Name)]
 public sealed class DateTimeUtcSerializationIntegrationTests
 {

@@ -3,7 +3,7 @@ using SigortaPro.Application.Features.Vehicles.DTOs;
 
 namespace SigortaPro.Application.Features.Vehicles.Queries.GetVehicleCatalog;
 
-// Katalog In-Memory cache'li Singleton provider'dan gelir (ADR-036); handler yalnızca CQRS yüzeyine adapte eder.
+// Katalog In-Memory cache'li Singleton provider'dan gelir; handler yalnızca CQRS yüzeyine adapte eder.
 public sealed class GetVehicleCatalogQueryHandler : IQueryHandler<GetVehicleCatalogQuery, VehicleCatalogDto>
 {
     private readonly IVehicleCatalogProvider _vehicleCatalogProvider;

@@ -5,15 +5,15 @@ interface PaginationProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  /** Toplam kayıt sayısı — verilirse "Toplam N kayıt" bağlamı gösterilir (ADR-045). */
+  /** Toplam kayıt sayısı — verilirse "Toplam N kayıt" bağlamı gösterilir. */
   totalCount?: number;
-  /** Sol tarafa yerleştirilen ek kontrol — ör. admin sayfa boyutu seçici (ADR-045). */
+  /** Sol tarafa yerleştirilen ek kontrol — ör. admin sayfa boyutu seçici. */
   children?: ReactNode;
 }
 
 /**
  * Önceki/Sonraki sayfalama çubuğu (liste sayfalarının ortak alt bileşeni). Opsiyonel toplam kayıt
- * bağlamı ve sol slot (sayfa boyutu seçici) taşır; mobilde dikey yığılır (ADR-045).
+ * bağlamı ve sol slot (sayfa boyutu seçici) taşır; mobilde dikey yığılır.
  */
 export function Pagination({ page, totalPages, onPageChange, totalCount, children }: PaginationProps) {
   const hasLeft = children !== undefined || totalCount !== undefined;

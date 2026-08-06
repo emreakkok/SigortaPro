@@ -56,11 +56,11 @@ public sealed class GetQuoteComparisonQueryHandler : IQueryHandler<GetQuoteCompa
 
         var now = _dateTimeProvider.UtcNow;
 
-        // ADR-048: Karşılaştırma bir ÖNİZLEMEDİR (henüz teklif yok) → o an yürürlükteki tarife kullanılır.
+        // Karşılaştırma bir ÖNİZLEMEDİR (henüz teklif yok) → o an yürürlükteki tarife kullanılır.
         // Müşteri teklifi oluşturduğunda aynı tarife teklifte sabitlenir; gösterilen fiyatla tutarlıdır.
         var effectivePricing = await _pricingRateResolver.ResolveEffectiveAsync(now, cancellationToken);
 
-        // ADR-056: Girdi, teklif oluşturmayla AYNI builder'dan kurulur (aynı yaş/il/araç primitifleri,
+        // Girdi, teklif oluşturmayla AYNI builder'dan kurulur (aynı yaş/il/araç primitifleri,
         // aynı sigara beyanı, adresten AYNI şekilde türetilen deprem bölgesi). Önizleme snapshot'ı
         // KALICILAŞTIRILMAZ — yalnızca fiyatı oluşturmayla birebir aynı hesaplamak için kullanılır.
         var snapshot = await _pricingInputBuilder.BuildAsync(

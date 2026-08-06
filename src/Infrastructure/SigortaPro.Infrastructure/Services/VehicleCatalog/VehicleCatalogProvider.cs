@@ -5,9 +5,9 @@ using SigortaPro.Application.Features.Vehicles.DTOs;
 
 namespace SigortaPro.Infrastructure.Services.VehicleCatalog;
 
-// ADR-036: Araç kataloğu, harici API veya yeni tablo yerine Infrastructure'da gömülü JSON kaynağından okunur.
+// Araç kataloğu, harici API veya yeni tablo yerine Infrastructure'da gömülü JSON kaynağından okunur.
 // Veri bir defa (thread-safe, Lazy) yüklenip In-Memory cache'lenir → sonraki çağrılar diske/kaynağa gitmez.
-// DI: Singleton (ARCHITECTURE_RULES.md §6.2, stateless-cache). Migration gerektirmez, API bağımsızlığı sağlar.
+// DI: Singleton. Migration gerektirmez, API bağımsızlığı sağlar.
 public sealed class VehicleCatalogProvider : IVehicleCatalogProvider
 {
     private const string ResourceFileName = "vehicle-catalog.json";

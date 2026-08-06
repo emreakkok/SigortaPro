@@ -44,14 +44,14 @@ function defaultRange(): { from: string; to: string } {
 /**
  * Poliçe yönetimi: tarih aralıklı poliçe raporu (`GET /dashboard/reports/policies`,
  * poliçe başlangıç tarihine göre) + detay çekmecesi. Personelin tüm poliçeleri
- * listeleyebildiği tek uç budur — `GET /policies` müşteri kapsamlıdır (ADR-031).
+ * listeleyebildiği tek uç budur — `GET /policies` müşteri kapsamlıdır.
  */
 export default function AdminPolicyListPage() {
   const [range, setRange] = useState(defaultRange);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useAdminPageSize();
   const [searchTerm, setSearchTerm] = useState("");
-  // ADR-047: bildirimden `?focus=<id>` ile gelindiğinde ilgili poliçenin çekmecesi doğrudan açılır.
+  // bildirimden `?focus=<id>` ile gelindiğinde ilgili poliçenin çekmecesi doğrudan açılır.
   const [selectedId, setSelectedId] = useFocusedRecord();
 
   const debouncedSearch = useDebounce(searchTerm);

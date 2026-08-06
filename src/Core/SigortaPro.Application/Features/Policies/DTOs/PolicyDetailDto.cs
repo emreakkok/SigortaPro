@@ -4,7 +4,7 @@ using SigortaPro.Domain.Enums;
 namespace SigortaPro.Application.Features.Policies.DTOs;
 
 // Poliçe detayı: poliçe künyesi + risk objesi + teminat tablosu. Teminatlar, poliçenin kaynaklandığı
-// teklifin saklanan seçiminden (CoveragePackage) deterministik yeniden hesaplanır (ADR-021 ile tutarlı).
+// teklifin saklanan seçiminden (CoveragePackage) deterministik yeniden hesaplanır.
 // Risk objesi ve teminat DTO'ları teklif detayıyla aynı şekildedir (aynı gösterim; DRY).
 public sealed record PolicyDetailDto(
     Guid Id,
@@ -23,5 +23,5 @@ public sealed record PolicyDetailDto(
     Guid CustomerId = default,
     string CustomerFullName = "",
     string? CustomerPhone = null,
-    // ADR-041 (additive): Sağlıkta "başkası adına" poliçede Sigortalı özeti; Ettiren = müşteri. Değilse null.
+    // (additive): Sağlıkta "başkası adına" poliçede Sigortalı özeti; Ettiren = müşteri. Değilse null.
     QuoteInsuredPersonDto? InsuredPerson = null);

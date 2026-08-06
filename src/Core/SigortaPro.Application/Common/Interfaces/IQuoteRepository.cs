@@ -4,7 +4,7 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// Teklif modülüne özgü sorgular (ARCHITECTURE_RULES.md §4.2, ADR-005). Detay/liste sorguları risk
+// Teklif modülüne özgü sorgular. Detay/liste sorguları risk
 // objesi ve ürün/teminat navigasyonlarını EF Core Include ile yükler; Application EF'e bağımlı olamaz.
 public interface IQuoteRepository : IReadRepository<Quote>, IWriteRepository<Quote>
 {
@@ -29,6 +29,6 @@ public interface IQuoteRepository : IReadRepository<Quote>, IWriteRepository<Quo
         CancellationToken cancellationToken = default);
 
     // İzlemeli: geçerlilik süresi dolmuş ancak henüz sonlanmamış (Draft/Priced/Approved) teklifler —
-    // arkaplan servisi bunları Expired'a çeker (Task 13).
+    // arkaplan servisi bunları Expired'a çeker.
     Task<IReadOnlyList<Quote>> GetExpirableAsync(DateTime asOf, CancellationToken cancellationToken = default);
 }

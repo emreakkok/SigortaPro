@@ -5,8 +5,8 @@ using SigortaPro.WebAPI.Extensions;
 
 namespace SigortaPro.WebAPI.Middleware;
 
-// ARCHITECTURE_RULES.md §7.1: Tüm isteklerde çalışan global exception handling.
-// Custom exception'ları uygun HTTP status koduna ve RFC 7807 ProblemDetails formatına (CODING_STANDARDS.md §5.4) çevirir.
+// : Tüm isteklerde çalışan global exception handling.
+// Custom exception'ları uygun HTTP status koduna ve RFC 7807 ProblemDetails formatına çevirir.
 // Bilinmeyen hatalar 500'e düşer; detay yalnızca geliştirme ortamında açığa çıkar.
 public sealed class ExceptionHandlingMiddleware
 {

@@ -1,7 +1,7 @@
 namespace SigortaPro.Persistence.Seed;
 
-// DEVELOPMENT_RULES.md §5.4: Seed data sabit Guid'ler kullanır (test verileriyle tutarlılık için).
-// SampleCustomerAppUserId, Task 5'te örnek müşterinin Identity kullanıcısı seed edilirken
+// : Seed data sabit Guid'ler kullanır (test verileriyle tutarlılık için).
+// SampleCustomerAppUserId, 'te örnek müşterinin Identity kullanıcısı seed edilirken
 // AppUser.Id olarak aynen kullanılmalıdır; aksi halde Customer.AppUserId hiçbir Identity
 // kaydına karşılık gelmez.
 public static class SeedIds

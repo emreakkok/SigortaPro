@@ -4,7 +4,7 @@ using SigortaPro.Persistence.Context;
 
 namespace SigortaPro.Persistence.Identity;
 
-// ADR-014: Refresh token'lar Persistence'ta yönetilir.
+// Refresh token'lar Persistence'ta yönetilir.
 public sealed class RefreshTokenService : IRefreshTokenService
 {
     private readonly AppDbContext _context;
@@ -62,7 +62,7 @@ public sealed class RefreshTokenService : IRefreshTokenService
     {
         var now = DateTime.UtcNow;
 
-        // Yalnızca hâlâ aktif olan (revoke edilmemiş, süresi dolmamış) token'lar iptal edilir (ADR-061).
+        // Yalnızca hâlâ aktif olan (revoke edilmemiş, süresi dolmamış) token'lar iptal edilir.
         var activeTokens = await _context.RefreshTokens
             .Where(token => token.UserId == userId && token.RevokedAt == null && now < token.ExpiresAt)
             .ToListAsync(cancellationToken);

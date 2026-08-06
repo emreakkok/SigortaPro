@@ -2,7 +2,7 @@ import { api } from "@/shared/lib/axios";
 import type { PagedResult } from "@/shared/types/api.types";
 import type { StoredNotificationDto, NotificationListParams } from "@/features/notifications/types/notification.types";
 
-/** `GET /notifications` — oturum sahibinin kalıcı bildirim geçmişi (ADR-042). */
+/** `GET /notifications` — oturum sahibinin kalıcı bildirim geçmişi. */
 export async function getMyNotifications(
   params: NotificationListParams,
 ): Promise<PagedResult<StoredNotificationDto>> {

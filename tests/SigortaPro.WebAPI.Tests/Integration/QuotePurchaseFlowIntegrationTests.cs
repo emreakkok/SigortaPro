@@ -13,12 +13,12 @@ using SigortaPro.Domain.Enums;
 
 namespace SigortaPro.WebAPI.Tests.Integration;
 
-// Task 21: Teklif → onay → ödeme → poliçe akışının uçtan uca entegrasyon testleri (PROJECT_CONTEXT §5.1).
+// Teklif → onay → ödeme → poliçe akışının uçtan uca entegrasyon testleri.
 // Kimlik arrange'i TestAccountFactory (ISender) ile yapılır; auth uçlarına HTTP çağrısı yapılmaz (rate limit).
 [Collection(IntegrationTestCollection.Name)]
 public sealed class QuotePurchaseFlowIntegrationTests
 {
-    // Mock POS senaryo kartları (ADR-007; README "Test Kartları").
+    // Mock POS senaryo kartları.
     private const string SuccessCard = "4111111111111111";
     private const string InsufficientFundsCard = "4000000000000002";
 
@@ -52,7 +52,7 @@ public sealed class QuotePurchaseFlowIntegrationTests
             "/api/v1/payments",
             CreatePurchaseCommand(quote.Id, SuccessCard));
 
-        // Assert: ödeme başarılı, aktif poliçe üretildi (ADR-022 atomikliği).
+        // Assert: ödeme başarılı, aktif poliçe üretildi.
         purchaseResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var purchase = await purchaseResponse.Content.ReadFromJsonAsync<PurchaseResultDto>();
         purchase!.PaymentStatus.Should().Be(PaymentStatus.Successful);
@@ -66,7 +66,7 @@ public sealed class QuotePurchaseFlowIntegrationTests
         var quoteAfter = await client.GetFromJsonAsync<QuoteDto>($"/api/v1/quotes/{quote.Id}");
         quoteAfter!.Status.Should().Be(QuoteStatus.Purchased);
 
-        // Poliçe "Poliçelerim" listesinde görünür (Task 18 ucu).
+        // Poliçe "Poliçelerim" listesinde görünür (ucu).
         var policies = await client.GetFromJsonAsync<PagedResult<PolicyListItemDto>>("/api/v1/policies");
         policies!.Items.Should().ContainSingle(policy => policy.Id == purchase.Policy.Id)
             .Which.PolicyNumber.Should().Be(purchase.Policy.PolicyNumber);
@@ -89,7 +89,7 @@ public sealed class QuotePurchaseFlowIntegrationTests
             "/api/v1/payments",
             CreatePurchaseCommand(quote.Id, InsufficientFundsCard));
 
-        // Assert: 402 döner; teklif Approved kalır, poliçe üretilmez (ADR-022).
+        // Assert: 402 döner; teklif Approved kalır, poliçe üretilmez.
         purchaseResponse.StatusCode.Should().Be(HttpStatusCode.PaymentRequired);
         purchaseResponse.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
 
@@ -141,7 +141,7 @@ public sealed class QuotePurchaseFlowIntegrationTests
             "/api/v1/quotes",
             new CreateQuoteCommand(InsuranceBranch.Kasko, vehicle.Id, null, CoveragePackage.Standart));
 
-        // Assert: kaynak sahipliği ihlali (DEVELOPMENT_RULES.md §7).
+        // Assert: kaynak sahipliği ihlali.
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 

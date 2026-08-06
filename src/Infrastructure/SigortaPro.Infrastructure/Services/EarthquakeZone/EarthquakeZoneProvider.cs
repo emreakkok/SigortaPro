@@ -5,10 +5,10 @@ using SigortaPro.Application.Common.Interfaces;
 
 namespace SigortaPro.Infrastructure.Services.EarthquakeZone;
 
-// ADR-055: Deprem bölgesi, konutun İLİNDEN türetilir (önceden kullanıcı serbestçe seçiyordu).
+// Deprem bölgesi, konutun İLİNDEN türetilir (önceden kullanıcı serbestçe seçiyordu).
 // Veri, harici API veya yeni tablo yerine gömülü JSON'dan bir defa yüklenip cache'lenir —
-// CityCatalogProvider (ADR-037) / VehicleCatalogProvider (ADR-036) deseninin birebir izidir.
-// DI: Singleton (ARCHITECTURE_RULES.md §6.2).
+// CityCatalogProvider / VehicleCatalogProvider deseninin birebir izidir.
+// DI: Singleton.
 public sealed class EarthquakeZoneProvider : IEarthquakeZoneProvider
 {
     private const string ResourceFileName = "earthquake-zone-catalog.json";

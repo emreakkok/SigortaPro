@@ -21,7 +21,7 @@ export function useRenewalList(params: RenewalListParams) {
 
 /**
  * Yenilemeyi onaylar. Onay, yeni dönem teklifini Approved'a çeker; ilgili yenileme ve teklif
- * cache'leri geçersizleştirilir (ardından müşteri ödeme akışına — Task 18 — yönlenir).
+ * cache'leri geçersizleştirilir (ardından müşteri ödeme akışına — — yönlenir).
  */
 export function useAcceptRenewal() {
   const queryClient = useQueryClient();

@@ -2,7 +2,7 @@ using SigortaPro.Application.Common.Payments;
 
 namespace SigortaPro.Application.Common.Interfaces;
 
-// Mock sanal POS soyutlaması (ADR-007). Implementasyonu Infrastructure'da (MockVirtualPosService).
+// Mock sanal POS soyutlaması. Implementasyonu Infrastructure'da (MockVirtualPosService).
 // İleride gerçek POS'a geçiş yalnızca implementasyon değişikliğidir.
 public interface IPaymentService
 {

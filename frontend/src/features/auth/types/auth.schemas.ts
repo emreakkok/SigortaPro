@@ -4,7 +4,7 @@ import { isValidTckn, TURKISH_PHONE_REGEX } from "@/shared/utils/validation";
 /**
  * Client-side ön doğrulama şemaları — kurallar ve Türkçe mesajlar backend
  * FluentValidation validator'larını (LoginCommandValidator/RegisterCommandValidator)
- * aynalar. Son söz her zaman backend'dedir (DEVELOPMENT_RULES.md §7).
+ * aynalar. Son söz her zaman backend'dedir.
  */
 export const loginSchema = z.object({
   email: z
