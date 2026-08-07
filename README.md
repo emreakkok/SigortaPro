@@ -155,7 +155,3 @@ dotnet test        # tüm birim ve entegrasyon testleri
 | Teklif sihirbazı | Dashboard |
 | Ödeme ekranı | Hasar yönetimi |
 | Poliçelerim | Fiyatlandırma yönetimi |
-
-## Lisans
-
-© 2026 SigortaPro. Tüm hakları saklıdır.
