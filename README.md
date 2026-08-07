@@ -10,8 +10,6 @@ Tek acenteli, B2C sigorta poliçe yönetim sistemi. Müşteriler self-servis ola
 - [Kurulum](#kurulum)
 - [Çalıştırma](#çalıştırma)
 - [Testler](#testler)
-- [Ekran Görüntüleri](#ekran-görüntüleri)
-- [Lisans](#lisans)
 
 ## Proje Tanımı
 
@@ -145,13 +143,3 @@ dotnet test        # tüm birim ve entegrasyon testleri
 
 - **Birim testleri** — fiyatlama motoru kuralları, domain durum makineleri (teklif/poliçe/hasar/ödeme/yenileme), handler ve doğrulama testleri (xUnit + FluentAssertions + NSubstitute).
 - **Entegrasyon testleri** — gerçek HTTP pipeline'ı (middleware → JWT → MediatR → EF Core → Identity) **SQLite in-memory** ile test edilir; SQL Server veya Docker kurulumu gerekmez.
-
-## Ekran Görüntüleri
-
-> Ekran görüntüleri `docs/screenshots/` klasörüne eklendiğinde burada görünecektir.
-
-| Müşteri Portalı | Acente Paneli |
-|-----------------|---------------|
-| Teklif sihirbazı | Dashboard |
-| Ödeme ekranı | Hasar yönetimi |
-| Poliçelerim | Fiyatlandırma yönetimi |
